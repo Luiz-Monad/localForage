@@ -30,7 +30,7 @@ var TYPE_SERIALIZED_MARKER_LENGTH =
 
 var toString = Object.prototype.toString;
 
-function stringToBuffer(serializedString) {
+function stringToBuffer(serializedString: string) {
     // Fill the string into a ArrayBuffer.
     var bufferLength = serializedString.length * 0.75;
     var len = serializedString.length;
@@ -64,7 +64,7 @@ function stringToBuffer(serializedString) {
 
 // Converts a buffer to a string to store, serialized, in the backend
 // storage library.
-function bufferToString(buffer) {
+function bufferToString(buffer: ArrayBuffer) {
     // base64-arraybuffer
     var bytes = new Uint8Array(buffer);
     var base64String = '';
@@ -92,7 +92,7 @@ function bufferToString(buffer) {
 // Serialize a value, afterwards executing a callback (which usually
 // instructs the `setItem()` callback/promise to be executed). This is how
 // we store binary data with localStorage.
-function serialize(value, callback) {
+function serialize<T>(value: ArrayBufferView | ArrayBuffer | Blob | T | null, callback: (onDone: string | Error | null, onError?: unknown) => void) {
     var valueType = '';
     if (value) {
         valueType = toString.call(value);
@@ -105,9 +105,11 @@ function serialize(value, callback) {
     if (
         value &&
         (valueType === '[object ArrayBuffer]' ||
-            (value.buffer &&
-                toString.call(value.buffer) === '[object ArrayBuffer]'))
+            ((value as Partial<ArrayBufferView>).buffer &&
+                toString.call((value as Partial<ArrayBufferView>).buffer) === '[object ArrayBuffer]'))
     ) {
+        const arrayBuffer = value as ArrayBufferView & ArrayBuffer;
+
         // Convert binary arrays to a string and prefix the string with
         // a special marker.
         var buffer;
@@ -117,7 +119,7 @@ function serialize(value, callback) {
             buffer = value;
             marker += TYPE_ARRAYBUFFER;
         } else {
-            buffer = value.buffer;
+            buffer = arrayBuffer.buffer;
 
             if (valueType === '[object Int8Array]') {
                 marker += TYPE_INT8ARRAY;
@@ -144,6 +146,8 @@ function serialize(value, callback) {
 
         callback(marker + bufferToString(buffer));
     } else if (valueType === '[object Blob]') {
+        const blobValue = value as Blob;
+        
         // Conver the blob to a binaryArray and then to a string.
         var fileReader = new FileReader();
 
@@ -151,14 +155,14 @@ function serialize(value, callback) {
             // Backwards-compatible prefix for the blob type.
             var str =
                 BLOB_TYPE_PREFIX +
-                value.type +
+                blobValue.type +
                 '~' +
-                bufferToString(this.result);
+                bufferToString(this.result as ArrayBuffer);
 
             callback(SERIALIZED_MARKER + TYPE_BLOB + str);
         };
 
-        fileReader.readAsArrayBuffer(value);
+        fileReader.readAsArrayBuffer(blobValue);
     } else {
         try {
             callback(JSON.stringify(value));
@@ -178,7 +182,7 @@ function serialize(value, callback) {
 // Oftentimes this will just deserialize JSON content, but if we have a
 // special marker (SERIALIZED_MARKER, defined above), we will extract
 // some kind of arraybuffer/binary data/typed array out of the string.
-function deserialize(value) {
+function deserialize<T>(value: string): ArrayBuffer | Blob | T {
     // If we haven't marked this string as being specially serialized (i.e.
     // something other than serialized JSON), we can just return it and be
     // done with it.
@@ -199,7 +203,7 @@ function deserialize(value) {
     // Backwards-compatible blob type serialization strategy.
     // DBs created with older versions of localForage will simply not have the blob type.
     if (type === TYPE_BLOB && BLOB_TYPE_PREFIX_REGEX.test(serializedString)) {
-        var matcher = serializedString.match(BLOB_TYPE_PREFIX_REGEX);
+        var matcher = serializedString.match(BLOB_TYPE_PREFIX_REGEX)!;
         blobType = matcher[1];
         serializedString = serializedString.substring(matcher[0].length);
     }

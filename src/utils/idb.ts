@@ -1,5 +1,5 @@
-function getIDB() {
-    /* global indexedDB,webkitIndexedDB,mozIndexedDB,OIndexedDB,msIndexedDB */
+
+function getIDB(): IDBFactory | undefined {
     try {
         if (typeof indexedDB !== 'undefined') {
             return indexedDB;
@@ -21,5 +21,5 @@ function getIDB() {
     }
 }
 
-var idb = getIDB();
+var idb = getIDB()!;
 export default idb;

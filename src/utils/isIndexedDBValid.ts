@@ -3,7 +3,6 @@ import idb from './idb';
 function isIndexedDBValid() {
     try {
         // Initialize IndexedDB; fall back to vendor-prefixed versions
-        // if needed.
         if (!idb || !idb.open) {
             return false;
         }

@@ -8,11 +8,27 @@ import executeTwoCallbacks from './utils/executeTwoCallbacks';
 import includes from './utils/includes';
 import isArray from './utils/isArray';
 
+interface Option {
+    storeName: string;
+    name: string;
+    version?: number;
+}
+
+type DriverKeys = Exclude<keyof (typeof idbDriver | typeof websqlDriver | typeof localstorageDriver), '_driver' | '_support'>;
+type Driver = Record<DriverKeys, (...args: any[]) => Promise<any>> & {
+    _driver: string;
+    _support: boolean;
+};
+
+interface Ready {    
+    ready: (callback?: (() => void)) => Promise<void>;
+}
+
 // Drivers are stored here when `defineDriver()` is called.
 // They are shared across all instances of localForage.
-const DefinedDrivers = {};
+const DefinedDrivers: Record<string, Driver> = {};
 
-const DriverSupport = {};
+const DriverSupport: Record<string, boolean> = {};
 
 const DefaultDrivers = {
     INDEXEDDB: idbDriver,
@@ -26,9 +42,9 @@ const DefaultDriverOrder = [
     DefaultDrivers.LOCALSTORAGE._driver
 ];
 
-const OptionalDriverMethods = ['dropInstance'];
+const OptionalDriverMethods = ['dropInstance'] as DriverKeys[];
 
-const LibraryMethods = [
+const LibraryMethods = ([
     'clear',
     'getItem',
     'iterate',
@@ -37,11 +53,11 @@ const LibraryMethods = [
     'length',
     'removeItem',
     'setItem'
-].concat(OptionalDriverMethods);
+] as DriverKeys[]).concat(OptionalDriverMethods);
 
 const DefaultConfig = {
     description: '',
-    driver: DefaultDriverOrder.slice(),
+    driver: DefaultDriverOrder.slice() as string | string[] | null,
     name: 'localforage',
     // Default DB size is _JUST UNDER_ 5MB, as it's the highest size
     // we can use without a prompt.
@@ -50,9 +66,9 @@ const DefaultConfig = {
     version: 1.0
 };
 
-function callWhenReady(localForageInstance, libraryMethod) {
+function callWhenReady(localForageInstance: Driver & Ready, libraryMethod: DriverKeys) {
     localForageInstance[libraryMethod] = function() {
-        const _args = arguments;
+        const _args = arguments as any;
         return localForageInstance.ready().then(function() {
             return localForageInstance[libraryMethod].apply(
                 localForageInstance,
@@ -62,7 +78,7 @@ function callWhenReady(localForageInstance, libraryMethod) {
     };
 }
 
-function extend() {
+function extend<T extends {}, U, V>(target: T, source: U, source2?: V): T & U & V {
     for (let i = 1; i < arguments.length; i++) {
         const arg = arguments[i];
 
@@ -83,12 +99,20 @@ function extend() {
 }
 
 class LocalForage {
-    constructor(options) {
+    private _defaultConfig: typeof DefaultConfig;
+    private _config: typeof DefaultConfig & Option;
+    private _driverSet: Promise<void> | null;
+    private _initDriver: (() => Promise<void>) | null;
+    private _ready: Promise<void> | null;
+    private _dbInfo: null;
+    private _driver?: string;
+
+    constructor(options?: Option) {
         for (let driverTypeKey in DefaultDrivers) {
             if (DefaultDrivers.hasOwnProperty(driverTypeKey)) {
-                const driver = DefaultDrivers[driverTypeKey];
+                const driver = DefaultDrivers[driverTypeKey as keyof typeof DefaultDrivers];
                 const driverName = driver._driver;
-                this[driverTypeKey] = driverName;
+                (this as any)[driverTypeKey] = driverName;
 
                 if (!DefinedDrivers[driverName]) {
                     // we don't need to wait for the promise,
@@ -103,7 +127,7 @@ class LocalForage {
         this._config = extend({}, this._defaultConfig, options);
         this._driverSet = null;
         this._initDriver = null;
-        this._ready = false;
+        this._ready = null;
         this._dbInfo = null;
 
         this._wrapLibraryMethodsWithReady();
@@ -114,7 +138,7 @@ class LocalForage {
     // the first API call (e.g. `getItem`, `setItem`).
     // We loop through options so we don't overwrite existing config
     // values.
-    config(options) {
+    config(options?: Option | string) {
         // If the options argument is an object, we use it to set values.
         // Otherwise, we return either a specified config value or all
         // config values.
@@ -136,7 +160,7 @@ class LocalForage {
                     return new Error('Database version must be a number.');
                 }
 
-                this._config[i] = options[i];
+                (this._config as any)[i] = (options as any)[i];
             }
 
             // after all config options are set and
@@ -147,7 +171,7 @@ class LocalForage {
 
             return true;
         } else if (typeof options === 'string') {
-            return this._config[options];
+            return this._config[options as keyof typeof this._config];
         } else {
             return this._config;
         }
@@ -155,8 +179,8 @@ class LocalForage {
 
     // Used to define a custom driver, shared across all instances of
     // localForage.
-    defineDriver(driverObject, callback, errorCallback) {
-        const promise = new Promise(function(resolve, reject) {
+    defineDriver(driverObject: Driver, callback?: ((value: unknown) => void), errorCallback?: ((reason: any) => void)) {
+        const promise = new Promise<void>(function(resolve, reject) {
             try {
                 const driverName = driverObject._driver;
                 const complianceError = new Error(
@@ -191,7 +215,7 @@ class LocalForage {
                 }
 
                 const configureMissingMethods = function() {
-                    const methodNotImplementedFactory = function(methodName) {
+                    const methodNotImplementedFactory = function(methodName: string) {
                         return function() {
                             const error = new Error(
                                 `Method ${methodName} is not implemented by the current driver`
@@ -223,7 +247,7 @@ class LocalForage {
 
                 configureMissingMethods();
 
-                const setDriverSupport = function(support) {
+                const setDriverSupport = function(support: boolean) {
                     if (DefinedDrivers[driverName]) {
                         console.info(
                             `Redefining LocalForage driver: ${driverName}`
@@ -242,7 +266,7 @@ class LocalForage {
                         driverObject._support &&
                         typeof driverObject._support === 'function'
                     ) {
-                        driverObject._support().then(setDriverSupport, reject);
+                        (driverObject._support as () => Promise<boolean>)().then(setDriverSupport, reject);
                     } else {
                         setDriverSupport(!!driverObject._support);
                     }
@@ -262,7 +286,7 @@ class LocalForage {
         return this._driver || null;
     }
 
-    getDriver(driverName, callback, errorCallback) {
+    getDriver(driverName: string, callback?: ((value: Driver) => void), errorCallback?: ((reason: any) => void)) {
         const getDriverPromise = DefinedDrivers[driverName]
             ? Promise.resolve(DefinedDrivers[driverName])
             : Promise.reject(new Error('Driver not found.'));
@@ -271,18 +295,18 @@ class LocalForage {
         return getDriverPromise;
     }
 
-    getSerializer(callback) {
+    getSerializer(callback?: ((value: typeof serializer) => void)) {
         const serializerPromise = Promise.resolve(serializer);
         executeTwoCallbacks(serializerPromise, callback);
         return serializerPromise;
     }
 
-    ready(callback) {
+    ready(callback?: (() => void)) {
         const self = this;
 
-        const promise = self._driverSet.then(() => {
+        const promise = self._driverSet!.then(() => {
             if (self._ready === null) {
-                self._ready = self._initDriver();
+                self._ready = self._initDriver!();
             }
 
             return self._ready;
@@ -292,11 +316,11 @@ class LocalForage {
         return promise;
     }
 
-    setDriver(drivers, callback, errorCallback) {
+    setDriver(drivers: string | string[] | null, callback?: ((value: unknown) => void), errorCallback?: ((reason: any) => void)) {
         const self = this;
 
         if (!isArray(drivers)) {
-            drivers = [drivers];
+            drivers = [drivers!];
         }
 
         const supportedDrivers = this._getSupportedDrivers(drivers);
@@ -305,19 +329,19 @@ class LocalForage {
             self._config.driver = self.driver();
         }
 
-        function extendSelfWithDriver(driver) {
+        function extendSelfWithDriver(driver: Driver) {
             self._extend(driver);
             setDriverToConfig();
 
-            self._ready = self._initStorage(self._config);
+            self._ready = (self as any as Driver)._initStorage(self._config);
             return self._ready;
         }
 
-        function initDriver(supportedDrivers) {
+        function initDriver(supportedDrivers: string[]) {
             return function() {
                 let currentDriverIndex = 0;
 
-                function driverPromiseLoop() {
+                function driverPromiseLoop(): Promise<void> {
                     while (currentDriverIndex < supportedDrivers.length) {
                         let driverName = supportedDrivers[currentDriverIndex];
                         currentDriverIndex++;
@@ -375,16 +399,16 @@ class LocalForage {
         return this._driverSet;
     }
 
-    supports(driverName) {
+    supports(driverName: string) {
         return !!DriverSupport[driverName];
     }
 
-    _extend(libraryMethodsAndProperties) {
+    _extend<T>(libraryMethodsAndProperties: T) {
         extend(this, libraryMethodsAndProperties);
     }
 
-    _getSupportedDrivers(drivers) {
-        const supportedDrivers = [];
+    _getSupportedDrivers(drivers: string[]) {
+        const supportedDrivers: string[] = [];
         for (let i = 0, len = drivers.length; i < len; i++) {
             const driverName = drivers[i];
             if (this.supports(driverName)) {
@@ -400,11 +424,11 @@ class LocalForage {
         // will be replaced by the driver methods as soon as the driver is
         // loaded, so there is no performance impact.
         for (let i = 0, len = LibraryMethods.length; i < len; i++) {
-            callWhenReady(this, LibraryMethods[i]);
+            callWhenReady(this as any, LibraryMethods[i]);
         }
     }
 
-    createInstance(options) {
+    createInstance(options: Option) {
         return new LocalForage(options);
     }
 }

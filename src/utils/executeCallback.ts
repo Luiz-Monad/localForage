@@ -1,4 +1,4 @@
-function executeCallback(promise, callback) {
+function executeCallback<T>(promise: Promise<T>, callback?: (onError: any, onResult?: T) => void) {
     if (callback) {
         promise.then(
             function(result) {
