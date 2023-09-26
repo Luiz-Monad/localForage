@@ -1,6 +1,3 @@
 {
-  "{src,test}/**/*.js": [
-    "prettier --write",
-    "git add"
-  ]
+    "*.{ts, js, json, html, md, yml, *rc}": ["prettier --write", "git add"]
 }

@@ -1,30 +1,31 @@
-var path = require('path');
-var saucelabsBrowsers = require(path.resolve('test', 'saucelabs-browsers.js'));
+const path = require('path');
+const saucelabsBrowsers = require(path.resolve('test', 'saucelabs-browsers.ts'));
 
-var sourceFiles = [
+const sourceFiles = [
     'Gruntfile.js',
-    'src/*.js',
-    'src/**/*.js',
-    'test/**/test.*.js'
+    'src/*.ts',
+    'src/**/*.ts',
+    'test/**/test.*.ts'
 ];
 
 module.exports = exports = function(grunt) {
     'use strict';
 
-    var BANNER = '/*!\n' +
-                 '    localForage -- Offline Storage, Improved\n' +
-                 '    Version ' + grunt.file.readJSON('package.json').version + '\n' +
-                 '    https://localforage.github.io/localForage\n' +
-                 '    (c) 2013-2017 Mozilla, Apache License 2.0\n' +
-                 '*/\n';
+    const BANNER = 
+        '/*!\n' +
+        '    localForage -- Offline Storage, Improved\n' +
+        '    Version ' + grunt.file.readJSON('package.json').version + '\n' +
+        '    https://localforage.github.io/localForage\n' +
+        '    (c) 2013-2017 Mozilla, Apache License 2.0\n' +
+        '*/\n';
 
-    var babelModuleIdProvider = function getModuleId(moduleName) {
-        var files = {
-            'src/localforage': 'localforage',
-            'src/utils/serializer': 'localforageSerializer',
-            'src/drivers/indexeddb': 'asyncStorage',
-            'src/drivers/localstorage': 'localStorageWrapper',
-            'src/drivers/websql': 'webSQLStorage'
+    const babelModuleIdProvider = function getModuleId(moduleName) {
+        const files = {
+            'build/localforage': 'localforage',
+            'build/utils/serializer': 'localforageSerializer',
+            'build/drivers/indexeddb': 'asyncStorage',
+            'build/drivers/localstorage': 'localStorageWrapper',
+            'build/drivers/websql': 'webSQLStorage'
         };
 
         return files[moduleName] || moduleName.replace('src/', '');
@@ -40,41 +41,47 @@ module.exports = exports = function(grunt) {
             },
             dist: {
                 files: {
-                    'build/es5src/localforage.js': 'src/localforage.js',
-                    'build/es5src/utils/serializer.js': 'src/utils/serializer.js',
-                    'build/es5src/drivers/indexeddb.js': 'src/drivers/indexeddb.js',
-                    'build/es5src/drivers/localstorage.js': 'src/drivers/localstorage.js',
-                    'build/es5src/drivers/websql.js': 'src/drivers/websql.js'
+                    'build/es5src/localforage.js': 'build/localforage.js',
+                    'build/es5src/utils/serializer.js': 'build/utils/serializer.js',
+                    'build/es5src/drivers/indexeddb.js': 'build/drivers/indexeddb.js',
+                    'build/es5src/drivers/localstorage.js': 'build/drivers/localstorage.js',
+                    'build/es5src/drivers/websql.js': 'build/drivers/websql.js'
                 }
             }
         },
         browserify: {
             package_bundling_test: {
-                src: 'test/runner.browserify.js',
-                dest: 'test/localforage.browserify.js'
+                src: 'build/test/runner.browserify.js',
+                dest: 'build/test/localforage.browserify.js'
             },
             main: {
                 files: {
-                    'dist/localforage.js': 'src/localforage.js'
+                    'dist/localforage.js': 'build/localforage.js'
                 },
                 options: {
                     browserifyOptions: {
                         standalone: 'localforage'
                     },
                     transform: ['rollupify', 'babelify'],
-                    plugin: ['bundle-collapser/plugin', 'browserify-derequire']
+                    plugin: [
+                        'bundle-collapser/plugin', 
+                        'browserify-derequire'
+                    ]
                 }
             },
             no_promises: {
                 files: {
-                    'dist/localforage.nopromises.js': 'src/localforage.js'
+                    'dist/localforage.nopromises.js': 'build/localforage.js'
                 },
                 options: {
                     browserifyOptions: {
                         standalone: 'localforage'
                     },
                     transform: ['rollupify', 'babelify'],
-                    plugin: ['bundle-collapser/plugin', 'browserify-derequire'],
+                    plugin: [
+                        'bundle-collapser/plugin', 
+                        'browserify-derequire'
+                    ],
                     exclude: ['lie/polyfill']
                 }
             }
@@ -153,6 +160,9 @@ module.exports = exports = function(grunt) {
             }
         },
         ts: {
+            build: {
+                tsconfig: '.'
+            },
             typing_tests: {
                 tsconfig: {
                     tsconfig: 'typing-tests',
@@ -204,14 +214,14 @@ module.exports = exports = function(grunt) {
     });
 
     require('load-grunt-tasks')(grunt);
-
+    
     grunt.registerTask('default', ['build', 'connect', 'watch']);
-    grunt.registerTask('build', ['browserify:main', 'browserify:no_promises',
+    grunt.registerTask('build', ['ts:build', 'browserify:main', 'browserify:no_promises',
         'concat', 'es3_safe_recast', 'uglify']);
     grunt.registerTask('serve', ['build', 'connect:test', 'watch']);
 
     // These are the test tasks we run regardless of Sauce Labs credentials.
-    var testTasks = [
+    const testTasks = [
         'build',
         'babel',
         'eslint',
@@ -224,14 +234,14 @@ module.exports = exports = function(grunt) {
     grunt.registerTask('test:local', testTasks.slice());
     grunt.registerTask('mocha', 'custom function to run mocha tests', function() {
         const {runner} = require('mocha-headless-chrome');
-        const fs   = require('fs');
-        var done = this.async();
-        var tempErrLogs = fs.createWriteStream('temp.test.log');
-        var oldStdErr = process.stderr.write;
-        var totaltestsPassed = 0;
-        var totaltestsFailed = 0;
-        var totalDuration = 0;
-        var urls = [
+        const fs = require('fs');
+        const done = this.async();
+        const tempErrLogs = fs.createWriteStream('temp.test.log');
+        const oldStdErr = process.stderr.write;
+        const totaltestsPassed = 0;
+        const totaltestsFailed = 0;
+        const totalDuration = 0;
+        const urls = [
                  'http://localhost:9999/test/test.main1.html',
                  'http://localhost:9999/test/test.min.html',
                  'http://localhost:9999/test/test.polyfill.html',

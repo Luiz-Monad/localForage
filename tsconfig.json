@@ -1,14 +1,14 @@
 {
   "include": [
-    "src/**/*"
+    "./src/**/*"
   ],
   "exclude": [
-    "node_modules/**",
+    "./node_modules/**/*"
   ],
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "target": "ES2015",
+    "module": "ESNext",
+    "moduleResolution": "Node",
 
     "strict": true,
     "strictNullChecks": true,
@@ -18,26 +18,23 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
+    "removeComments": false,
 
     "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable",
-      "WebWorker",
-      "Webworker.Iterable",
+      "DOM"
     ],
 
     "allowJs": true,
     "checkJs": true,
 
     "rootDir": "./src",
-    "outDir": "./types/",
+    "outDir": "./build/",
     "baseUrl": "./src/",
     "paths": {
       "openpromise": [
         "../../openpromise"
-      ],
-    },
+      ]
+    }
 
   }
 }

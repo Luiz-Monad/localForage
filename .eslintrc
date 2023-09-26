@@ -1,19 +1,28 @@
 {
-  "parser": "babel-eslint",
+  "root": true,
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 6,
-    "sourceType": "module",
-    "ecmaFeatures": {
-        "modules": true
-    }
+    "project": [
+      "./tsconfig.json",
+      "./test/tsconfig.json" 
+    ]
   },
-  "extends": "eslint:recommended",
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "prettier",
+    "plugin:@typescript-eslint/recommended"
+  ],
   "env": {
     "browser": true,
     "es6": true,
     "node": true
   },
   "rules": {
+    "no-undef": "off",
+    "no-unused-vars": "off",
+    "no-prototype-builtins": "off",
+    "no-dupe-class-members": "off",
     "semi": [
       2,
       "always"
@@ -26,7 +35,7 @@
       2,
       "inside"
     ],
-    "no-use-before-define": [
+    "@typescript-eslint/no-use-before-define": [
       2,
       {
         "functions": false
