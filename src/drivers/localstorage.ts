@@ -9,6 +9,7 @@ import Promise from '../utils/promise';
 import executeCallback from '../utils/executeCallback';
 import normalizeKey from '../utils/normalizeKey';
 import getCallback from '../utils/getCallback';
+import { Callback, DbIterator, Driver, Forage, InstanceOptions, Options } from '../types';
 
 export interface Module extends Driver, Forage<DbInfo> {}
 

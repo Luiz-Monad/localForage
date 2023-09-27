@@ -1,3 +1,5 @@
+import { Callback } from '../types';
+
 function executeCallback<T>(promise: Promise<T>, callback?: Callback<T>) {
     if (callback) {
         promise.then(

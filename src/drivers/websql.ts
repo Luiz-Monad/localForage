@@ -4,6 +4,7 @@ import Promise from '../utils/promise';
 import executeCallback from '../utils/executeCallback';
 import normalizeKey from '../utils/normalizeKey';
 import getCallback from '../utils/getCallback';
+import { Callback, DbIterator, Driver, Forage, InstanceOptions, Options } from '../types';
 
 /*
  * Includes code from:
@@ -76,7 +77,7 @@ function _initStorage(this: Module, options: Options) {
         }
 
         // Create our key/value table if it doesn't exist.
-        dbInfo.db.transaction(function (t) {
+        dbInfo.db!.transaction(function (t) {
             createDbTable(
                 t,
                 dbInfo,

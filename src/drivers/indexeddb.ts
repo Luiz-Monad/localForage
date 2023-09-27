@@ -6,6 +6,7 @@ import executeCallback from '../utils/executeCallback';
 import executeTwoCallbacks from '../utils/executeTwoCallbacks';
 import normalizeKey from '../utils/normalizeKey';
 import getCallback from '../utils/getCallback';
+import { Callback, DbIterator, Driver, Forage, InstanceOptions, Options } from '../types';
 
 export interface Module extends Driver, Forage<DbInfo> {
     _initReady?: () => Promise<void>;
@@ -322,7 +323,7 @@ function _isEncodedBlob(value?: EncodedBlob) {
 // on the current database operations. Thus, the driver will be actually
 // ready when it's been initialized (default) *and* there are no pending
 // operations on the database (initiated by some other instances).
-function _fullyReady(this: Module, callback?: () => void): Promise<void> {
+function _fullyReady(this: Module, callback?: Callback<void>): Promise<void> {
     var self = this;
 
     var promise = self._initReady!().then(function () {

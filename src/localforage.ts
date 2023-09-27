@@ -7,15 +7,18 @@ import executeCallback from './utils/executeCallback';
 import executeTwoCallbacks from './utils/executeTwoCallbacks';
 import includes from './utils/includes';
 import isArray from './utils/isArray';
+import {
+    LocalForageComplete,
+    Driver,
+    Options,
+    OptionalDropInstanceDriver,
+    ILocalForage,
+    Callback,
+    Forage
+} from './types';
 
-type DriverKeys = keyof MethodsCore;
-type DriverMethods = Record<DriverKeys, (...args: any[]) => Promise<any>>;
-
-interface Ready {
-    ready: (callback?: () => void) => Promise<void>;
-}
-
-type DefaultDriversName = Record<keyof typeof DefaultDrivers, string>;
+type DriverKeys = keyof OptionalDropInstanceDriver;
+type DriverMethods = Forage & Record<DriverKeys, (...args: any[]) => Promise<any>>;
 
 // Drivers are stored here when `defineDriver()` is called.
 // They are shared across all instances of localForage.
@@ -59,7 +62,7 @@ const DefaultConfig: Options = {
     version: 1.0
 };
 
-function callWhenReady(localForageInstance: DriverMethods & Ready, libraryMethod: DriverKeys) {
+function callWhenReady(localForageInstance: DriverMethods, libraryMethod: DriverKeys) {
     localForageInstance[libraryMethod] = function () {
         const _args = arguments as any;
         return localForageInstance.ready().then(function () {
@@ -88,7 +91,7 @@ function extend<T extends {}, U, V>(target: T, source: U, source2?: V): T & U & 
     return arguments[0];
 }
 
-class LocalForage implements Forage<Options> {
+class LocalForage implements ILocalForage {
     _defaultConfig: Options;
     _dbInfo: Options;
     private _config: Options;
@@ -174,8 +177,8 @@ class LocalForage implements Forage<Options> {
     // localForage.
     defineDriver(
         driverObject: OptionalDropInstanceDriver,
-        callback?: (value: unknown) => void,
-        errorCallback?: (reason: any) => void
+        callback?: Callback<void>,
+        errorCallback?: Callback<void>
     ) {
         const promise = new Promise<void>(function (resolve, reject) {
             try {
@@ -217,7 +220,7 @@ class LocalForage implements Forage<Options> {
                             const promise = Promise.reject(error);
                             executeCallback(promise, arguments[arguments.length - 1]);
                             return promise;
-                        };
+                        } as any;
                     };
 
                     for (let i = 0, len = OptionalDriverMethods.length; i < len; i++) {
@@ -267,8 +270,8 @@ class LocalForage implements Forage<Options> {
 
     getDriver(
         driverName: string,
-        callback?: (value: Driver) => void,
-        errorCallback?: (reason: any) => void
+        callback?: Callback<OptionalDropInstanceDriver>,
+        errorCallback?: Callback<void>
     ) {
         const getDriverPromise = DefinedDrivers[driverName]
             ? Promise.resolve(DefinedDrivers[driverName])
@@ -278,13 +281,13 @@ class LocalForage implements Forage<Options> {
         return getDriverPromise;
     }
 
-    getSerializer(callback?: (value: typeof serializer) => void) {
+    getSerializer(callback?: Callback<typeof serializer>) {
         const serializerPromise = Promise.resolve(serializer);
         executeTwoCallbacks(serializerPromise, callback);
         return serializerPromise;
     }
 
-    ready(callback?: () => void) {
+    ready(callback?: Callback<void>) {
         const self = this;
 
         const promise = self._driverSet!.then(() => {
@@ -301,8 +304,8 @@ class LocalForage implements Forage<Options> {
 
     setDriver(
         drivers: string | string[],
-        callback?: () => void,
-        errorCallback?: (reason: any) => void
+        callback?: Callback<void>,
+        errorCallback?: Callback<void>
     ) {
         const self = this;
 
@@ -414,17 +417,10 @@ class LocalForage implements Forage<Options> {
     }
 
     createInstance(options?: Options) {
-        return new LocalForage(options) as LocalForageComplete;
+        return new LocalForage(options) as ILocalForage as LocalForageComplete;
     }
 }
 
-type LocalForageClass = InstanceType<typeof LocalForage>;
-type UnamedOptionalDropInstanceDriver = Omit<OptionalDropInstanceDriver, '_driver'>;
-interface LocalForageComplete
-    extends LocalForageClass,
-        DefaultDriversName,
-        UnamedOptionalDropInstanceDriver {}
-
 // The actual localForage object that we expose as a module or via a
 // global. It's extended by pulling in one of our other libraries.
-export default new LocalForage() as LocalForageComplete;
+export default new LocalForage() as ILocalForage as LocalForageComplete;

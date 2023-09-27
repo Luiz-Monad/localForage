@@ -1,6 +1,13 @@
-﻿import * as localforage from 'localforage';
+﻿import LocalForageValue from '../src/localforage';
+import LocalForageSerializerValue from '../src/utils/serializer';
+import { InstanceOptions, OptionalDropInstanceDriver, Options } from '../src/types';
 
-let localForage: LocalForage = localforage;
+type LocalForageOptions = Options;
+type LocalForageDbInstanceOptions = Partial<InstanceOptions>;
+type LocalForageDriver = OptionalDropInstanceDriver;
+type LocalForageSerializer = typeof LocalForageSerializerValue;
+type LocalForage = typeof LocalForageValue;
+const localForage = LocalForageValue;
 
 namespace LocalForageTest {
     localForage.clear((err: any) => {
@@ -33,30 +40,15 @@ namespace LocalForageTest {
         let newNum: number = num;
     });
 
-    localForage.iterate((str: string, key: string, num: number) => {
-        let newStr: string = str;
+    localForage.iterate((str: string | undefined, key: string, num: number) => {
+        let newStr: string | undefined = str;
         let newKey: string = key;
         let newNum: number = num;
     });
 
     localForage
-        .iterate((str: string, key: string, num: number) => {
-            let newStr: string = str;
-            let newKey: string = key;
-            let newNum: number = num;
-            if (newStr === 'END') {
-                return newNum;
-            }
-        })
-        .then((result: number | undefined) => {
-            if (result) {
-                let numResult: number = result;
-            }
-        });
-
-    localForage
-        .iterate<string, number | void>((str, key: string, num: number) => {
-            let newStr: string = str;
+        .iterate((str: string | undefined, key: string, num: number) => {
+            let newStr: string | undefined = str;
             let newKey: string = key;
             let newNum: number = num;
             if (newStr === 'END') {
@@ -70,8 +62,23 @@ namespace LocalForageTest {
         });
 
     localForage
-        .iterate<string, number | void>((str: string, key: string, num: number) => {
-            let newStr: string = str;
+        .iterate<string, number | void>((str, key: string, num: number) => {
+            let newStr: string | undefined = str;
+            let newKey: string = key;
+            let newNum: number = num;
+            if (newStr === 'END') {
+                return newNum;
+            }
+        })
+        .then((result: number | void) => {
+            if (result) {
+                let numResult: number = result;
+            }
+        });
+
+    localForage
+        .iterate<string, number | void>((str: string | undefined, key: string, num: number) => {
+            let newStr: string | undefined = str;
             let newKey: string = key;
             let newNum: number = num;
             if (newStr === 'END') {
@@ -93,9 +100,9 @@ namespace LocalForageTest {
         var newNumber: number = num;
     });
 
-    localForage.key(0, (err: any, value: string) => {
+    localForage.key(0, (err: any, value: string | null) => {
         let newError: any = err;
-        let newValue: string = value;
+        let newValue: string | null = value;
     });
 
     localForage.keys((err: any, keys: Array<string>) => {
@@ -107,22 +114,22 @@ namespace LocalForageTest {
         var newArray: Array<string> = keys;
     });
 
-    localForage.getItem('key', (err: any, str: string) => {
+    localForage.getItem('key', (err: any, str?: string | null) => {
         let newError: any = err;
-        let newStr: string = str;
+        let newStr: string | null | undefined = str;
     });
 
-    localForage.getItem<string>('key').then((str: string) => {
-        let newStr: string = str;
+    localForage.getItem<string>('key').then((str?: string) => {
+        let newStr: string | undefined = str;
     });
 
-    localForage.setItem('key', 'value', (err: any, str: string) => {
+    localForage.setItem('key', 'value', (err: any, str: string | null) => {
         let newError: any = err;
-        let newStr: string = str;
+        let newStr: string | null = str;
     });
 
-    localForage.setItem('key', 'value').then((str: string) => {
-        let newStr: string = str;
+    localForage.setItem('key', 'value').then((str: string | null) => {
+        let newStr: string | null = str;
     });
 
     localForage.removeItem('key', (err: any) => {
@@ -133,7 +140,7 @@ namespace LocalForageTest {
 
     const customDriver: LocalForageDriver = {
         _driver: 'CustomDriver',
-        _initStorage: (options: LocalForageOptions) => {},
+        _initStorage: (options: LocalForageOptions) => Promise.resolve(),
         getItem: <T>(key: string, callback?: (err: any, value: T) => void) =>
             Promise.resolve({} as T),
         setItem: <T>(key: string, value: T, callback?: (err: any, value: T) => void) =>
@@ -153,7 +160,7 @@ namespace LocalForageTest {
 
     const customDriver2: LocalForageDriver = {
         _driver: 'CustomDriver',
-        _initStorage: (options: LocalForageOptions) => {},
+        _initStorage: (options: LocalForageOptions) => Promise.resolve(),
         _support: true,
         getItem: <T>(key: string, callback?: (err: any, value: T) => void) =>
             Promise.resolve({} as T),
@@ -174,7 +181,7 @@ namespace LocalForageTest {
 
     const customDriver3: LocalForageDriver = {
         _driver: 'CustomDriver',
-        _initStorage: (options: LocalForageOptions) => {},
+        _initStorage: (options: LocalForageOptions) => Promise.resolve(),
         _support: () => Promise.resolve(true),
         getItem: <T>(key: string, callback?: (err: any, value: T) => void) =>
             Promise.resolve({} as T),
@@ -212,17 +219,19 @@ namespace LocalForageTest {
     });
 
     {
-        let config: boolean;
+        let config: boolean | Promise<void> | Error;
 
         const configOptions: LocalForageOptions = {
             name: 'testyo',
-            driver: localForage.LOCALSTORAGE
+            driver: localForage.LOCALSTORAGE,
+            storeName: ''
         };
 
         config = localForage.config(configOptions);
         config = localForage.config({
             name: 'testyo',
-            driver: localForage.LOCALSTORAGE
+            driver: localForage.LOCALSTORAGE,
+            storeName: ''
         });
     }
 
@@ -231,42 +240,36 @@ namespace LocalForageTest {
 
         const configOptions: LocalForageOptions = {
             name: 'da instance',
-            driver: localForage.LOCALSTORAGE
+            driver: localForage.LOCALSTORAGE,
+            storeName: ''
         };
 
         store = localForage.createInstance(configOptions);
         store = localForage.createInstance({
             name: 'da instance',
-            driver: localForage.LOCALSTORAGE
+            driver: localForage.LOCALSTORAGE,
+            storeName: ''
         });
     }
 
     {
-        localForage.dropInstance().then(() => {});
+        localForage.dropInstance!().then(() => {});
 
         const dropInstanceOptions: LocalForageDbInstanceOptions = {
             name: 'da instance',
             storeName: 'da store'
         };
 
-        localForage.dropInstance(dropInstanceOptions).then(() => {});
+        localForage.dropInstance!(dropInstanceOptions).then(() => {});
 
-        localForage
-            .dropInstance({
-                name: 'da instance',
-                storeName: 'da store'
-            })
-            .then(() => {});
+        localForage.dropInstance!({
+            name: 'da instance',
+            storeName: 'da store'
+        }).then(() => {});
 
-        const dropDbOptions: LocalForageDbInstanceOptions = {
+        localForage.dropInstance!({
             name: 'da instance'
-        };
-
-        localForage
-            .dropInstance({
-                name: 'da instance'
-            })
-            .then(() => {});
+        }).then(() => {});
     }
 
     {
@@ -284,10 +287,6 @@ namespace LocalForageTest {
     {
         localForage.ready().then(() => {});
 
-        localForage.ready((error) => {
-            if (error) {
-            } else {
-            }
-        });
+        localForage.ready(() => {});
     }
 }
