@@ -105,8 +105,7 @@ function serialize<T>(
         value &&
         (valueType === '[object ArrayBuffer]' ||
             ((value as Partial<ArrayBufferView>).buffer &&
-                toString.call((value as Partial<ArrayBufferView>).buffer) ===
-                    '[object ArrayBuffer]'))
+                toString.call((value as ArrayBufferView).buffer) === '[object ArrayBuffer]'))
     ) {
         const arrayBuffer = value as ArrayBufferView & ArrayBuffer;
 

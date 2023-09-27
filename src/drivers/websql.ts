@@ -15,23 +15,11 @@ import getCallback from '../utils/getCallback';
  * Licensed under the MIT license.
  */
 
-interface Module {
-    _defaultConfig: Option;
-    _dbInfo: DbInfo;
-    ready: () => Promise<void>;
-    config: () => DbInfo;
-}
+interface Module extends Driver, Forage<DbInfo> {}
 
-interface Option {
-    storeName: string;
-    name: string;
-}
-
-interface DbInfo {
+interface DbInfo extends Options {
     db: Database | null;
-    name: string;
     version: number;
-    storeName: string;
     description: string;
     size: number;
     serializer: typeof serializer;
@@ -59,7 +47,7 @@ function createDbTable(
 
 // Open the WebSQL database (automatically creates one if one didn't
 // previously exist), using any options set in the config.
-function _initStorage(this: Module, options: Option) {
+function _initStorage(this: Module, options: Options) {
     var self = this;
     var dbInfo = {
         db: null
@@ -146,11 +134,7 @@ function tryExecuteSql(
     });
 }
 
-function getItem<T>(
-    this: Module,
-    key: IDBValidKey,
-    callback: (onError: any, onResult?: T | void) => void
-) {
+function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined>) {
     var self = this;
 
     key = normalizeKey(key);
@@ -193,14 +177,14 @@ function getItem<T>(
     return promise;
 }
 
-function iterate<T>(
+function iterate<T, U>(
     this: Module,
-    iterator: (value: T | undefined, key: IDBValidKey, ix: number) => T,
-    callback: (onError: any, onResult?: T | void) => void
+    iterator: DbIterator<T, U>,
+    callback?: Callback<U | undefined | void>
 ) {
     var self = this;
 
-    var promise = new Promise<T | void>(function (resolve, reject) {
+    var promise = new Promise<U | void | undefined>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 var dbInfo = self._dbInfo;
@@ -218,15 +202,16 @@ function iterate<T>(
                             for (var i = 0; i < length; i++) {
                                 var item = rows.item(i);
                                 var sresult = item.value as string;
-                                var result: T | undefined;
+                                var oresult: T | undefined;
+                                var result: U | undefined;
 
                                 // Check to see if this is serialized content
                                 // we need to unpack.
-                                if (result) {
-                                    result = dbInfo.serializer.deserialize(sresult) as T;
+                                if (sresult) {
+                                    oresult = dbInfo.serializer.deserialize(sresult) as T;
                                 }
 
-                                result = iterator(result, item.key, i + 1);
+                                result = iterator(oresult, item.key, i + 1);
 
                                 // void(0) prevents problems with redefinition
                                 // of `undefined`.
@@ -254,9 +239,9 @@ function iterate<T>(
 
 function _setItem<T>(
     this: Module,
-    key: IDBValidKey,
+    key: string,
     value: T | null,
-    callback: (onError: any, onResult?: T | null) => void,
+    callback: Callback<T | null> | undefined,
     retriesLeft: number
 ) {
     var self = this;
@@ -334,16 +319,11 @@ function _setItem<T>(
     return promise;
 }
 
-function setItem<T>(
-    this: Module,
-    key: IDBValidKey,
-    value: T | null,
-    callback: (onError: any, onResult?: T | null) => void
-) {
+function setItem<T>(this: Module, key: string, value: T | null, callback?: Callback<T | null>) {
     return (_setItem<T>).apply(this, [key, value, callback, 1]);
 }
 
-function removeItem(this: Module, key: IDBValidKey, callback: (onError: any) => void) {
+function removeItem(this: Module, key: string, callback: Callback<void>) {
     var self = this;
 
     key = normalizeKey(key);
@@ -377,7 +357,7 @@ function removeItem(this: Module, key: IDBValidKey, callback: (onError: any) => 
 
 // Deletes every item in the table.
 // TODO: Find out if this resets the AUTO_INCREMENT number.
-function clear(this: Module, callback: (onError: any) => void) {
+function clear(this: Module, callback: Callback<void>) {
     var self = this;
 
     var promise = new Promise<void>(function (resolve, reject) {
@@ -409,7 +389,7 @@ function clear(this: Module, callback: (onError: any) => void) {
 
 // Does a simple `COUNT(key)` to get the number of items stored in
 // localForage.
-function length(this: Module, callback: (onError: any, onResult?: number) => void) {
+function length(this: Module, callback?: Callback<number>) {
     var self = this;
 
     var promise = new Promise<number>(function (resolve, reject) {
@@ -448,14 +428,10 @@ function length(this: Module, callback: (onError: any, onResult?: number) => voi
 // the ID of each key will change every time it's updated. Perhaps a stored
 // procedure for the `setItem()` SQL would solve this problem?
 // TODO: Don't change ID on `setItem()`.
-function key(
-    this: Module,
-    n: number,
-    callback: (onError: any, onResult?: IDBValidKey | null) => void
-) {
+function key(this: Module, n: number, callback?: Callback<string | null>) {
     var self = this;
 
-    var promise = new Promise<IDBValidKey | null>(function (resolve, reject) {
+    var promise = new Promise<string | null>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 var dbInfo = self._dbInfo;
@@ -483,10 +459,10 @@ function key(
     return promise;
 }
 
-function keys(this: Module, callback?: (onError: any, onResult?: IDBValidKey[]) => void) {
+function keys(this: Module, callback?: Callback<string[]>) {
     var self = this;
 
-    var promise = new Promise<IDBValidKey[]>(function (resolve, reject) {
+    var promise = new Promise<string[]>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 var dbInfo = self._dbInfo;
@@ -554,7 +530,7 @@ function getAllStoreNames(db: Database) {
     });
 }
 
-function dropInstance(this: Module, _options: Partial<Option>, callback?: (onError: any) => void) {
+function dropInstance(this: Module, _options: Partial<InstanceOptions>, callback?: Callback<void>) {
     callback = getCallback.apply(this, arguments as any);
 
     var currentConfig = this.config();
@@ -563,7 +539,7 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
         _options.name = _options.name || currentConfig.name;
         _options.storeName = _options.storeName || currentConfig.storeName;
     }
-    var options: Option = {
+    var options: InstanceOptions = {
         name: _options.name,
         storeName: _options.storeName!
     };
@@ -636,7 +612,7 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
     return promise;
 }
 
-var webSQLStorage = {
+var webSQLStorage: Driver = {
     _driver: 'webSQLStorage',
     _initStorage: _initStorage,
     _support: isWebSQLValid(),

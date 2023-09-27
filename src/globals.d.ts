@@ -6,7 +6,6 @@ declare global {
     declare let mozIndexedDB: IDBFactory | undefined;
     declare let OIndexedDB: IDBFactory | undefined;
     declare let msIndexedDB: IDBFactory | undefined;
-    declare let webkitIndexedDB: IDBFactory | undefined;
 
     declare let BlobBuilder: BlobBuilder | undefined;
     declare let MSBlobBuilder: BlobBuilder | undefined;

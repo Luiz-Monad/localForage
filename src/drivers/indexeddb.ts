@@ -7,26 +7,13 @@ import executeTwoCallbacks from '../utils/executeTwoCallbacks';
 import normalizeKey from '../utils/normalizeKey';
 import getCallback from '../utils/getCallback';
 
-interface Module {
-    _defaultConfig: {
-        version?: number;
-    };
-    _dbInfo: DbInfo;
-    ready: () => Promise<void>;
+interface Module extends Driver, Forage<DbInfo> {
     _initReady?: () => Promise<void>;
-    config: () => DbInfo;
 }
 
-interface Option {
-    storeName: string;
-    name: string;
-}
-
-interface DbInfo {
+interface DbInfo extends Options {
     db: IDBDatabase | null;
-    name: string;
     version: number;
-    storeName: string;
 }
 
 interface Context {
@@ -454,7 +441,7 @@ function createDbContext(): Context {
 
 // Open the IndexedDB database (automatically creates one if one didn't
 // previously exist), using any options set in the config.
-function _initStorage(this: Module, options: Option) {
+function _initStorage(this: Module, options: Options) {
     var self = this;
     var dbInfo = {
         db: null
@@ -536,16 +523,12 @@ function _initStorage(this: Module, options: Option) {
         });
 }
 
-function getItem<T>(
-    this: Module,
-    key: IDBValidKey,
-    callback: (onError: any, onResult?: T | void) => void
-) {
+function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined>) {
     var self = this;
 
     key = normalizeKey(key);
 
-    var promise = new Promise<T>(function (resolve, reject) {
+    var promise = new Promise<T | undefined>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
@@ -584,14 +567,14 @@ function getItem<T>(
 }
 
 // Iterate over all items stored in database.
-function iterate<T>(
+function iterate<T, U>(
     this: Module,
-    iterator: (value: T | undefined, key: IDBValidKey, ix: number) => T,
-    callback: (onError: any, onResult?: T | void) => void
+    iterator: DbIterator<T, U>,
+    callback?: Callback<U | undefined | void>
 ) {
     var self = this;
 
-    var promise = new Promise<T | void>(function (resolve, reject) {
+    var promise = new Promise<U | undefined | void>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
@@ -612,7 +595,11 @@ function iterate<T>(
                                 if (_isEncodedBlob(value)) {
                                     value = _decodeBlob(value);
                                 }
-                                var result = iterator(value, cursor.key, iterationNumber++);
+                                var result = iterator(
+                                    value,
+                                    cursor.key as string,
+                                    iterationNumber++
+                                );
 
                                 // when the iterator callback returns any
                                 // (non-`undefined`) value, then we stop
@@ -645,17 +632,12 @@ function iterate<T>(
 
 type ObjectLike<T> = T | Blob | EncodedBlob | null;
 
-function setItem<T>(
-    this: Module,
-    key: IDBValidKey,
-    value: T | null,
-    callback: (onError: any, onResult?: ObjectLike<T>) => void
-) {
+function setItem<T>(this: Module, key: string, value: T | null, callback?: Callback<T | null>) {
     var self = this;
 
     key = normalizeKey(key);
 
-    var promise = new Promise<ObjectLike<T>>(function (resolve, reject) {
+    var promise = new Promise<T | null>(function (resolve, reject) {
         var dbInfo;
         self.ready()
             .then(function () {
@@ -703,7 +685,7 @@ function setItem<T>(
                                 value = null;
                             }
 
-                            resolve(value);
+                            resolve(value as T);
                         };
                         transaction.onabort = transaction.onerror = function () {
                             var err = req.error ? req.error : req.transaction?.error;
@@ -721,7 +703,7 @@ function setItem<T>(
     return promise;
 }
 
-function removeItem(this: Module, key: IDBValidKey, callback: (onError: any) => void) {
+function removeItem(this: Module, key: string, callback: Callback<void>) {
     var self = this;
 
     key = normalizeKey(key);
@@ -768,7 +750,7 @@ function removeItem(this: Module, key: IDBValidKey, callback: (onError: any) => 
     return promise;
 }
 
-function clear(this: Module, callback: (onError: any) => void) {
+function clear(this: Module, callback: Callback<void>) {
     var self = this;
 
     var promise = new Promise<void>(function (resolve, reject) {
@@ -803,7 +785,7 @@ function clear(this: Module, callback: (onError: any) => void) {
     return promise;
 }
 
-function length(this: Module, callback: (onError: any, onResult?: number) => void) {
+function length(this: Module, callback?: Callback<number>) {
     var self = this;
 
     var promise = new Promise<number>(function (resolve, reject) {
@@ -837,14 +819,10 @@ function length(this: Module, callback: (onError: any, onResult?: number) => voi
     return promise;
 }
 
-function key(
-    this: Module,
-    n: number,
-    callback: (onError: any, onResult?: IDBValidKey | null) => void
-) {
+function key(this: Module, n: number, callback?: Callback<string | null>) {
     var self = this;
 
-    var promise = new Promise<IDBValidKey | null>(function (resolve, reject) {
+    var promise = new Promise<string | null>(function (resolve, reject) {
         if (n < 0) {
             resolve(null);
 
@@ -875,7 +853,7 @@ function key(
                             if (n === 0) {
                                 // We have the first key, return it if that's what they
                                 // wanted.
-                                resolve(cursor.key);
+                                resolve(cursor.key as string);
                             } else {
                                 if (!advanced) {
                                     // Otherwise, ask the cursor to skip ahead n
@@ -884,7 +862,7 @@ function key(
                                     cursor.advance(n);
                                 } else {
                                     // When we get here, we've got the nth key.
-                                    resolve(cursor.key);
+                                    resolve(cursor.key as string);
                                 }
                             }
                         };
@@ -904,10 +882,10 @@ function key(
     return promise;
 }
 
-function keys(this: Module, callback?: (onError: any, onResult?: IDBValidKey[]) => void) {
+function keys(this: Module, callback?: Callback<string[]>) {
     var self = this;
 
-    var promise = new Promise<IDBValidKey[]>(function (resolve, reject) {
+    var promise = new Promise<string[]>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
@@ -918,7 +896,7 @@ function keys(this: Module, callback?: (onError: any, onResult?: IDBValidKey[]) 
                     try {
                         var store = transaction!.objectStore(self._dbInfo.storeName);
                         var req = store.openKeyCursor();
-                        var keys: IDBValidKey[] = [];
+                        var keys: string[] = [];
 
                         req.onsuccess = function () {
                             var cursor = req.result;
@@ -928,7 +906,7 @@ function keys(this: Module, callback?: (onError: any, onResult?: IDBValidKey[]) 
                                 return;
                             }
 
-                            keys.push(cursor.key);
+                            keys.push(cursor.key as string);
                             cursor.continue();
                         };
 
@@ -947,7 +925,7 @@ function keys(this: Module, callback?: (onError: any, onResult?: IDBValidKey[]) 
     return promise;
 }
 
-function dropInstance(this: Module, _options: Partial<Option>, callback?: (onError: any) => void) {
+function dropInstance(this: Module, _options: Partial<InstanceOptions>, callback?: Callback<void>) {
     callback = getCallback.apply(this, arguments as any);
 
     var currentConfig = this.config();
@@ -1100,7 +1078,7 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
     return promise;
 }
 
-var asyncStorage = {
+var asyncStorage: Driver = {
     _driver: 'asyncStorage',
     _initStorage: _initStorage,
     _support: isIndexedDBValid(),
@@ -1114,4 +1092,5 @@ var asyncStorage = {
     keys: keys,
     dropInstance: dropInstance
 };
+
 export default asyncStorage;
