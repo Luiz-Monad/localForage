@@ -1,4 +1,5 @@
-/* global beforeEach:true, describe:true, expect:true, it:true */
+import { expect } from 'chai';
+
 describe('Driver API', function () {
     'use strict';
 
@@ -54,7 +55,7 @@ describe('Driver API', function () {
 
             // These should be rejected in component builds but aren't.
             // TODO: Look into why.
-            localforage.setDriver(localforage.INDEXEDDB, null, function () {
+            localforage.setDriver(localforage.INDEXEDDB, null!, function () {
                 expect(localforage.driver()).to.be(previousDriver);
                 done();
             });
@@ -96,7 +97,7 @@ describe('Driver API', function () {
             var previousDriver = localforage.driver();
             expect(previousDriver).to.not.be(localforage.LOCALSTORAGE);
 
-            localforage.setDriver(localforage.LOCALSTORAGE, null, function () {
+            localforage.setDriver(localforage.LOCALSTORAGE, null!, function () {
                 expect(localforage.driver()).to.be(previousDriver);
                 done();
             });
@@ -139,7 +140,7 @@ describe('Driver API', function () {
             var previousDriver = localforage.driver();
             expect(previousDriver).to.not.be(localforage.WEBSQL);
 
-            localforage.setDriver(localforage.WEBSQL, null, function () {
+            localforage.setDriver(localforage.WEBSQL, null!, function () {
                 expect(localforage.driver()).to.be(previousDriver);
                 done();
             });

@@ -1,4 +1,3 @@
-/*globals importScripts:true, self:true */
 importScripts('/dist/localforage.js');
 
 self.onmessage = function (messageEvent) {

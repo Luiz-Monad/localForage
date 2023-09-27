@@ -1,19 +1,23 @@
-/* global requirejs:true */
 // Run before window.onload to make sure the specs have access to describe()
 // and other mocha methods. All feels very hacky though :-/
-this.mocha.setup('bdd');
+mocha.setup('bdd');
 
-function runTests() {
-    var runner = this.mocha.run();
+interface Title {
+    title: string;
+    parent: Title;
+}
 
-    var failedTests = [];
+function runTestSuit() {
+    var runner = mocha.run();
+
+    var failedTests: any[] = [];
 
     runner.on('end', function () {
         window.mochaResults = runner.stats;
         window.mochaResults.reports = failedTests;
     });
 
-    function flattenTitles(test) {
+    function flattenTitles(test: Title) {
         var titles = [];
 
         while (test.parent.title) {
@@ -24,7 +28,7 @@ function runTests() {
         return titles.reverse();
     }
 
-    function logFailure(test, err) {
+    function logFailure(test: Title, err: Error) {
         failedTests.push({
             name: test.title,
             result: false,
@@ -49,14 +53,16 @@ if (!Array.prototype.forEach) {
     };
 }
 
-var require = this.require;
+declare var requirejs: any;
+
+var require: any = this.require;
 if (require) {
     requirejs.config({
         paths: {
             localforage: '/dist/localforage'
         }
     });
-    require(['localforage'], function (localforage) {
+    require(['localforage'], function (localforage: LocalForageDriver) {
         window.localforage = localforage;
 
         require([
@@ -66,10 +72,10 @@ if (require) {
             '/test/test.drivers.js',
             '/test/test.iframes.js',
             '/test/test.webworkers.js'
-        ], runTests);
+        ], runTestSuit);
     });
 } else if (this.addEventListener) {
-    this.addEventListener('load', runTests);
+    this.addEventListener('load', runTestSuit);
 } else if (this.attachEvent) {
-    this.attachEvent('onload', runTests);
+    this.attachEvent('onload', runTestSuit);
 }

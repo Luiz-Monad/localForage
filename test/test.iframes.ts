@@ -1,3 +1,5 @@
+import { expect } from 'chai';
+
 /* global before:true, after:true, describe:true, expect:true, it:true */
 describe('Inside iFrames', function () {
     'use strict';
@@ -14,14 +16,14 @@ describe('Inside iFrames', function () {
 
     after(function () {
         var iFrame = window.document.getElementById('iframe');
-        iFrame.parentNode.removeChild(iFrame);
+        iFrame?.parentNode?.removeChild(iFrame);
     });
 
     it('can run localForage in an iFrame', function (done) {
         var timer = setInterval(function () {
-            var element = window.document
-                .getElementById('iframe')
-                .contentWindow.document.getElementById('my-text');
+            var element = (
+                window.document.getElementById('iframe')! as any
+            ).contentWindow.document.getElementById('my-text');
             if (element && element.innerHTML) {
                 clearInterval(timer);
                 expect(element.innerHTML).to.be('I have been set');

@@ -1,4 +1,5 @@
-/* global beforeEach:true, describe:true, expect:true, it:true */
+import { expect } from 'chai';
+
 describe('When Driver Fails to Initialize', function () {
     'use strict';
 
@@ -24,7 +25,8 @@ describe('When Driver Fails to Initialize', function () {
 
             it('fails to setDriver ' + driverName + ' [callback]', function (done) {
                 localforage.setDriver(driverName, function () {
-                    localforage.ready(function (err) {
+                    localforage.ready(function () {
+                        const err = arguments[0];
                         expect(err).to.be.an(Error);
                         expect(err.message).to.be('No available storage method found.');
                         done();

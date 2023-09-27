@@ -1,4 +1,5 @@
-/* global before:true, beforeEach:true, describe:true, expect:true, it:true, Modernizr:true */
+import { expect } from 'chai';
+
 var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
 
 DRIVERS.forEach(function (driverName) {

@@ -1,9 +1,10 @@
-/* global before:true, beforeEach:true, describe:true, expect:true, it:true */
+import { expect } from 'chai';
+
 describe('Config API', function () {
     'use strict';
 
     var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
-    var supportedDrivers = [];
+    var supportedDrivers: string[] = [];
 
     before(function () {
         this.defaultConfig = localforage.config();
@@ -19,7 +20,7 @@ describe('Config API', function () {
     // Reset localForage before each test so we can call `config()` without
     // errors.
     beforeEach(function () {
-        localforage._ready = null;
+        (localforage as any)._ready = null;
         localforage.config(this.defaultConfig);
     });
 
@@ -43,7 +44,7 @@ describe('Config API', function () {
                 name: 'My Cool App',
                 storeName: 'myStoreName',
                 version: 2.0
-            });
+            })!;
 
             var error = "Error: Can't call config() after localforage " + 'has been used.';
 
@@ -169,7 +170,7 @@ describe('Config API', function () {
 
         localforage.setItem('some key', 'some value').then(function (value) {
             if (localforage.driver() === localforage.INDEXEDDB) {
-                var indexedDB =
+                indexedDB =
                     indexedDB ||
                     window.indexedDB ||
                     window.webkitIndexedDB ||
@@ -212,7 +213,7 @@ describe('Config API', function () {
 
     it("returns all values when config isn't passed arguments", function () {
         expect(localforage.config()).to.be.an('object');
-        expect(Object.keys(localforage.config()).length).to.be(6);
+        expect(Object.keys(localforage.config()!).length).to.be(6);
     });
 
     // This may go away when https://github.com/mozilla/localForage/issues/168
@@ -235,8 +236,8 @@ describe('Config API', function () {
 
     it('returns error if database version is not a number', function (done) {
         var configResult = localforage.config({
-            version: '2.0'
-        });
+            version: 2.0
+        })!;
 
         var error = 'Error: Database version must be a number.';
 

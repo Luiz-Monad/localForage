@@ -1,4 +1,5 @@
-/* global after:true, afterEach:true, before:true, beforeEach:true, describe:true, expect:true, it:true, Promise:true */
+import { expect } from 'chai';
+
 var DRIVERS = [localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE];
 
 var SUPPORTED_DRIVERS = DRIVERS.filter(function (driverName) {
@@ -7,7 +8,7 @@ var SUPPORTED_DRIVERS = DRIVERS.filter(function (driverName) {
 
 var driverApiMethods = ['getItem', 'setItem', 'clear', 'length', 'removeItem', 'key', 'keys'];
 
-var indexedDB =
+indexedDB =
     // eslint-disable-next-line no-use-before-define
     indexedDB ||
     window.indexedDB ||
@@ -57,7 +58,7 @@ describe('localForage', function () {
     );
 
     it('errors when a requested driver is not found [callback]', function (done) {
-        localforage.getDriver('UnknownDriver', null, function (error) {
+        localforage.getDriver('UnknownDriver', null!, function (error) {
             expect(error).to.be.an(Error);
             expect(error.message).to.be('Driver not found.');
             done();
@@ -96,7 +97,7 @@ describe('localForage', function () {
             '1': localforage.WEBSQL,
             '2': localforage.LOCALSTORAGE,
             length: 3
-        };
+        } as any as string[];
 
         localforage.setDriver(driverPreferedOrder).then(null, function (error) {
             expect(error).to.be.an(Error);
@@ -149,18 +150,18 @@ describe('localForage', function () {
     });
 
     describe('createInstance()', function () {
-        var oldConsoleInfo;
+        var oldConsoleInfo: typeof console.info;
 
         before(function () {
             oldConsoleInfo = console.info;
-            var logs = [];
+            var logs: typeof console.infoLogs = [];
             console.info = function () {
-                console.info.logs.push({
-                    args: arguments
+                console.infoLogs.push({
+                    args: arguments as any
                 });
-                oldConsoleInfo.apply(this, arguments);
+                oldConsoleInfo.apply(this, arguments as any);
             };
-            console.info.logs = logs;
+            console.infoLogs = logs;
         });
 
         after(function () {
@@ -168,7 +169,7 @@ describe('localForage', function () {
         });
 
         it('does not log unnecessary messages', function () {
-            var oldLogCount = console.info.logs.length;
+            var oldLogCount = console.infoLogs.length;
             var localforage2 = localforage.createInstance();
             var localforage3 = localforage.createInstance();
 
@@ -177,14 +178,14 @@ describe('localForage', function () {
                 localforage2.ready(),
                 localforage3.ready()
             ]).then(function () {
-                expect(console.info.logs.length).to.be(oldLogCount);
+                expect(console.infoLogs.length).to.be(oldLogCount);
             });
         });
     });
 });
 
 SUPPORTED_DRIVERS.forEach(function (driverName) {
-    if (this.require && 'asyncStorage' === driverName) {
+    if (require && 'asyncStorage' === driverName) {
         console.warn('asyncStorage with requirejs not working well');
         return;
     }
@@ -252,18 +253,20 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         if (driverName === localforage.INDEXEDDB) {
+            const localforageIDB = localforage as any as import('../src/drivers/indexeddb').Module;
+
             describe('Blob support', function () {
-                var transaction;
-                var called;
-                var db;
+                var transaction: IDBDatabase['transaction'];
+                var called: number;
+                var db: IDBDatabase;
                 var blob = new Blob([''], { type: 'image/png' });
 
                 before(function () {
-                    db = localforage._dbInfo.db;
+                    db = localforageIDB._dbInfo.db!;
                     transaction = db.transaction;
                     db.transaction = function () {
                         called += 1;
-                        return transaction.apply(db, arguments);
+                        return transaction.apply(db, arguments as any);
                     };
                 });
 
@@ -308,7 +311,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 });
 
                 after(function () {
-                    localforage._dbInfo.db.transaction = transaction;
+                    localforageIDB._dbInfo.db!.transaction = transaction;
                 });
             });
 
@@ -321,7 +324,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         localforage.setItem('key3', 'value3')
                     ]).then(
                         function () {
-                            localforage._dbInfo.db.close();
+                            localforageIDB._dbInfo.db!.close();
                             done();
                         },
                         function (error) {
@@ -402,18 +405,20 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         }
 
         if (driverName === localforage.WEBSQL) {
-            describe('on QUOTA ERROR', function () {
-                var transaction;
-                var called;
-                var db;
+            const localforageWSQL = localforage as any as import('../src/drivers/websql').Module;
 
-                function getQuotaErrorCode(transaction) {
-                    return new Promise(function (resolve) {
+            describe('on QUOTA ERROR', function () {
+                var transaction: Database['transaction'];
+                var called: number;
+                var db: Database;
+
+                function getQuotaErrorCode(transaction: Database['transaction']) {
+                    return new Promise<any>(function (resolve) {
                         transaction(
                             function (t) {
                                 t.executeSql('');
                             },
-                            function (err) {
+                            function (err: any) {
                                 resolve(err.QUOTA_ERR);
                             }
                         );
@@ -424,7 +429,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
                 beforeEach(function () {
                     called = 0;
-                    db = localforage._dbInfo.db;
+                    db = localforageWSQL._dbInfo.db!;
                     transaction = db.transaction;
 
                     db.transaction = function (fn, errFn) {
@@ -434,9 +439,9 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         db.transaction = transaction;
 
                         getQuotaErrorCode(transaction).then(function (QUOTA_ERR) {
-                            var error = new Error();
+                            var error = new Error() as any as SQLError;
                             error.code = QUOTA_ERR;
-                            errFn(error);
+                            errFn!(error);
                         });
                     };
                 });
@@ -472,8 +477,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         localforage.getItem('officeY', function (err, value) {
                             expect(value).to.be(setValue);
 
-                            var accumulator = {};
-                            var iterationNumbers = [];
+                            var accumulator: any = {};
+                            var iterationNumbers: number[] = [];
 
                             localforage.iterate(
                                 function (value, key, iterationNumber) {
@@ -498,8 +503,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('should iterate [promise]', function () {
-            var accumulator = {};
-            var iterationNumbers = [];
+            var accumulator: any = {};
+            var iterationNumbers: number[] = [];
 
             return localforage
                 .setItem('officeX', 'InitechX')
@@ -1011,16 +1016,16 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         // https://github.com/mozilla/localForage/issues/250
         it('casts an undefined key to a String', function (done) {
             localforage
-                .setItem(undefined, 'goodness!')
+                .setItem(undefined!, 'goodness!')
                 .then(function (value) {
                     expect(value).to.be('goodness!');
 
-                    return localforage.getItem(undefined);
+                    return localforage.getItem(undefined!);
                 })
                 .then(function (value) {
                     expect(value).to.be('goodness!');
 
-                    return localforage.removeItem(undefined);
+                    return localforage.removeItem(undefined!);
                 })
                 .then(function () {
                     return localforage.length();
@@ -1033,16 +1038,16 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         it('casts a null key to a String', function (done) {
             localforage
-                .setItem(null, 'goodness!')
+                .setItem(null!, 'goodness!')
                 .then(function (value) {
                     expect(value).to.be('goodness!');
 
-                    return localforage.getItem(null);
+                    return localforage.getItem(null!);
                 })
                 .then(function (value) {
                     expect(value).to.be('goodness!');
 
-                    return localforage.removeItem(null);
+                    return localforage.removeItem(null!);
                 })
                 .then(function () {
                     return localforage.length();
@@ -1055,16 +1060,16 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         it('casts a float key to a String', function (done) {
             localforage
-                .setItem(537.35737, 'goodness!')
+                .setItem(537.35737 as any, 'goodness!')
                 .then(function (value) {
                     expect(value).to.be('goodness!');
 
-                    return localforage.getItem(537.35737);
+                    return localforage.getItem(537.35737 as any);
                 })
                 .then(function (value) {
                     expect(value).to.be('goodness!');
 
-                    return localforage.removeItem(537.35737);
+                    return localforage.removeItem(537.35737 as any);
                 })
                 .then(function () {
                     return localforage.length();
@@ -1079,7 +1084,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage.getDriver(driverName, function (driver) {
                 expect(typeof driver).to.be('object');
                 driverApiMethods.concat('_initStorage').forEach(function (methodName) {
-                    expect(typeof driver[methodName]).to.be('function');
+                    expect(typeof driver[methodName as keyof MethodsCore]).to.be('function');
                 });
                 expect(driver._driver).to.be(driverName);
                 done();
@@ -1090,7 +1095,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage.getDriver(driverName).then(function (driver) {
                 expect(typeof driver).to.be('object');
                 driverApiMethods.concat('_initStorage').forEach(function (methodName) {
-                    expect(typeof driver[methodName]).to.be('function');
+                    expect(typeof driver[methodName as keyof MethodsCore]).to.be('function');
                 });
                 expect(driver._driver).to.be(driverName);
                 done();
@@ -1098,16 +1103,19 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         if (driverName === localforage.WEBSQL || driverName === localforage.LOCALSTORAGE) {
+            const localforageLOCAL =
+                localforage as any as import('../src/drivers/localstorage').Module;
+
             it('exposes the serializer on the dbInfo object', function (done) {
                 localforage.ready().then(function () {
-                    expect(localforage._dbInfo.serializer).to.be.an('object');
+                    expect(localforageLOCAL._dbInfo.serializer).to.be.an('object');
                     done();
                 });
             });
         }
     });
 
-    function prepareStorage(storageName) {
+    function prepareStorage(storageName: string) {
         // Delete IndexedDB storages (start from scratch)
         // Refers to issue #492 - https://github.com/mozilla/localForage/issues/492
         if (driverName === localforage.INDEXEDDB) {
@@ -1125,8 +1133,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         this.timeout(30000);
 
-        var localforage2 = null;
-        var localforage3 = null;
+        var localforage2 = {} as LocalForageDriver;
+        var localforage3 = {} as LocalForageDriver;
 
         before(function (done) {
             prepareStorage('storage2').then(function () {
@@ -1297,9 +1305,9 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('can create multiple instances of the same store', function () {
-            var localforage1;
-            var localforage2;
-            var localforage3;
+            var localforage1 = {} as LocalForageDriver;
+            var localforage2 = {} as LocalForageDriver;
+            var localforage3 = {} as LocalForageDriver;
 
             Promise.resolve()
                 .then(function () {
@@ -1362,10 +1370,10 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('can create multiple instances of the same store and do concurrent operations', function () {
-            var localforage1;
-            var localforage2;
-            var localforage3;
-            var localforage3b;
+            var localforage1 = {} as LocalForageDriver;
+            var localforage2 = {} as LocalForageDriver;
+            var localforage3 = {} as LocalForageDriver;
+            var localforage3b = {} as LocalForageDriver;
 
             Promise.resolve()
                 .then(function () {
@@ -1509,7 +1517,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
     describe(driverName + ' driver', function () {
         'use strict';
 
-        var driverPreferedOrder;
+        var driverPreferedOrder: string[];
 
         before(function () {
             // add some unsupported drivers before
@@ -1523,7 +1531,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 driverPreferedOrder.push(localforage.INDEXEDDB);
             }
             if (!localforage.supports(localforage.LOCALSTORAGE)) {
-                driverPreferedOrder.push(localforage.localStorage);
+                driverPreferedOrder.push(localforage.LOCALSTORAGE);
             }
 
             driverPreferedOrder.push(driverName);
@@ -1591,7 +1599,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('resolves the promise of key()', function (done) {
-            localforage.key('key', testObj.throwFunc).then(function () {
+            localforage.key(0, testObj.throwFunc).then(function () {
                 expect(testObj.throwFuncCalls).to.be(1);
                 done();
             });
@@ -1610,7 +1618,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         this.timeout(30000);
 
-        var _oldReady;
+        var _oldReady: typeof localforage.ready;
 
         beforeEach(function (done) {
             _oldReady = localforage.ready;
@@ -1622,13 +1630,13 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         afterEach(function (done) {
             localforage.ready = _oldReady;
-            _oldReady = null;
+            _oldReady = null!;
             done();
         });
 
         driverApiMethods.forEach(function (methodName) {
             it('rejects ' + methodName + '() promise', function (done) {
-                localforage[methodName]().then(null, function (/*err*/) {
+                (localforage as any)[methodName]().then(null, function (/*err*/) {
                     done();
                 });
             });
@@ -1671,45 +1679,47 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
     describe(driverName + ' driver dropInstance', function () {
         this.timeout(80000);
 
-        function setCommonOpts(opts) {
-            opts.driver = driverName;
-            opts.size = 1024;
-            return opts;
+        function setCommonOpts(opts: { name: string; storeName: string }) {
+            return {
+                ...opts,
+                driver: driverName,
+                size: 1024
+            };
         }
 
         var dropStoreDbName = 'dropStoreDb';
 
-        var nodropInstance;
+        var nodropInstance = {} as LocalForageDriver;
         var nodropInstanceOptions = setCommonOpts({
             name: dropStoreDbName,
             storeName: 'nodropStore'
         });
 
-        var dropStoreInstance1;
+        var dropStoreInstance1 = {} as LocalForageDriver;
         var dropStoreInstance1Options = setCommonOpts({
             name: dropStoreDbName,
             storeName: 'dropStore'
         });
 
-        var dropStoreInstance2;
+        var dropStoreInstance2 = {} as LocalForageDriver;
         var dropStoreInstance2Options = setCommonOpts({
             name: dropStoreDbName,
             storeName: 'dropStore2'
         });
 
-        var dropStoreInstance3;
+        var dropStoreInstance3 = {} as LocalForageDriver;
         var dropStoreInstance3Options = setCommonOpts({
             name: dropStoreDbName,
             storeName: 'dropStore3'
         });
 
-        var dropDbInstance;
+        var dropDbInstance = {} as LocalForageDriver;
         var dropDbInstanceOptions = setCommonOpts({
             name: 'dropDb',
             storeName: 'dropStore'
         });
 
-        var dropDb2Instance;
+        var dropDb2Instance = {} as LocalForageDriver;
         var dropDb2InstanceOptions = setCommonOpts({
             name: 'dropDb2',
             storeName: 'dropStore'
@@ -1717,19 +1727,19 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         var dropDb3name = 'dropDb3';
 
-        var dropDb3Instance1;
+        var dropDb3Instance1 = {} as LocalForageDriver;
         var dropDb3Instance1Options = setCommonOpts({
             name: dropDb3name,
             storeName: 'dropStore1'
         });
 
-        var dropDb3Instance2;
+        var dropDb3Instance2 = {} as LocalForageDriver;
         var dropDb3Instance2Options = setCommonOpts({
             name: dropDb3name,
             storeName: 'dropStore2'
         });
 
-        var dropDb3Instance3;
+        var dropDb3Instance3 = {} as LocalForageDriver;
         var dropDb3Instance3Options = setCommonOpts({
             name: dropDb3name,
             storeName: 'dropStore3'
@@ -1775,8 +1785,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 });
         });
 
-        function expectStoreToNotExistAsync(options) {
-            return new Promise(function (resolve, reject) {
+        function expectStoreToNotExistAsync(options: { name: string; storeName: string }) {
+            return new Promise<void>(function (resolve, reject) {
                 if (driverName === localforage.INDEXEDDB) {
                     var req = indexedDB.open(options.name);
                     req.onsuccess = function () {
@@ -1800,7 +1810,10 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                                 expect(results.rows.length).to.be(0);
                                 resolve();
                             },
-                            reject
+                            function () {
+                                reject();
+                                return false;
+                            }
                         );
                     }, reject);
                 } else if (driverName === localforage.LOCALSTORAGE) {
@@ -1818,7 +1831,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
                     var foundLocalStorageKey = false;
                     for (var i = 0, length = localStorage.length; i < length; i++) {
-                        if (localStorage.key(i).indexOf(keyPrefix) === 0) {
+                        if (localStorage.key(i)?.indexOf(keyPrefix) === 0) {
                             foundLocalStorageKey = true;
                             break;
                         }
@@ -1832,8 +1845,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         }
 
         it('drops the current instance without affecting the rest', function () {
-            return dropStoreInstance1
-                .dropInstance()
+            return dropStoreInstance1.dropInstance!()
                 .then(function () {
                     return nodropInstance.getItem('key1');
                 })
@@ -1843,8 +1855,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('can recreate and set values to previously dropped instances', function () {
-            return dropStoreInstance1
-                .dropInstance()
+            return dropStoreInstance1.dropInstance!()
                 .then(function () {
                     return dropStoreInstance1.getItem('key1');
                 })
@@ -1871,8 +1882,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 name: dropStoreInstance2Options.name,
                 storeName: dropStoreInstance2Options.storeName
             };
-            return nodropInstance
-                .dropInstance(opts)
+            return nodropInstance.dropInstance!(opts)
                 .then(function () {
                     return nodropInstance.getItem('key1');
                 })
@@ -1886,7 +1896,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 name: dropStoreInstance3Options.name,
                 storeName: dropStoreInstance3Options.storeName
             };
-            return dropStoreInstance3.dropInstance().then(function () {
+            return dropStoreInstance3.dropInstance!().then(function () {
                 return expectStoreToNotExistAsync(opts);
             });
         });
@@ -1896,11 +1906,11 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 name: dropStoreInstance3Options.name,
                 storeName: 'NotExistingStore' + Date.now()
             };
-            return dropStoreInstance3.dropInstance(opts);
+            return dropStoreInstance3.dropInstance!(opts);
         });
 
-        function expectDBToNotExistAsync(options) {
-            return new Promise(function (resolve, reject) {
+        function expectDBToNotExistAsync(options: { name: string }) {
+            return new Promise<void>(function (resolve, reject) {
                 if (driverName === localforage.INDEXEDDB) {
                     var req = indexedDB.open(options.name);
                     req.onsuccess = function () {
@@ -1930,7 +1940,10 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                                 expect(stores.length).to.be(0);
                                 resolve();
                             },
-                            reject
+                            function () {
+                                reject();
+                                return false;
+                            }
                         );
                     }, reject);
                 } else if (driverName === localforage.LOCALSTORAGE) {
@@ -1940,7 +1953,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
                     var foundLocalStorageKey = false;
                     for (var i = 0, length = localStorage.length; i < length; i++) {
-                        if (localStorage.key(i).indexOf(keyPrefix) === 0) {
+                        if (localStorage.key(i)?.indexOf(keyPrefix) === 0) {
                             foundLocalStorageKey = true;
                             break;
                         }
@@ -1957,8 +1970,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             var opts = {
                 name: dropDbInstanceOptions.name
             };
-            return dropDbInstance
-                .dropInstance(opts)
+            return dropDbInstance.dropInstance!(opts)
                 .then(function () {
                     return dropDbInstance.getItem('key1');
                 })
@@ -1971,7 +1983,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             var opts = {
                 name: dropDb2InstanceOptions.name
             };
-            return dropDb2Instance.dropInstance(opts).then(function () {
+            return dropDb2Instance.dropInstance!(opts).then(function () {
                 return expectDBToNotExistAsync(opts);
             });
         });
@@ -1981,21 +1993,21 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 name: 'NotExistingDB' + Date.now(),
                 storeName: 'NotExistingStore' + Date.now()
             };
-            return dropStoreInstance3.dropInstance(opts);
+            return dropStoreInstance3.dropInstance!(opts);
         });
 
         it('resolves when trying to drop a "DB" that does not exist', function () {
             var opts = {
                 name: 'NotExistingDB' + Date.now()
             };
-            return dropStoreInstance3.dropInstance(opts);
+            return dropStoreInstance3.dropInstance!(opts);
         });
 
         it('drops a "DB" that we previously dropped a store', function () {
             var opts = {
                 name: dropStoreInstance3Options.name
             };
-            return dropStoreInstance3.dropInstance(opts).then(function () {
+            return dropStoreInstance3.dropInstance!(opts).then(function () {
                 return expectDBToNotExistAsync(opts);
             });
         });
@@ -2009,25 +2021,25 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             // is configured to use the same driver as well.
             return Promise.resolve()
                 .then(function () {
-                    return dropDb3Instance1.dropInstance({
+                    return dropDb3Instance1.dropInstance!({
                         name: dropDb3name,
                         storeName: dropDb3Instance1Options.storeName
                     });
                 })
                 .then(function () {
-                    return dropDb3Instance1.dropInstance({
+                    return dropDb3Instance1.dropInstance!({
                         name: dropDb3name,
                         storeName: dropDb3Instance2Options.storeName
                     });
                 })
                 .then(function () {
-                    return dropDb3Instance1.dropInstance({
+                    return dropDb3Instance1.dropInstance!({
                         name: dropDb3name,
                         storeName: dropDb3Instance3Options.storeName
                     });
                 })
                 .then(function () {
-                    return dropDb3Instance1.dropInstance(opts);
+                    return dropDb3Instance1.dropInstance!(opts);
                 })
                 .then(function () {
                     return expectDBToNotExistAsync(opts);

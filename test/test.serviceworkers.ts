@@ -1,4 +1,5 @@
-/* global navigator:true, window:true, Modernizr:true, describe:true, expect:true, it:true, xit:true, before:true, beforeEach:true, after:true*/
+import { expect } from 'chai';
+
 var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
 
 DRIVERS.forEach(function (driverName) {
@@ -91,7 +92,7 @@ DRIVERS.forEach(function (driverName) {
 
             navigator.serviceWorker.ready
                 .then(function (registration) {
-                    registration.active.postMessage(
+                    registration?.active?.postMessage(
                         {
                             driver: driverName,
                             value: 'I have been set'

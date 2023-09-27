@@ -1,5 +1,4 @@
-/* global beforeEach:true */
-this.mocha.setup('bdd');
+mocha.setup('bdd');
 
 beforeEach(function (done) {
     var previousDriver = localforage.driver();
@@ -18,8 +17,8 @@ beforeEach(function (done) {
         // callWhenReady API method stubs are called before RequireJS
         // asynchronously loads the drivers that replace them.
         require.undef('localforage');
-        require(['localforage'], function (localforage) {
-            localforage.setDriver(previousDriver);
+        require(['localforage'], function (localforage: LocalForageDriver) {
+            localforage.setDriver(previousDriver!);
             window.localforage = localforage;
             done();
         });
