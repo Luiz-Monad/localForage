@@ -2,4 +2,4 @@
 //     require('../bower_components/es6-promise/promise');
 // }
 // require localforage as defined in package.json
-window.localforage = require('../');
+window.localforage = require('localforage');

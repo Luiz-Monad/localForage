@@ -2,7 +2,6 @@ import { expect } from 'chai';
 
 // kinda lame to define this twice, but it seems require() isn't available here
 function createBlob(parts: BlobPart[] | undefined, properties?: BlobPropertyBag) {
-    /* global BlobBuilder,MSBlobBuilder,MozBlobBuilder,WebKitBlobBuilder */
     parts = parts || [];
     properties = properties || {};
     try {

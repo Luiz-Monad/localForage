@@ -170,8 +170,8 @@ describe('Config API', function () {
 
         localforage.setItem('some key', 'some value').then(function (value) {
             if (localforage.driver() === localforage.INDEXEDDB) {
-                indexedDB =
-                    indexedDB ||
+                const indexedDB =
+                    global.indexedDB ||
                     window.indexedDB ||
                     window.webkitIndexedDB ||
                     window.mozIndexedDB ||

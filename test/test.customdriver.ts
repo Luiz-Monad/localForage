@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { dummyStorageDriver } from './dummyStorageDriver';
+import dummyStorageDriver from './dummyStorageDriver';
 
 describe('When Custom Drivers are used', function () {
     'use strict';
@@ -192,8 +192,7 @@ describe('When Custom Drivers are used', function () {
 
     it('sets and uses a custom driver', function (done) {
         localforage.defineDriver(dummyStorageDriver, function () {
-            localforage.setDriver(dummyStorageDriver._driver, function () {
-                const err = arguments[0];
+            localforage.setDriver(dummyStorageDriver._driver, function (err) {
                 expect(err).to.be(undefined);
                 localforage.setItem('testCallbackKey', 'testCallbackValue', function (err) {
                     expect(err).to.be(null);

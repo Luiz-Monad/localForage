@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 
-/* global before:true, after:true, describe:true, expect:true, it:true */
 describe('Inside iFrames', function () {
     'use strict';
 

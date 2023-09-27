@@ -1,6 +1,5 @@
 {
     "include": ["./src/**/*"],
-    "exclude": ["./node_modules/**/*"],
     "compilerOptions": {
         "target": "ES2015",
         "module": "ESNext",
@@ -15,17 +14,14 @@
         "resolveJsonModule": true,
         "forceConsistentCasingInFileNames": true,
         "removeComments": false,
+        "declaration": true,
 
-        "lib": ["DOM"],
+        "lib": ["DOM", "ESNext"],
 
-        "allowJs": true,
+        // "allowJs": true,
         "checkJs": true,
 
         "rootDir": "./src",
-        "outDir": "./build/",
-        "baseUrl": "./src/",
-        "paths": {
-            "openpromise": ["../../openpromise"]
-        }
+        "outDir": ""
     }
 }

@@ -1,6 +1,5 @@
 {
-    "include": ["../test/**/*", "../src/**/*"],
-    "exclude": ["../node_modules/**/*", "./build/**"],
+    "include": ["../test/**/*", "../src/*.d.ts"],
     "compilerOptions": {
         "target": "ES2015",
         "module": "ESNext",
@@ -21,9 +20,14 @@
         // "allowJs": true,
         "checkJs": true,
 
-        "rootDir": "..",
-        "outDir": "./build/",
-        "baseUrl": "./",
-        "paths": {}
+        "rootDir": "./",
+        "outDir": "",
+
+        "baseUrl": "../build/",
+        "paths": {
+            "drivers/indexeddb": ["./drivers/indexeddb"],
+            "drivers/websql": ["./drivers/websql"],
+            "drivers/localstorage": ["./drivers/localstorage"]
+        }
     }
 }

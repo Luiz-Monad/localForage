@@ -1,4 +1,4 @@
-import LocalForage from '../src/localforage';
+import { LocalForageComplete } from '../src/types';
 
 declare global {
     declare var Modernizr: any;
@@ -7,8 +7,8 @@ declare global {
     declare var define: Function & { amd?: any };
     declare var importScripts: Function;
 
-    type LocalForageDriver = typeof LocalForage;
-    declare var localforage: LocalForageDriver;
+    type LocalForageDriver = LocalForageComplete;
+    declare var localforage: LocalForageComplete;
 
     interface Window {
         localforage: LocalForageDriver;

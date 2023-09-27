@@ -1,7 +1,10 @@
 const path = require('path');
+const glob = require('glob');
 const saucelabsBrowsers = require(path.resolve('test', 'saucelabs-browsers.ts'));
 
-const sourceFiles = ['Gruntfile.js', 'src/*.ts', 'src/**/*.ts', 'test/**/test.*.ts'];
+const sourceFiles = ['Gruntfile.js', 'src/*.ts', 'src/**/*.ts'];
+
+const testFiles = ['Gruntfile.js', 'test/*.ts', 'test/**/*.ts'];
 
 module.exports = exports = function (grunt) {
     'use strict';
@@ -48,8 +51,14 @@ module.exports = exports = function (grunt) {
         },
         browserify: {
             package_bundling_test: {
-                src: 'build/test/runner.browserify.js',
-                dest: 'build/test/localforage.browserify.js'
+                src: 'build/test/test/runner.browserify.js',
+                dest: 'build/test/localforage.browserify.js',
+                options: {
+                    alias: {
+                        localforage: path.resolve('build/localforage.js')
+                    },
+                    transform: ['rollupify', 'babelify']
+                }
             },
             main: {
                 files: {
@@ -96,21 +105,58 @@ module.exports = exports = function (grunt) {
         connect: {
             test: {
                 options: {
-                    base: '.',
+                    base: path.resolve('build/'),
                     hostname: '*',
                     port: 9999,
-                    middleware: function (connect) {
-                        return [
-                            function (req, res, next) {
-                                res.setHeader('Access-Control-Allow-Origin', '*');
-                                res.setHeader('Access-Control-Allow-Methods', '*');
-
-                                return next();
-                            },
-                            connect.static(require('path').resolve('.'))
-                        ];
+                    middleware: function (connect, options, middlewares) {
+                        middlewares.unshift(function (req, res, next) {
+                            res.setHeader('Access-Control-Allow-Origin', '*');
+                            res.setHeader('Access-Control-Allow-Methods', '*');
+                            return next();
+                        });
+                        return middlewares;
                     }
                 }
+            }
+        },
+        copy: {
+            html: {
+                expand: true,
+                cwd: 'test/',
+                src: '*.html',
+                dest: 'build/test/',
+                filter: 'isFile'
+            },
+            pics: {
+                expand: true,
+                cwd: 'test/',
+                src: '*.jpg',
+                dest: 'build/test/',
+                filter: 'isFile'
+            },
+            test_dist: {
+                expand: true,
+                cwd: 'dist/',
+                src: 'localforage*',
+                dest: 'build/dist/',
+                filter: 'isFile'
+            },
+            test_deps: {
+                expand: true,
+                cwd: 'node_modules/',
+                src: ['mocha/mocha.css'],
+                dest: 'build/bower_components/',
+                filter: 'isFile'
+            }
+        },
+        curl: {
+            modernizr: {
+                src: 'https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js',
+                dest: 'build/bower_components/modernizr/modernizr.js'
+            },
+            require: {
+                src: 'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js',
+                dest: 'build/bower_components/requirejs/require.js'
             }
         },
         es3_safe_recast: {
@@ -132,7 +178,8 @@ module.exports = exports = function (grunt) {
             }
         },
         eslint: {
-            target: sourceFiles
+            target: sourceFiles,
+            test: testFiles
         },
         'saucelabs-mocha': {
             all: {
@@ -150,7 +197,19 @@ module.exports = exports = function (grunt) {
         },
         ts: {
             build: {
-                tsconfig: '.'
+                tsconfig: {
+                    tsconfig: './tsconfig.json'
+                },
+                outDir: path.resolve('build/')
+            },
+            test: {
+                tsconfig: {
+                    tsconfig: 'test/tsconfig.json'
+                },
+                outDir: path.resolve('build/test/'),
+                options: {
+                    baseUrl: path.resolve('build/')
+                }
             },
             typing_tests: {
                 tsconfig: {
@@ -172,25 +231,64 @@ module.exports = exports = function (grunt) {
         },
         watch: {
             build: {
-                files: ['src/*.js', 'src/**/*.js'],
-                tasks: ['build']
+                files: ['src/*.ts', 'src/**/*.ts'],
+                tasks: ['build', 'eslint:target']
+            },
+            test: {
+                files: ['test/*.ts', 'test/**/*.ts', 'test/*.html'],
+                tasks: ['build:test', 'eslint:test']
+            },
+            dist: {
+                files: ['dist/localforage*'],
+                tasks: ['copy:test_dist']
             },
             'mocha:unit': {
-                files: ['dist/localforage.js', 'test/runner.js', 'test/test.*.*'],
-                tasks: [
-                    'eslint',
-                    'browserify:package_bundling_test',
-                    'webpack:package_bundling_test',
-                    'mocha:unit'
-                ]
+                files: ['build/dist/localforage.js', 'build/test/*'],
+                tasks: ['build:test', 'connect:test', 'mocha:unit']
             }
         },
         webpack: {
             package_bundling_test: {
-                entry: './test/runner.webpack.js',
+                entry: './build/test/test/runner.webpack.js',
                 output: {
-                    path: 'test/',
+                    path: path.resolve('build/test/'),
                     filename: 'localforage.webpack.js'
+                },
+                resolve: {
+                    alias: {
+                        localforage: path.resolve('build/localforage.js')
+                    }
+                }
+            },
+            test_deps: {
+                mode: 'development',
+                entry: {
+                    assert: ['./node_modules/assert/assert.js'],
+                    chai: ['./node_modules/chai/chai.js'],
+                    mocha: ['./node_modules/mocha/mocha.js']
+                },
+                output: {
+                    path: path.resolve('build/bower_components/'),
+                    filename: '[name]/[name].js',
+                    libraryTarget: 'amd',
+                    library: '[name]'
+                }
+            },
+            test: {
+                mode: 'development',
+                entry: () =>
+                    glob.sync('build/test/test/*.js').reduce((acc, file) => {
+                        acc[path.basename(file).replace(/\.js$/, '')] = [path.resolve(file)];
+                        return acc;
+                    }, {}),
+                output: {
+                    path: path.resolve('build/test/'),
+                    filename: '[name].js',
+                    libraryTarget: 'amd',
+                    library: '[name]'
+                },
+                externals: {
+                    localforage: 'localforage'
                 }
             }
         }
@@ -207,6 +305,15 @@ module.exports = exports = function (grunt) {
         'es3_safe_recast',
         'uglify'
     ]);
+    grunt.registerTask('build:test', [
+        'ts:test',
+        'webpack:test',
+        'copy',
+        'curl',
+        'webpack:test_deps',
+        'browserify:package_bundling_test',
+        'webpack:package_bundling_test'
+    ]);
     grunt.registerTask('serve', ['build', 'connect:test', 'watch']);
 
     // These are the test tasks we run regardless of Sauce Labs credentials.
@@ -215,8 +322,7 @@ module.exports = exports = function (grunt) {
         'babel',
         'eslint',
         'ts:typing_tests',
-        'browserify:package_bundling_test',
-        'webpack:package_bundling_test',
+        'build:test',
         'connect:test',
         'mocha'
     ];

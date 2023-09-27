@@ -23,7 +23,7 @@
         "checkJs": true,
 
         "rootDir": "../",
-        "outDir": "./build/"
+        "outDir": ""
     },
     "files": [
         "../build/types.d.ts",

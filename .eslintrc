@@ -5,7 +5,7 @@
         "project": ["./tsconfig.json", "./test/tsconfig.json"]
     },
     "plugins": ["@typescript-eslint"],
-    "extends": ["eslint:recommended", "prettier", "plugin:@typescript-eslint/recommended"],
+    "extends": "eslint:recommended",
     "env": {
         "browser": true,
         "es6": true,
@@ -39,7 +39,7 @@
                 "avoidEscape": true
             }
         ],
-        "space-before-function-paren": [2, "always"],
+        "space-before-function-paren": [2, "never"],
         "comma-dangle": [2, "never"],
         "eol-last": 2,
         "keyword-spacing": [2, {}],

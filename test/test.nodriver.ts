@@ -17,8 +17,7 @@ describe('When No Drivers Are Available', function () {
     });
 
     it('fails to load localForage [callback]', function (done) {
-        localforage.ready(function () {
-            const err = arguments[0];
+        localforage.ready(function (err) {
             expect(err).to.be.an(Error);
             expect(err.message).to.be('No available storage method found.');
             done();

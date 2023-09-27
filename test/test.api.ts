@@ -8,9 +8,9 @@ var SUPPORTED_DRIVERS = DRIVERS.filter(function (driverName) {
 
 var driverApiMethods = ['getItem', 'setItem', 'clear', 'length', 'removeItem', 'key', 'keys'];
 
-indexedDB =
+const indexedDB =
     // eslint-disable-next-line no-use-before-define
-    indexedDB ||
+    global.indexedDB ||
     window.indexedDB ||
     window.webkitIndexedDB ||
     window.mozIndexedDB ||
@@ -253,7 +253,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         if (driverName === localforage.INDEXEDDB) {
-            const localforageIDB = localforage as any as import('../src/drivers/indexeddb').Module;
+            const localforageIDB = localforage as any as import('drivers/indexeddb').Module;
 
             describe('Blob support', function () {
                 var transaction: IDBDatabase['transaction'];
@@ -405,7 +405,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         }
 
         if (driverName === localforage.WEBSQL) {
-            const localforageWSQL = localforage as any as import('../src/drivers/websql').Module;
+            const localforageWSQL = localforage as any as import('drivers/websql').Module;
 
             describe('on QUOTA ERROR', function () {
                 var transaction: Database['transaction'];
@@ -1081,10 +1081,10 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('is retrieved by getDriver [callback]', function (done) {
-            localforage.getDriver(driverName, function (driver) {
+            localforage.getDriver(driverName, function (err, driver) {
                 expect(typeof driver).to.be('object');
                 driverApiMethods.concat('_initStorage').forEach(function (methodName) {
-                    expect(typeof driver[methodName as keyof MethodsCore]).to.be('function');
+                    expect(typeof driver[methodName as keyof typeof driver]).to.be('function');
                 });
                 expect(driver._driver).to.be(driverName);
                 done();
@@ -1095,7 +1095,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage.getDriver(driverName).then(function (driver) {
                 expect(typeof driver).to.be('object');
                 driverApiMethods.concat('_initStorage').forEach(function (methodName) {
-                    expect(typeof driver[methodName as keyof MethodsCore]).to.be('function');
+                    expect(typeof driver[methodName as keyof typeof driver]).to.be('function');
                 });
                 expect(driver._driver).to.be(driverName);
                 done();
@@ -1103,8 +1103,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         if (driverName === localforage.WEBSQL || driverName === localforage.LOCALSTORAGE) {
-            const localforageLOCAL =
-                localforage as any as import('../src/drivers/localstorage').Module;
+            const localforageLOCAL = localforage as any as import('drivers/localstorage').Module;
 
             it('exposes the serializer on the dbInfo object', function (done) {
                 localforage.ready().then(function () {
