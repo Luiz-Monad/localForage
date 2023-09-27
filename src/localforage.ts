@@ -88,13 +88,13 @@ function extend<T extends {}, U, V>(target: T, source: U, source2?: V): T & U & 
     return arguments[0];
 }
 
-class LocalForage {
-    private _defaultConfig: Options;
+class LocalForage implements Forage<Options> {
+    _defaultConfig: Options;
+    _dbInfo: Options;
     private _config: Options;
     private _driverSet: Promise<void> | null;
     private _initDriver: (() => Promise<void>) | null;
     private _ready: Promise<void> | null;
-    private _dbInfo: null;
     private _driver?: string;
 
     constructor(options?: Options) {
@@ -118,7 +118,7 @@ class LocalForage {
         this._driverSet = null;
         this._initDriver = null;
         this._ready = null;
-        this._dbInfo = null;
+        this._dbInfo = null!;
 
         this._wrapLibraryMethodsWithReady();
         this.setDriver(this._config.driver!).catch(() => {});
@@ -128,7 +128,12 @@ class LocalForage {
     // the first API call (e.g. `getItem`, `setItem`).
     // We loop through options so we don't overwrite existing config
     // values.
-    config(options?: Options | string) {
+    config(): Options;
+    config(options: string): unknown;
+    config(options: Partial<Options>): boolean | Promise<void> | Error;
+    config(
+        options?: string | Partial<Options>
+    ): Options | unknown | boolean | Promise<void> | Error {
         // If the options argument is an object, we use it to set values.
         // Otherwise, we return either a specified config value or all
         // config values.
@@ -141,7 +146,7 @@ class LocalForage {
 
             for (let i in options) {
                 if (i === 'storeName') {
-                    options[i] = options[i].replace(/\W/g, '_');
+                    options[i] = options[i]?.replace(/\W/g, '_');
                 }
 
                 if (i === 'version' && typeof options[i] !== 'number') {
@@ -328,7 +333,7 @@ class LocalForage {
                         let driverName = supportedDrivers[currentDriverIndex];
                         currentDriverIndex++;
 
-                        self._dbInfo = null;
+                        self._dbInfo = null!;
                         self._ready = null;
 
                         return self
@@ -358,7 +363,7 @@ class LocalForage {
         this._driverSet = oldDriverSetDone
             .then(() => {
                 const driverName = supportedDrivers[0];
-                self._dbInfo = null;
+                self._dbInfo = null!;
                 self._ready = null;
 
                 return self.getDriver(driverName).then((driver) => {
@@ -383,11 +388,11 @@ class LocalForage {
         return !!DriverSupport[driverName];
     }
 
-    _extend<T>(libraryMethodsAndProperties: T) {
+    private _extend<T>(libraryMethodsAndProperties: T) {
         extend(this, libraryMethodsAndProperties);
     }
 
-    _getSupportedDrivers(drivers: string[]) {
+    private _getSupportedDrivers(drivers: string[]) {
         const supportedDrivers: string[] = [];
         for (let i = 0, len = drivers.length; i < len; i++) {
             const driverName = drivers[i];
@@ -398,7 +403,7 @@ class LocalForage {
         return supportedDrivers;
     }
 
-    _wrapLibraryMethodsWithReady() {
+    private _wrapLibraryMethodsWithReady() {
         // Add a stub for each driver API method that delays the call to the
         // corresponding driver method until localForage is ready. These stubs
         // will be replaced by the driver methods as soon as the driver is
@@ -409,15 +414,17 @@ class LocalForage {
     }
 
     createInstance(options?: Options) {
-        return new LocalForage(options);
+        return new LocalForage(options) as LocalForageComplete;
     }
 }
 
-interface LocalForageDriver
-    extends InstanceType<typeof LocalForage>,
+type LocalForageClass = InstanceType<typeof LocalForage>;
+type UnamedOptionalDropInstanceDriver = Omit<OptionalDropInstanceDriver, '_driver'>;
+interface LocalForageComplete
+    extends LocalForageClass,
         DefaultDriversName,
-        Omit<OptionalDropInstanceDriver, '_driver'> {}
+        UnamedOptionalDropInstanceDriver {}
 
 // The actual localForage object that we expose as a module or via a
 // global. It's extended by pulling in one of our other libraries.
-export default new LocalForage() as LocalForageDriver;
+export default new LocalForage() as LocalForageComplete;

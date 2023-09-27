@@ -29,7 +29,7 @@ interface MethodsCore {
         iteratee: DbIterator<T, U>,
         callback?: Callback<U | undefined | void>
     ): Promise<U | undefined | void>;
-    dropInstance(options: Partial<InstanceOptions>, callback?: Callback<void>): Promise<void>;
+    dropInstance(options?: Partial<InstanceOptions>, callback?: Callback<void>): Promise<void>;
 }
 
 interface Driver extends MethodsCore {
@@ -39,12 +39,14 @@ interface Driver extends MethodsCore {
 }
 
 interface OptionalDropInstanceDriver extends Driver {
-    dropInstance?: (options: Partial<InstanceOptions>, callback?: Callback<void>) => Promise<void>;
+    dropInstance?: (options?: Partial<InstanceOptions>, callback?: Callback<void>) => Promise<void>;
 }
 
 interface Forage<DbInfo extends Options> {
     _defaultConfig: Options;
     _dbInfo: DbInfo;
-    ready: () => Promise<void>;
-    config: () => DbInfo;
+    config(): DbInfo;
+    config(option: string): unknown;
+    config(option: Partial<Options>): boolean | Promise<void> | Error;
+    ready(callback?: () => void): Promise<void>;
 }

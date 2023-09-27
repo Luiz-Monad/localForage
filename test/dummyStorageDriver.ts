@@ -1,16 +1,20 @@
-(function () {
-    'use strict';
+(function (this: any) {
+    interface Module extends Driver, Forage<DbInfo> {}
 
-    var dummyStorage = {};
+    interface DbInfo extends Options {
+        db: Record<string, string>;
+    }
+
+    var dummyStorage: Record<string, Record<string, string>> = {};
 
     // Config the localStorage backend, using options set in the config.
-    function _initStorage(options) {
+    function _initStorage(this: Module, options: Options) {
         var self = this;
 
-        var dbInfo = {};
+        var dbInfo = {} as DbInfo;
         if (options) {
             for (var i in options) {
-                dbInfo[i] = options[i];
+                (dbInfo as any)[i] = (options as any)[i];
             }
         }
 
@@ -37,9 +41,9 @@
     var TYPE_FLOAT64ARRAY = 'fl64';
     var TYPE_SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
 
-    function clear(callback) {
+    function clear(this: Module, callback?: Callback<void>) {
         var self = this;
-        var promise = new Promise(function (resolve, reject) {
+        var promise = new Promise<void>(function (resolve, reject) {
             self.ready()
                 .then(function () {
                     var db = self._dbInfo.db;
@@ -60,7 +64,7 @@
         return promise;
     }
 
-    function getItem(key, callback) {
+    function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined>) {
         var self = this;
 
         // Cast the key to a string, as that's all we can set as a key.
@@ -69,15 +73,16 @@
             key = String(key);
         }
 
-        var promise = new Promise(function (resolve, reject) {
+        var promise = new Promise<T | undefined>(function (resolve, reject) {
             self.ready()
                 .then(function () {
                     try {
                         var db = self._dbInfo.db;
-                        var result = db[key];
+                        var sresult = db[key];
+                        var result: T | undefined;
 
-                        if (result) {
-                            result = _deserialize(result);
+                        if (sresult) {
+                            result = _deserialize(sresult) as T;
                         }
 
                         resolve(result);
@@ -92,23 +97,29 @@
         return promise;
     }
 
-    function iterate(callback) {
+    function iterate<T, U>(
+        this: Module,
+        iterator: DbIterator<T, U>,
+        callback?: Callback<U | undefined | void>
+    ) {
         var self = this;
+        var iterationNumber = 1;
 
-        var promise = new Promise(function (resolve, reject) {
+        var promise = new Promise<U | undefined | void>(function (resolve, reject) {
             self.ready()
                 .then(function () {
                     try {
                         var db = self._dbInfo.db;
 
                         for (var key in db) {
-                            var result = db[key];
+                            var sresult = db[key];
+                            var result: T | undefined;
 
-                            if (result) {
-                                result = _deserialize(result);
+                            if (sresult) {
+                                result = _deserialize(sresult) as T;
                             }
 
-                            callback(result, key);
+                            resolve(iterator(result, key, iterationNumber++));
                         }
 
                         resolve();
@@ -123,13 +134,13 @@
         return promise;
     }
 
-    function key(n, callback) {
+    function key(this: Module, n: number, callback?: Callback<string | null>) {
         var self = this;
-        var promise = new Promise(function (resolve, reject) {
+        var promise = new Promise<string | null>(function (resolve, reject) {
             self.ready()
                 .then(function () {
                     var db = self._dbInfo.db;
-                    var result = null;
+                    var result: string | null = null;
                     var index = 0;
 
                     for (var key in db) {
@@ -151,13 +162,13 @@
         return promise;
     }
 
-    function keys(callback) {
+    function keys(this: Module, callback?: Callback<string[]>) {
         var self = this;
-        var promise = new Promise(function (resolve, reject) {
+        var promise = new Promise<string[]>(function (resolve, reject) {
             self.ready()
                 .then(function () {
                     var db = self._dbInfo.db;
-                    var keys = [];
+                    var keys: string[] = [];
 
                     for (var key in db) {
                         if (db.hasOwnProperty(key)) {
@@ -174,9 +185,9 @@
         return promise;
     }
 
-    function length(callback) {
+    function length(this: Module, callback?: Callback<number>) {
         var self = this;
-        var promise = new Promise(function (resolve, reject) {
+        var promise = new Promise<number>(function (resolve, reject) {
             self.keys()
                 .then(function (keys) {
                     resolve(keys.length);
@@ -188,7 +199,7 @@
         return promise;
     }
 
-    function removeItem(key, callback) {
+    function removeItem(this: Module, key: string, callback: Callback<void>) {
         var self = this;
 
         // Cast the key to a string, as that's all we can set as a key.
@@ -197,7 +208,7 @@
             key = String(key);
         }
 
-        var promise = new Promise(function (resolve, reject) {
+        var promise = new Promise<void>(function (resolve, reject) {
             self.ready()
                 .then(function () {
                     var db = self._dbInfo.db;
@@ -215,7 +226,7 @@
         return promise;
     }
 
-    function setItem(key, value, callback) {
+    function setItem<T>(this: Module, key: string, value: T | null, callback: Callback<T | null>) {
         var self = this;
 
         // Cast the key to a string, as that's all we can set as a key.
@@ -224,7 +235,7 @@
             key = String(key);
         }
 
-        var promise = new Promise(function (resolve, reject) {
+        var promise = new Promise<T | null>(function (resolve, reject) {
             self.ready()
                 .then(function () {
                     // Convert undefined values to null.
@@ -242,7 +253,7 @@
                         } else {
                             try {
                                 var db = self._dbInfo.db;
-                                db[key] = value;
+                                db[key] = value as string;
                                 resolve(originalValue);
                             } catch (e) {
                                 reject(e);
@@ -258,7 +269,10 @@
     }
 
     // _serialize just like in LocalStorage
-    function _serialize(value, callback) {
+    function _serialize<T>(
+        value: ArrayBufferView | ArrayBuffer | Blob | T | null,
+        callback: (onDone: string | Error | null, onError?: unknown) => void
+    ) {
         var valueString = '';
         if (value) {
             valueString = value.toString();
@@ -271,8 +285,11 @@
         if (
             value &&
             (value.toString() === '[object ArrayBuffer]' ||
-                (value.buffer && value.buffer.toString() === '[object ArrayBuffer]'))
+                ((value as Partial<ArrayBufferView>).buffer &&
+                    (value as ArrayBufferView).buffer.toString() === '[object ArrayBuffer]'))
         ) {
+            const arrayBuffer = value as ArrayBufferView & ArrayBuffer;
+
             // Convert binary arrays to a string and prefix the string with
             // a special marker.
             var buffer;
@@ -282,7 +299,7 @@
                 buffer = value;
                 marker += TYPE_ARRAYBUFFER;
             } else {
-                buffer = value.buffer;
+                buffer = arrayBuffer.buffer;
 
                 if (valueString === '[object Int8Array]') {
                     marker += TYPE_INT8ARRAY;
@@ -309,20 +326,22 @@
 
             callback(marker + _bufferToString(buffer));
         } else if (valueString === '[object Blob]') {
+            const blobValue = value as Blob;
+
             // Conver the blob to a binaryArray and then to a string.
             var fileReader = new FileReader();
 
             fileReader.onload = function () {
-                var str = _bufferToString(this.result);
+                var str = _bufferToString(this.result as ArrayBuffer);
 
                 callback(SERIALIZED_MARKER + TYPE_BLOB + str);
             };
 
-            fileReader.readAsArrayBuffer(value);
+            fileReader.readAsArrayBuffer(blobValue);
         } else {
             try {
                 callback(JSON.stringify(value));
-            } catch (e) {
+            } catch (e: any) {
                 window.console.error("Couldn't convert value into a JSON " + 'string: ', value);
 
                 callback(e);
@@ -331,7 +350,7 @@
     }
 
     // _deserialize just like in LocalStorage
-    function _deserialize(value) {
+    function _deserialize<T>(value: string): ArrayBuffer | Blob | T {
         // If we haven't marked this string as being specially serialized (i.e.
         // something other than serialized JSON), we can just return it and be
         // done with it.
@@ -384,12 +403,12 @@
     }
 
     // _bufferToString just like in LocalStorage
-    function _bufferToString(buffer) {
+    function _bufferToString(buffer: ArrayBuffer) {
         var str = '';
         var uint16Array = new Uint16Array(buffer);
 
         try {
-            str = String.fromCharCode.apply(null, uint16Array);
+            str = String.fromCharCode.apply(null, uint16Array as any);
         } catch (e) {
             // This is a fallback implementation in case the first one does
             // not work. This is required to get the phantomjs passing...
@@ -401,23 +420,31 @@
         return str;
     }
 
-    function executeCallback(promise, callback) {
+    function executeCallback<T>(promise: Promise<T>, callback?: Callback<T>) {
         if (callback) {
             promise.then(
                 function (result) {
                     callback(null, result);
                 },
                 function (error) {
-                    callback(error);
+                    (callback as Function)(error);
                 }
             );
         }
     }
 
-    var dummyStorageDriver = {
+    function dropInstance(
+        this: Module,
+        _options: Partial<InstanceOptions>,
+        callback?: Callback<void>
+    ) {
+        return new Promise<void>(() => {});
+    }
+
+    var dummyStorageDriver: Driver = {
         _driver: 'dummyStorageDriver',
         _initStorage: _initStorage,
-        // _supports: function() { return true; }
+        _support: true,
         iterate: iterate,
         getItem: getItem,
         setItem: setItem,
@@ -425,7 +452,8 @@
         clear: clear,
         length: length,
         key: key,
-        keys: keys
+        keys: keys,
+        dropInstance: dropInstance
     };
 
     if (typeof define === 'function' && define.amd) {
@@ -438,3 +466,5 @@
         this.dummyStorageDriver = dummyStorageDriver;
     }
 }).call(window);
+
+export declare var dummyStorageDriver: Driver;

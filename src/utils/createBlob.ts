@@ -5,7 +5,6 @@
 // browsers that don't support the native Blob constructor. (i.e.
 // old QtWebKit versions, at least).
 function createBlob(parts: BlobPart[] | undefined, properties?: BlobPropertyBag) {
-    /* global BlobBuilder,MSBlobBuilder,MozBlobBuilder,WebKitBlobBuilder */
     parts = parts || [];
     properties = properties || {};
     try {

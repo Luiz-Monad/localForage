@@ -7,7 +7,7 @@ import executeTwoCallbacks from '../utils/executeTwoCallbacks';
 import normalizeKey from '../utils/normalizeKey';
 import getCallback from '../utils/getCallback';
 
-interface Module extends Driver, Forage<DbInfo> {
+export interface Module extends Driver, Forage<DbInfo> {
     _initReady?: () => Promise<void>;
 }
 
@@ -925,7 +925,11 @@ function keys(this: Module, callback?: Callback<string[]>) {
     return promise;
 }
 
-function dropInstance(this: Module, _options: Partial<InstanceOptions>, callback?: Callback<void>) {
+function dropInstance(
+    this: Module,
+    _options?: Partial<InstanceOptions>,
+    callback?: Callback<void>
+) {
     callback = getCallback.apply(this, arguments as any);
 
     var currentConfig = this.config();

@@ -10,7 +10,7 @@ import executeCallback from '../utils/executeCallback';
 import normalizeKey from '../utils/normalizeKey';
 import getCallback from '../utils/getCallback';
 
-interface Module extends Driver, Forage<DbInfo> {}
+export interface Module extends Driver, Forage<DbInfo> {}
 
 interface DbInfo extends Options {
     serializer: typeof serializer;
@@ -288,7 +288,11 @@ function setItem<T>(this: Module, key: string, value: T | null, callback: Callba
     return promise;
 }
 
-function dropInstance(this: Module, _options: Partial<InstanceOptions>, callback?: Callback<void>) {
+function dropInstance(
+    this: Module,
+    _options?: Partial<InstanceOptions>,
+    callback?: Callback<void>
+) {
     callback = getCallback.apply(this, arguments as any);
 
     _options = (typeof _options !== 'function' && _options) || {};

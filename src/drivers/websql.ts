@@ -15,7 +15,7 @@ import getCallback from '../utils/getCallback';
  * Licensed under the MIT license.
  */
 
-interface Module extends Driver, Forage<DbInfo> {}
+export interface Module extends Driver, Forage<DbInfo> {}
 
 interface DbInfo extends Options {
     db: Database | null;
@@ -530,7 +530,11 @@ function getAllStoreNames(db: Database) {
     });
 }
 
-function dropInstance(this: Module, _options: Partial<InstanceOptions>, callback?: Callback<void>) {
+function dropInstance(
+    this: Module,
+    _options?: Partial<InstanceOptions>,
+    callback?: Callback<void>
+) {
     callback = getCallback.apply(this, arguments as any);
 
     var currentConfig = this.config();
