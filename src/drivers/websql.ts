@@ -135,12 +135,12 @@ function tryExecuteSql(
     });
 }
 
-function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined>) {
+function getItem<T>(this: Module, key: string, callback?: Callback<T | null>) {
     var self = this;
 
     key = normalizeKey(key);
 
-    var promise = new Promise<T | undefined>(function (resolve, reject) {
+    var promise = new Promise<T | null>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 var dbInfo = self._dbInfo;
@@ -154,7 +154,7 @@ function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined
                             var sresult = results.rows.length
                                 ? (results.rows.item(0).value as string)
                                 : null;
-                            var result: T | undefined;
+                            var result: T | null = null;
 
                             // Check to see if this is serialized content we need to
                             // unpack.
@@ -181,11 +181,11 @@ function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined
 function iterate<T, U>(
     this: Module,
     iterator: DbIterator<T, U>,
-    callback?: Callback<U | undefined | void>
+    callback?: Callback<U | null | void>
 ) {
     var self = this;
 
-    var promise = new Promise<U | void | undefined>(function (resolve, reject) {
+    var promise = new Promise<U | void | null>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 var dbInfo = self._dbInfo;
@@ -203,8 +203,8 @@ function iterate<T, U>(
                             for (var i = 0; i < length; i++) {
                                 var item = rows.item(i);
                                 var sresult = item.value as string;
-                                var oresult: T | undefined;
-                                var result: U | undefined;
+                                var oresult: T | null = null;
+                                var result: U | null = null;
 
                                 // Check to see if this is serialized content
                                 // we need to unpack.

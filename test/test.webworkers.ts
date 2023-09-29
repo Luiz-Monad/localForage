@@ -1,5 +1,7 @@
 import { expect } from 'chai';
 
+mocha.setup({ asyncOnly: true });
+
 var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
 
 DRIVERS.forEach(function (driverName) {
@@ -17,12 +19,12 @@ DRIVERS.forEach(function (driverName) {
     describe('Web Worker support in ' + driverName, function () {
         'use strict';
 
-        before(function (done) {
-            localforage.setDriver(driverName).then(done);
+        before(function () {
+            return localforage.setDriver(driverName);
         });
 
-        beforeEach(function (done) {
-            localforage.clear(done);
+        beforeEach(function () {
+            return new Promise((resolve) => localforage.clear(resolve));
         });
 
         if (!Modernizr.webworkers) {
@@ -35,24 +37,26 @@ DRIVERS.forEach(function (driverName) {
             return;
         }
 
-        it('saves data', function (done) {
-            var webWorker = new Worker('/test/webworker-client.js');
+        it('saves data', function () {
+            return new Promise<void>(function (resolve, reject) {
+                var webWorker = new Worker('/test/webworker-client.js');
 
-            webWorker.addEventListener('message', function (e) {
-                var body = e.data.body;
+                webWorker.addEventListener('message', function (e) {
+                    var body = e.data.body;
 
-                window.console.log(body);
-                expect(body).to.be.eq('I have been set');
-                done();
-            });
+                    window.console.log(body);
+                    expect(body).to.be.eq('I have been set');
+                    resolve();
+                });
 
-            webWorker.addEventListener('error', function (e) {
-                window.console.log(e);
-            });
+                webWorker.addEventListener('error', function (e) {
+                    window.console.log(e);
+                });
 
-            webWorker.postMessage({
-                driver: driverName,
-                value: 'I have been set'
+                webWorker.postMessage({
+                    driver: driverName,
+                    value: 'I have been set'
+                });
             });
         });
     });

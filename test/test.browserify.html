@@ -18,9 +18,8 @@
         <!-- Modernizr  -->
         <script src="/bower_components/modernizr/modernizr.js"></script>
 
-        <script>
-            mocha.setup('bdd');
-        </script>
+        <!-- Test runner -->
+        <script src="/test/runner.js"></script>
 
         <!-- localForage -->
         <script src="/test/localforage.browserify.js"></script>
@@ -32,6 +31,7 @@
         <script src="/test/test.drivers.js"></script>
         <script src="/test/test.iframes.js"></script>
         <script src="/test/test.webworkers.js"></script>
+        <script src="/test/test.serviceworkers.js"></script>
 
         <!-- Disable warning -->
         <script>
@@ -40,7 +40,7 @@
 
         <!-- Run tests -->
         <script>
-            mocha.run();
+            require(['runner']);
         </script>
     </body>
 </html>

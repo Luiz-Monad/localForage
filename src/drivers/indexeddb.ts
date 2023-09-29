@@ -392,7 +392,7 @@ function createTransaction(
     }
 
     try {
-        var tx = dbInfo.db?.transaction(dbInfo.storeName, mode);
+        var tx = dbInfo.db!.transaction(dbInfo.storeName, mode);
         callback(null, tx);
     } catch (err: any) {
         if (
@@ -524,12 +524,12 @@ function _initStorage(this: Module, options: Options) {
         });
 }
 
-function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined>) {
+function getItem<T>(this: Module, key: string, callback?: Callback<T | null>) {
     var self = this;
 
     key = normalizeKey(key);
 
-    var promise = new Promise<T | undefined>(function (resolve, reject) {
+    var promise = new Promise<T | null>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
@@ -571,11 +571,11 @@ function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined
 function iterate<T, U>(
     this: Module,
     iterator: DbIterator<T, U>,
-    callback?: Callback<U | undefined | void>
+    callback?: Callback<U | null | void>
 ) {
     var self = this;
 
-    var promise = new Promise<U | undefined | void>(function (resolve, reject) {
+    var promise = new Promise<U | null | void>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
@@ -973,13 +973,13 @@ function dropInstance(
                 const forages = dbContext.forages;
 
                 db.close();
-                for (var i = 0; i < forages.length; i++) {
+                for (let i = 0; i < forages.length; i++) {
                     const forage = forages[i];
                     forage._dbInfo.db = null;
                 }
 
                 const dropDBPromise = new Promise<IDBDatabase>((resolve, reject) => {
-                    var req = idb.deleteDatabase(options.name);
+                    const req = idb.deleteDatabase(options.name);
 
                     req.onerror = () => {
                         const db = req.result;
@@ -1011,7 +1011,7 @@ function dropInstance(
                 return dropDBPromise
                     .then((db) => {
                         dbContext.db = db;
-                        for (var i = 0; i < forages.length; i++) {
+                        for (let i = 0; i < forages.length; i++) {
                             const forage = forages[i];
                             _advanceReadiness(forage._dbInfo);
                         }
@@ -1044,10 +1044,10 @@ function dropInstance(
                 const dropObjectPromise = new Promise<IDBDatabase>((resolve, reject) => {
                     const req = idb.open(options.name, newVersion);
 
-                    req.onerror = (err) => {
+                    req.onerror = () => {
                         const db = req.result;
                         db.close();
-                        reject(err);
+                        reject(req.error);
                     };
 
                     req.onupgradeneeded = () => {

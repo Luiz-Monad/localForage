@@ -15,9 +15,6 @@
         <script src="/bower_components/mocha/mocha.js"></script>
         <script src="/bower_components/chai/chai.js"></script>
 
-        <!-- require.js  -->
-        <script src="/bower_components/requirejs/require.js"></script>
-
         <!-- Modernizr  -->
         <script src="/bower_components/modernizr/modernizr.js"></script>
 
@@ -45,13 +42,16 @@
                 require(['localforage'], function (localforage) {
                     window.localforage = localforage;
                     require([
-                        '/test/test.api.js',
-                        '/test/test.config.js',
-                        '/test/test.datatypes.js',
-                        '/test/test.drivers.js',
-                        '/test/test.iframes.js',
-                        '/test/test.webworkers.js'
-                    ], mocha.run); // Run tests
+                        'mocha',
+                        'test.callwhenready',
+                        'test.api',
+                        'test.config',
+                        'test.datatypes',
+                        'test.drivers',
+                        'test.iframes',
+                        'test.webworkers',
+                        'test.serviceworkers'
+                    ], () => mocha.run()); // Run tests
                 });
             }
             // Disable warning

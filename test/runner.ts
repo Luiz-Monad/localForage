@@ -1,5 +1,6 @@
 // Run before window.onload to make sure the specs have access to describe()
 // and other mocha methods. All feels very hacky though :-/
+import 'mocha';
 mocha.setup('bdd');
 
 interface Title {
@@ -55,7 +56,7 @@ if (!Array.prototype.forEach) {
 
 declare var requirejs: any;
 
-var require: any = this.require;
+var require: any = global.require;
 if (require) {
     requirejs.config({
         paths: {
@@ -66,16 +67,17 @@ if (require) {
         window.localforage = localforage;
 
         require([
-            '/test/test.api.js',
-            '/test/test.config.js',
-            '/test/test.datatypes.js',
-            '/test/test.drivers.js',
-            '/test/test.iframes.js',
-            '/test/test.webworkers.js'
+            'test.api',
+            'test.config',
+            'test.datatypes',
+            'test.drivers',
+            'test.iframes',
+            'test.webworkers',
+            'test.serviceworkers'
         ], runTestSuit);
     });
-} else if (this.addEventListener) {
-    this.addEventListener('load', runTestSuit);
-} else if (this.attachEvent) {
-    this.attachEvent('onload', runTestSuit);
+} else if (window.addEventListener) {
+    window.addEventListener('load', runTestSuit);
+} else if (window.attachEvent) {
+    window.attachEvent('onload', runTestSuit);
 }

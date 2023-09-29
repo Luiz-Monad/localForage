@@ -2,9 +2,9 @@ import { LocalForageComplete } from '../src/types';
 
 declare global {
     declare var Modernizr: any;
-    declare var attachEvent: any;
 
     declare var define: Function & { amd?: any };
+    declare var require: Function | undefined;
     declare var importScripts: Function;
 
     type LocalForageDriver = LocalForageComplete;
@@ -21,8 +21,9 @@ declare global {
 
         mochaResults: any;
         oninstall: typeof onmessage;
-
-        requiretest: boolean | undefined;
+        attachEvent: Function;
+        requireTest: boolean | undefined;
+        callWhenReadyTest: boolean | undefined;
     }
 
     interface MessageEvent {

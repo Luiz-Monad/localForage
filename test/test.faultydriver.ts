@@ -1,5 +1,7 @@
 import { expect } from 'chai';
 
+mocha.setup({ asyncOnly: true });
+
 describe('When Driver Fails to Initialize', function () {
     'use strict';
 

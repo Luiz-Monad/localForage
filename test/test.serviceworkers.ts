@@ -1,5 +1,7 @@
 import { expect } from 'chai';
 
+mocha.setup({ asyncOnly: true });
+
 var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
 
 DRIVERS.forEach(function (driverName) {
@@ -37,31 +39,22 @@ DRIVERS.forEach(function (driverName) {
             return;
         }
 
-        before(function (done) {
-            navigator.serviceWorker
+        before(function () {
+            return navigator.serviceWorker
                 .register('/test/serviceworker-client.js')
                 .then(function () {
                     return localforage.setDriver(driverName);
-                })
-                .then(done);
-        });
-
-        after(function (done) {
-            navigator.serviceWorker.ready
-                .then(function (registration) {
-                    return registration.unregister();
-                })
-                .then(function (bool) {
-                    if (bool) {
-                        done();
-                    } else {
-                        done('service worker failed to unregister');
-                    }
                 });
         });
 
-        beforeEach(function (done) {
-            localforage.clear(done);
+        after(function () {
+            return navigator.serviceWorker.ready.then(function (registration) {
+                return registration.unregister();
+            });
+        });
+
+        beforeEach(function () {
+            return new Promise((resolve) => localforage.clear(resolve));
         });
 
         if (driverName === localforage.LOCALSTORAGE || driverName === localforage.WEBSQL) {
@@ -69,40 +62,37 @@ DRIVERS.forEach(function (driverName) {
             return;
         }
 
-        xit('should set a value on registration', function (done) {
-            navigator.serviceWorker.ready
+        xit('should set a value on registration', function () {
+            return navigator.serviceWorker.ready
                 .then(function () {
                     return localforage.getItem('service worker registration');
                 })
                 .then(function (result) {
                     expect(result).to.equal('serviceworker present');
-                    done();
-                })
-                .catch(function (error) {
-                    done(error);
                 });
         });
 
-        it('saves data', function (done) {
-            var messageChannel = new MessageChannel();
-            messageChannel.port1.onmessage = function (event) {
-                expect(event.data.body).to.be.eq('I have been set using ' + driverName);
-                done();
-            };
+        it('saves data', function () {
+            return new Promise<void>(function (resolve, reject) {
+                var messageChannel = new MessageChannel();
+                messageChannel.port1.onmessage = function (event) {
+                    expect(event.data.body).to.be.eq('I have been set using ' + driverName);
+                    resolve();
+                };
 
-            navigator.serviceWorker.ready
-                .then(function (registration) {
-                    registration?.active?.postMessage(
-                        {
-                            driver: driverName,
-                            value: 'I have been set'
-                        },
-                        [messageChannel.port2]
-                    );
-                })
-                .catch(function (error) {
-                    done(error);
-                });
+                navigator.serviceWorker.ready
+                    .then(function (registration) {
+                        registration?.active?.postMessage(
+                            {
+                                driver: driverName,
+                                value: 'I have been set'
+                            },
+                            [messageChannel.port2]
+                        );
+                    })
+                    .then(resolve)
+                    .catch(reject);
+            });
         });
     });
 });

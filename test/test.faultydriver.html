@@ -9,12 +9,6 @@
     <body>
         <div id="mocha"></div>
 
-        <!-- test libs -->
-        <script src="/bower_components/requirejs/require.js"></script>
-        <script src="/bower_components/assert/assert.js"></script>
-        <script src="/bower_components/mocha/mocha.js"></script>
-        <script src="/bower_components/chai/chai.js"></script>
-
         <script>
             try {
                 window.originalIdbOpen = window.indexedDB.open;
@@ -46,15 +40,22 @@
             } catch (error) {}
         </script>
 
+        <!-- localForage -->
+        <script src="/dist/localforage.js"></script>
+
         <!-- Modernizr  -->
         <script src="/bower_components/modernizr/modernizr.js"></script>
 
-        <script>
-            mocha.setup('bdd');
-        </script>
+        <!-- test libs -->
+        <script src="/bower_components/requirejs/require.js"></script>
+        <script src="/bower_components/assert/assert.js"></script>
+        <script src="/bower_components/mocha/mocha.js"></script>
+        <script src="/bower_components/chai/chai.js"></script>
 
-        <!-- localForage -->
-        <script src="/dist/localforage.js"></script>
+        <!-- Test runner -->
+        <script>
+            require(['mocha'], () => mocha.setup('bdd'));
+        </script>
 
         <!-- specs -->
         <script src="/test/test.faultydriver.js"></script>
@@ -66,7 +67,7 @@
 
         <!-- Run tests -->
         <script>
-            mocha.run();
+            require(['mocha', 'test.faultydriver'], () => mocha.run());
         </script>
     </body>
 </html>

@@ -94,7 +94,7 @@ function clear(this: Module, callback?: Callback<void>) {
 // Retrieve an item from the store. Unlike the original async_storage
 // library in Gaia, we don't modify return values at all. If a key's value
 // is `undefined`, we pass that value to the callback function.
-function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined>) {
+function getItem<T>(this: Module, key: string, callback?: Callback<T | null>) {
     var self = this;
 
     key = normalizeKey(key);
@@ -102,7 +102,7 @@ function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined
     var promise = self.ready().then(function () {
         var dbInfo = self._dbInfo;
         var sresult = localStorage.getItem(dbInfo.keyPrefix + key);
-        var result: T | undefined;
+        var result: T | null = null;
 
         // If a result was found, parse it from the serialized
         // string into a JS object. If result isn't truthy, the key
@@ -123,7 +123,7 @@ function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined
 function iterate<T, U>(
     this: Module,
     iterator: DbIterator<T, U>,
-    callback?: Callback<U | undefined | void>
+    callback?: Callback<U | null | void>
 ) {
     var self = this;
 
@@ -147,8 +147,8 @@ function iterate<T, U>(
                 continue;
             }
             var svalue = localStorage.getItem(key);
-            var ovalue: T | undefined;
-            var value: U | undefined;
+            var ovalue: T | null = null;
+            var value: U | null = null;
 
             // If a result was found, parse it from the serialized
             // string into a JS object. If result isn't truthy, the

@@ -65,7 +65,7 @@ function clear(this: Module, callback?: Callback<void>) {
     return promise;
 }
 
-function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined>) {
+function getItem<T>(this: Module, key: string, callback?: Callback<T | null>) {
     var self = this;
 
     // Cast the key to a string, as that's all we can set as a key.
@@ -74,13 +74,13 @@ function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined
         key = String(key);
     }
 
-    var promise = new Promise<T | undefined>(function (resolve, reject) {
+    var promise = new Promise<T | null>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 try {
                     var db = self._dbInfo.db;
                     var sresult = db[key];
-                    var result: T | undefined;
+                    var result: T | null = null;
 
                     if (sresult) {
                         result = _deserialize(sresult) as T;
@@ -101,12 +101,12 @@ function getItem<T>(this: Module, key: string, callback?: Callback<T | undefined
 function iterate<T, U>(
     this: Module,
     iterator: DbIterator<T, U>,
-    callback?: Callback<U | undefined | void>
+    callback?: Callback<U | null | void>
 ) {
     var self = this;
     var iterationNumber = 1;
 
-    var promise = new Promise<U | undefined | void>(function (resolve, reject) {
+    var promise = new Promise<U | null | void>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 try {
@@ -114,7 +114,7 @@ function iterate<T, U>(
 
                     for (var key in db) {
                         var sresult = db[key];
-                        var result: T | undefined;
+                        var result: T | null = null;
 
                         if (sresult) {
                             result = _deserialize(sresult) as T;

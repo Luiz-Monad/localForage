@@ -9,16 +9,6 @@
     <body>
         <div id="mocha"></div>
 
-        <!-- test libs -->
-        <script src="/bower_components/requirejs/require.js"></script>
-        <script src="/bower_components/assert/assert.js"></script>
-        <script src="/bower_components/mocha/mocha.js"></script>
-        <script src="/bower_components/chai/chai.js"></script>
-
-        <script>
-            mocha.setup('bdd');
-        </script>
-
         <script>
             // Virtually remove support for the drivers.
             // This has to be done before localforage
@@ -37,11 +27,22 @@
             } catch (error) {}
         </script>
 
+        <!-- localForage -->
+        <script src="/dist/localforage.js"></script>
+
         <!-- Modernizr  -->
         <script src="/bower_components/modernizr/modernizr.js"></script>
 
-        <!-- localForage -->
-        <script src="/dist/localforage.js"></script>
+        <!-- test libs -->
+        <script src="/bower_components/requirejs/require.js"></script>
+        <script src="/bower_components/assert/assert.js"></script>
+        <script src="/bower_components/mocha/mocha.js"></script>
+        <script src="/bower_components/chai/chai.js"></script>
+
+        <!-- Test runner -->
+        <script>
+            require(['mocha'], () => mocha.setup('bdd'));
+        </script>
 
         <!-- specs -->
         <script src="/test/test.nodriver.js"></script>
@@ -53,7 +54,7 @@
 
         <!-- Run tests -->
         <script>
-            this.mocha.run();
+            require(['mocha', 'test.nodriver'], () => mocha.run());
         </script>
     </body>
 </html>

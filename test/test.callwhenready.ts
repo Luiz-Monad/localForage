@@ -1,5 +1,7 @@
 mocha.setup('bdd');
 
+var require: any = global.require;
+
 beforeEach(function (done) {
     var previousDriver = localforage.driver();
 
@@ -20,6 +22,7 @@ beforeEach(function (done) {
         require(['localforage'], function (localforage: LocalForageDriver) {
             localforage.setDriver(previousDriver!);
             window.localforage = localforage;
+            window.callWhenReadyTest = true;
             done();
         });
     }

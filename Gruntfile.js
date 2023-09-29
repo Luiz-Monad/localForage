@@ -262,6 +262,9 @@ module.exports = exports = function (grunt) {
             },
             test_deps: {
                 mode: 'development',
+                optimization: {
+                    minimize: false
+                },
                 entry: {
                     assert: ['./node_modules/assert/assert.js'],
                     chai: ['./node_modules/chai/chai.js'],
@@ -270,12 +273,18 @@ module.exports = exports = function (grunt) {
                 output: {
                     path: path.resolve('build/bower_components/'),
                     filename: '[name]/[name].js',
-                    libraryTarget: 'amd',
-                    library: '[name]'
+                    library: {
+                        name: '[name]',
+                        type: 'umd',
+                        umdNamedDefine: true
+                    }
                 }
             },
             test: {
                 mode: 'development',
+                optimization: {
+                    minimize: false
+                },
                 entry: () =>
                     glob.sync('build/test/test/*.js').reduce((acc, file) => {
                         acc[path.basename(file).replace(/\.js$/, '')] = [path.resolve(file)];
@@ -284,10 +293,15 @@ module.exports = exports = function (grunt) {
                 output: {
                     path: path.resolve('build/test/'),
                     filename: '[name].js',
-                    libraryTarget: 'amd',
-                    library: '[name]'
+                    library: {
+                        name: '[name]',
+                        type: 'umd',
+                        umdNamedDefine: true
+                    }
                 },
                 externals: {
+                    chai: 'chai',
+                    mocha: 'mocha',
                     localforage: 'localforage'
                 }
             }

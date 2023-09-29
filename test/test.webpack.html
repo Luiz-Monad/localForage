@@ -21,9 +21,8 @@
         <!-- Modernizr  -->
         <script src="/bower_components/modernizr/modernizr.js"></script>
 
-        <script>
-            require(['mocha'], () => mocha.setup('bdd'));
-        </script>
+        <!-- Test runner -->
+        <script src="/test/runner.js"></script>
 
         <!-- specs -->
         <script src="/test/test.api.js"></script>
@@ -41,16 +40,7 @@
 
         <!-- Run tests -->
         <script>
-            require([
-                'mocha',
-                'test.api',
-                'test.config',
-                'test.datatypes',
-                'test.drivers',
-                'test.iframes',
-                'test.webworkers',
-                'test.serviceworkers'
-            ], () => mocha.run());
+            require(['runner']);
         </script>
     </body>
 </html>

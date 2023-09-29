@@ -15,6 +15,9 @@
             }
         </script>
 
+        <!-- localForage -->
+        <script src="/dist/localforage.min.js"></script>
+
         <!-- test libs -->
         <script src="/bower_components/requirejs/require.js"></script>
         <script src="/bower_components/assert/assert.js"></script>
@@ -24,12 +27,10 @@
         <!-- Modernizr  -->
         <script src="/bower_components/modernizr/modernizr.js"></script>
 
+        <!-- Test runner -->
         <script>
-            mocha.setup('bdd');
+            require(['mocha'], () => mocha.setup('bdd'));
         </script>
-
-        <!-- localForage -->
-        <script src="/dist/localforage.min.js"></script>
 
         <!-- specs -->
         <script src="/test/test.api.js"></script>
@@ -41,7 +42,7 @@
 
         <!-- Run tests -->
         <script>
-            mocha.run();
+            require(['mocha', 'test.api'], () => mocha.run());
         </script>
     </body>
 </html>

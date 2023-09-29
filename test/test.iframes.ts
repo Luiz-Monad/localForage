@@ -1,5 +1,7 @@
 import { expect } from 'chai';
 
+mocha.setup({ asyncOnly: true });
+
 describe('Inside iFrames', function () {
     'use strict';
 

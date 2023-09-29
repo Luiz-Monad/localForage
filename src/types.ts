@@ -12,15 +12,16 @@ export interface Options extends InstanceOptions {
     description?: string;
 }
 
+export type InvCallback<T> = (value: T, err: any) => void;
 export type Callback<T> = (err: any, value: T) => void;
 export type DbIterator<T, U> = (
-    result: T | undefined,
+    result: T | null,
     value: string,
     iterationNumber: number
-) => U | undefined;
+) => U | null;
 
 export interface MethodsCore {
-    getItem<T>(key: string, callback?: Callback<T | undefined>): Promise<T | undefined>;
+    getItem<T>(key: string, callback?: Callback<T | null>): Promise<T | null>;
     setItem<T>(key: string, value: T | null, callback?: Callback<T | null>): Promise<T | null>;
     removeItem(key: string, callback?: Callback<void>): Promise<void>;
     clear(callback?: Callback<void>): Promise<void>;
@@ -29,8 +30,8 @@ export interface MethodsCore {
     keys(callback?: Callback<string[]>): Promise<string[]>;
     iterate<T, U>(
         iteratee: DbIterator<T, U>,
-        callback?: Callback<U | undefined | void>
-    ): Promise<U | undefined | void>;
+        callback?: Callback<U | null | void>
+    ): Promise<U | null | void>;
 }
 
 export interface Methods extends MethodsCore {
@@ -69,10 +70,10 @@ export interface ILocalForage extends Forage {
     driver(): string | null;
     getDriver(
         driverName: string,
-        callback?: Callback<OptionalDropInstanceDriver>,
+        callback?: InvCallback<OptionalDropInstanceDriver>,
         errorCallback?: Callback<void>
     ): Promise<OptionalDropInstanceDriver>;
-    getSerializer(callback?: Callback<typeof serializer>): Promise<typeof serializer>;
+    getSerializer(callback?: InvCallback<typeof serializer>): Promise<typeof serializer>;
     setDriver(
         drivers: string | string[],
         callback?: Callback<void>,

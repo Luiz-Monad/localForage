@@ -18,12 +18,13 @@
         <!-- Modernizr  -->
         <script src="/bower_components/modernizr/modernizr.js"></script>
 
+        <!-- Test runner -->
         <script>
-            mocha.setup('bdd');
+            require(['mocha'], () => mocha.setup('bdd'));
         </script>
 
         <script>
-            window.requiretest = 1;
+            // window.requireTest = true;
             var require = this.require;
             if (require) {
                 requirejs.config({
@@ -34,13 +35,16 @@
                 require(['localforage'], function (localforage) {
                     window.localforage = localforage;
                     require([
-                        '/test/test.api.js',
-                        '/test/test.config.js',
-                        '/test/test.datatypes.js',
-                        '/test/test.drivers.js',
-                        '/test/test.iframes.js',
-                        '/test/test.webworkers.js'
-                    ], mocha.run); // Run tests
+                        'mocha',
+                        'test.callwhenready',
+                        'test.api',
+                        'test.config',
+                        'test.datatypes',
+                        'test.drivers',
+                        'test.iframes',
+                        'test.webworkers',
+                        'test.serviceworkers'
+                    ], () => mocha.run()); // Run tests
                 });
             }
             // Disable warning
