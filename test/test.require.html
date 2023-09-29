@@ -10,12 +10,10 @@
         <div id="mocha"></div>
 
         <!-- test libs -->
+        <script src="/bower_components/requirejs/require.js"></script>
         <script src="/bower_components/assert/assert.js"></script>
         <script src="/bower_components/mocha/mocha.js"></script>
         <script src="/bower_components/chai/chai.js"></script>
-
-        <!-- require.js  -->
-        <script src="/bower_components/requirejs/require.js"></script>
 
         <!-- Modernizr  -->
         <script src="/bower_components/modernizr/modernizr.js"></script>
@@ -25,6 +23,7 @@
         </script>
 
         <script>
+            window.requiretest = 1;
             var require = this.require;
             if (require) {
                 requirejs.config({

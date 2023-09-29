@@ -9,7 +9,11 @@
     <body>
         <div id="mocha"></div>
 
+        <!-- localForage -->
+        <script src="/test/localforage.webpack.js"></script>
+
         <!-- test libs -->
+        <script src="/bower_components/requirejs/require.js"></script>
         <script src="/bower_components/assert/assert.js"></script>
         <script src="/bower_components/mocha/mocha.js"></script>
         <script src="/bower_components/chai/chai.js"></script>
@@ -17,11 +21,8 @@
         <!-- Modernizr  -->
         <script src="/bower_components/modernizr/modernizr.js"></script>
 
-        <!-- localForage -->
-        <script src="/test/localforage.webpack.js"></script>
-
         <script>
-            mocha.setup('bdd');
+            require(['mocha'], () => mocha.setup('bdd'));
         </script>
 
         <!-- specs -->
@@ -31,6 +32,7 @@
         <script src="/test/test.drivers.js"></script>
         <script src="/test/test.iframes.js"></script>
         <script src="/test/test.webworkers.js"></script>
+        <script src="/test/test.serviceworkers.js"></script>
 
         <!-- Disable warning -->
         <script>
@@ -39,7 +41,16 @@
 
         <!-- Run tests -->
         <script>
-            mocha.run();
+            require([
+                'mocha',
+                'test.api',
+                'test.config',
+                'test.datatypes',
+                'test.drivers',
+                'test.iframes',
+                'test.webworkers',
+                'test.serviceworkers'
+            ], () => mocha.run());
         </script>
     </body>
 </html>

@@ -25,7 +25,7 @@ describe('Inside iFrames', function () {
             ).contentWindow.document.getElementById('my-text');
             if (element && element.innerHTML) {
                 clearInterval(timer);
-                expect(element.innerHTML).to.be('I have been set');
+                expect(element.innerHTML).to.be.eq('I have been set');
                 done();
             }
         }, 10);

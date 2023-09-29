@@ -21,8 +21,8 @@ describe('When Custom Drivers are used', function () {
             } as any,
             null!,
             function (err) {
-                expect(err).to.be.an(Error);
-                expect(err.message).to.be(errorMessage);
+                expect(err).to.be.instanceof(Error);
+                expect(err.message).to.be.eq(errorMessage);
                 done();
             }
         );
@@ -43,8 +43,8 @@ describe('When Custom Drivers are used', function () {
                 keys: () => Promise.reject()
             })
             .then(null, function (err) {
-                expect(err).to.be.an(Error);
-                expect(err.message).to.be(errorMessage);
+                expect(err).to.be.instanceof(Error);
+                expect(err.message).to.be.eq(errorMessage);
                 done();
             });
     });
@@ -62,8 +62,8 @@ describe('When Custom Drivers are used', function () {
             } as any,
             null!,
             function (err) {
-                expect(err).to.be.an(Error);
-                expect(err.message).to.be(errorMessage);
+                expect(err).to.be.instanceof(Error);
+                expect(err.message).to.be.eq(errorMessage);
                 done();
             }
         );
@@ -81,8 +81,8 @@ describe('When Custom Drivers are used', function () {
                 clear: () => Promise.reject()
             } as any)
             .then(null, function (err) {
-                expect(err).to.be.an(Error);
-                expect(err.message).to.be(errorMessage);
+                expect(err).to.be.instanceof(Error);
+                expect(err.message).to.be.eq(errorMessage);
                 done();
             });
     });
@@ -102,7 +102,7 @@ describe('When Custom Drivers are used', function () {
     it('sets a custom driver', function (done) {
         localforage.defineDriver(dummyStorageDriver, function () {
             localforage.setDriver(dummyStorageDriver._driver, function () {
-                expect(localforage.driver()).to.be(dummyStorageDriver._driver);
+                expect(localforage.driver()).to.be.eq(dummyStorageDriver._driver);
                 done();
             });
         });
@@ -115,7 +115,7 @@ describe('When Custom Drivers are used', function () {
                 return localforage.setDriver(dummyStorageDriver._driver);
             })
             .then(function () {
-                expect(localforage.driver()).to.be(dummyStorageDriver._driver);
+                expect(localforage.driver()).to.be.eq(dummyStorageDriver._driver);
                 done();
             });
     });
@@ -137,7 +137,7 @@ describe('When Custom Drivers are used', function () {
 
         localforage.defineDriver(customDriver);
         localforage.setDriver(customDriver._driver).then(function () {
-            expect(localforage.driver()).to.be(customDriver._driver);
+            expect(localforage.driver()).to.be.eq(customDriver._driver);
             done();
         });
     });
@@ -159,7 +159,7 @@ describe('When Custom Drivers are used', function () {
 
         localforage.defineDriver(customDriver);
         localforage.setDriver(customDriver._driver).then(function () {
-            expect(localforage.driver()).to.be(customDriver._driver);
+            expect(localforage.driver()).to.be.eq(customDriver._driver);
             done();
         });
     });
@@ -185,7 +185,7 @@ describe('When Custom Drivers are used', function () {
                 return localforage.setDriver(customDriver._driver);
             })
             .then(function () {
-                expect(localforage.driver()).to.be(customDriver._driver);
+                expect(localforage.driver()).to.be.eq(customDriver._driver);
                 done();
             });
     });
@@ -193,12 +193,12 @@ describe('When Custom Drivers are used', function () {
     it('sets and uses a custom driver', function (done) {
         localforage.defineDriver(dummyStorageDriver, function () {
             localforage.setDriver(dummyStorageDriver._driver, function (err) {
-                expect(err).to.be(undefined);
+                expect(err).to.be.eq(undefined);
                 localforage.setItem('testCallbackKey', 'testCallbackValue', function (err) {
-                    expect(err).to.be(null);
+                    expect(err).to.be.eq(null);
                     localforage.getItem('testCallbackKey', function (err, value) {
-                        expect(err).to.be(null);
-                        expect(value).to.be('testCallbackValue');
+                        expect(err).to.be.eq(null);
+                        expect(value).to.be.eq('testCallbackValue');
                         done();
                     });
                 });
@@ -219,7 +219,7 @@ describe('When Custom Drivers are used', function () {
                 return localforage.getItem('testPromiseKey');
             })
             .then(function (value) {
-                expect(value).to.be('testPromiseValue');
+                expect(value).to.be.eq('testPromiseValue');
                 done();
             });
     });
@@ -249,7 +249,7 @@ describe('When Custom Drivers are used', function () {
                     return localforage.dropInstance!();
                 })
                 .catch(function (err) {
-                    expect(err.message).to.be(
+                    expect(err.message).to.be.eq(
                         'Method dropInstance is not implemented by the current driver'
                     );
                     done();

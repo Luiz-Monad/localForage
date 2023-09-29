@@ -42,7 +42,7 @@ DRIVERS.forEach(function (driverName) {
                 var body = e.data.body;
 
                 window.console.log(body);
-                expect(body).to.be('I have been set');
+                expect(body).to.be.eq('I have been set');
                 done();
             });
 

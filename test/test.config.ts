@@ -25,13 +25,13 @@ describe('Config API', function () {
     });
 
     it('returns the default values', function (done) {
-        expect(localforage.config('description')).to.be('');
-        expect(localforage.config('name')).to.be('localforage');
-        expect(localforage.config('size')).to.be(4980736);
-        expect(localforage.config('storeName')).to.be('keyvaluepairs');
-        expect(localforage.config('version')).to.be(1.0);
+        expect(localforage.config('description')).to.be.eq('');
+        expect(localforage.config('name')).to.be.eq('localforage');
+        expect(localforage.config('size')).to.be.eq(4980736);
+        expect(localforage.config('storeName')).to.be.eq('keyvaluepairs');
+        expect(localforage.config('version')).to.be.eq(1.0);
         localforage.ready(function () {
-            expect(localforage.config('driver')).to.be(localforage.driver());
+            expect(localforage.config('driver')).to.be.eq(localforage.driver());
             done();
         });
     });
@@ -48,19 +48,19 @@ describe('Config API', function () {
 
             var error = "Error: Can't call config() after localforage " + 'has been used.';
 
-            expect(configResult).to.not.be(true);
-            expect(configResult.toString()).to.be(error);
+            expect(configResult).to.not.be.eq(true);
+            expect(configResult.toString()).to.be.eq(error);
 
             // Expect the config values to be as they were before.
-            expect(localforage.config('description')).to.not.be('123');
-            expect(localforage.config('description')).to.be('');
-            expect(localforage.config('driver')).to.be(localforage.driver());
-            expect(localforage.config('driver')).to.not.be('I a not set driver');
-            expect(localforage.config('name')).to.be('localforage');
-            expect(localforage.config('name')).to.not.be('My Cool App');
-            expect(localforage.config('size')).to.be(4980736);
-            expect(localforage.config('storeName')).to.be('keyvaluepairs');
-            expect(localforage.config('version')).to.be(1.0);
+            expect(localforage.config('description')).to.not.be.eq('123');
+            expect(localforage.config('description')).to.be.eq('');
+            expect(localforage.config('driver')).to.be.eq(localforage.driver());
+            expect(localforage.config('driver')).to.not.be.eq('I a not set driver');
+            expect(localforage.config('name')).to.be.eq('localforage');
+            expect(localforage.config('name')).to.not.be.eq('My Cool App');
+            expect(localforage.config('size')).to.be.eq(4980736);
+            expect(localforage.config('storeName')).to.be.eq('keyvaluepairs');
+            expect(localforage.config('version')).to.be.eq(1.0);
 
             done();
         });
@@ -77,19 +77,19 @@ describe('Config API', function () {
             version: 2.0
         });
 
-        expect(localforage.config('description')).to.not.be('');
-        expect(localforage.config('description')).to.be('The offline datastore for my cool app');
-        expect(localforage.config('driver')).to.be(secondSupportedDriver);
-        expect(localforage.config('name')).to.be('My Cool App');
-        expect(localforage.config('size')).to.be(4980736);
-        expect(localforage.config('storeName')).to.be('myStoreName');
-        expect(localforage.config('version')).to.be(2.0);
+        expect(localforage.config('description')).to.not.be.eq('');
+        expect(localforage.config('description')).to.be.eq('The offline datastore for my cool app');
+        expect(localforage.config('driver')).to.be.eq(secondSupportedDriver);
+        expect(localforage.config('name')).to.be.eq('My Cool App');
+        expect(localforage.config('size')).to.be.eq(4980736);
+        expect(localforage.config('storeName')).to.be.eq('myStoreName');
+        expect(localforage.config('version')).to.be.eq(2.0);
 
         localforage.ready(function () {
             if (supportedDrivers.length >= 2) {
-                expect(localforage.config('driver')).to.be(secondSupportedDriver);
+                expect(localforage.config('driver')).to.be.eq(secondSupportedDriver);
             } else {
-                expect(localforage.config('driver')).to.be(supportedDrivers[0]);
+                expect(localforage.config('driver')).to.be.eq(supportedDrivers[0]);
             }
             done();
         });
@@ -106,7 +106,7 @@ describe('Config API', function () {
             expect(configResult).to.be.a(Promise);
             localforage
                 .ready(function () {
-                    expect(localforage.config('driver')).to.be(otherSupportedDrivers[0]);
+                    expect(localforage.config('driver')).to.be.eq(otherSupportedDrivers[0]);
                     return configResult;
                 })
                 .then(function () {
@@ -124,12 +124,12 @@ describe('Config API', function () {
         expect(configResult).to.be.a(Promise);
         localforage
             .ready(function () {
-                expect(localforage.config('driver')).to.be(oldDriver);
+                expect(localforage.config('driver')).to.be.eq(oldDriver);
                 return configResult;
             })
             .catch(function (error) {
-                expect(error).to.be.an(Error);
-                expect(error.message).to.be('No available storage method found.');
+                expect(error).to.be.instanceof(Error);
+                expect(error.message).to.be.eq('No available storage method found.');
                 done();
             });
     });
@@ -141,7 +141,7 @@ describe('Config API', function () {
         });
 
         localforage.ready(function () {
-            expect(localforage.config('driver')).to.be(oldDriver);
+            expect(localforage.config('driver')).to.be.eq(oldDriver);
             done();
         });
     });
@@ -154,9 +154,9 @@ describe('Config API', function () {
             version: 2.0
         });
 
-        expect(localforage.config('name')).to.be('My Cool App');
-        expect(localforage.config('storeName')).to.be('my_store_name_v1');
-        expect(localforage.config('version')).to.be(2.0);
+        expect(localforage.config('name')).to.be.eq('My Cool App');
+        expect(localforage.config('storeName')).to.be.eq('my_store_name_v1');
+        expect(localforage.config('version')).to.be.eq(2.0);
     });
 
     it('uses the config values in ' + localforage.driver(), function (done) {
@@ -184,7 +184,7 @@ describe('Config API', function () {
                         .transaction('myStoreName', 'readonly')
                         .objectStore('myStoreName')
                         .get('some key');
-                    expect(dbValue).to.be(value);
+                    expect(dbValue).to.be.eq(value);
                     done();
                 };
             } else if (localforage.driver() === localforage.WEBSQL) {
@@ -197,7 +197,7 @@ describe('Config API', function () {
                             function (t, results) {
                                 var dbValue = JSON.parse(results.rows.item(0).value);
 
-                                expect(dbValue).to.be(value);
+                                expect(dbValue).to.be.eq(value);
                                 done();
                             }
                         );
@@ -205,7 +205,7 @@ describe('Config API', function () {
             } else if (localforage.driver() === localforage.LOCALSTORAGE) {
                 var dbValue = JSON.parse(localStorage['My Cool App/myStoreName/some key']);
 
-                expect(dbValue).to.be(value);
+                expect(dbValue).to.be.eq(value);
                 done();
             }
         });
@@ -213,7 +213,7 @@ describe('Config API', function () {
 
     it("returns all values when config isn't passed arguments", function () {
         expect(localforage.config()).to.be.an('object');
-        expect(Object.keys(localforage.config()!).length).to.be(6);
+        expect(Object.keys(localforage.config()!).length).to.be.eq(6);
     });
 
     // This may go away when https://github.com/mozilla/localForage/issues/168
@@ -229,7 +229,7 @@ describe('Config API', function () {
                 return localforage.setDriver(localforage.LOCALSTORAGE);
             })
             .then(function () {
-                expect(localforage.config('name')).to.be('Mega Mozilla Dino');
+                expect(localforage.config('name')).to.be.eq('Mega Mozilla Dino');
                 done();
             });
     });
@@ -241,8 +241,8 @@ describe('Config API', function () {
 
         var error = 'Error: Database version must be a number.';
 
-        expect(configResult).to.not.be(true);
-        expect(configResult.toString()).to.be(error);
+        expect(configResult).to.not.be.eq(true);
+        expect(configResult.toString()).to.be.eq(error);
         done();
     });
 });

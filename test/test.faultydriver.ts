@@ -26,8 +26,8 @@ describe('When Driver Fails to Initialize', function () {
             it('fails to setDriver ' + driverName + ' [callback]', function (done) {
                 localforage.setDriver(driverName, function () {
                     localforage.ready(function (err) {
-                        expect(err).to.be.an(Error);
-                        expect(err.message).to.be('No available storage method found.');
+                        expect(err).to.be.instanceof(Error);
+                        expect(err.message).to.be.eq('No available storage method found.');
                         done();
                     });
                 });
@@ -40,8 +40,8 @@ describe('When Driver Fails to Initialize', function () {
                         return localforage.ready();
                     })
                     .then(null, function (err) {
-                        expect(err).to.be.an(Error);
-                        expect(err.message).to.be('No available storage method found.');
+                        expect(err).to.be.instanceof(Error);
+                        expect(err.message).to.be.eq('No available storage method found.');
                         done();
                     });
             });

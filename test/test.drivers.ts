@@ -28,8 +28,8 @@ describe('Driver API', function () {
                 var previousDriver = localforage.driver();
 
                 localforage.setDriver(localforage.LOCALSTORAGE, function () {
-                    expect(localforage.driver()).to.be(localforage.LOCALSTORAGE);
-                    expect(localforage.driver()).to.not.be(previousDriver);
+                    expect(localforage.driver()).to.be.eq(localforage.LOCALSTORAGE);
+                    expect(localforage.driver()).to.not.be.eq(previousDriver);
                     done();
                 });
             }
@@ -40,8 +40,8 @@ describe('Driver API', function () {
                 var previousDriver = localforage.driver();
 
                 localforage.setDriver(localforage.LOCALSTORAGE).then(function () {
-                    expect(localforage.driver()).to.be(localforage.LOCALSTORAGE);
-                    expect(localforage.driver()).to.not.be(previousDriver);
+                    expect(localforage.driver()).to.be.eq(localforage.LOCALSTORAGE);
+                    expect(localforage.driver()).to.not.be.eq(previousDriver);
                     done();
                 });
             }
@@ -51,42 +51,42 @@ describe('Driver API', function () {
     if (!localforage.supports(localforage.INDEXEDDB)) {
         it("can't use unsupported IndexedDB [callback]", function (done) {
             var previousDriver = localforage.driver();
-            expect(previousDriver).to.not.be(localforage.INDEXEDDB);
+            expect(previousDriver).to.not.be.eq(localforage.INDEXEDDB);
 
             // These should be rejected in component builds but aren't.
             // TODO: Look into why.
             localforage.setDriver(localforage.INDEXEDDB, null!, function () {
-                expect(localforage.driver()).to.be(previousDriver);
+                expect(localforage.driver()).to.be.eq(previousDriver);
                 done();
             });
         });
         it("can't use unsupported IndexedDB [promise]", function (done) {
             var previousDriver = localforage.driver();
-            expect(previousDriver).to.not.be(localforage.INDEXEDDB);
+            expect(previousDriver).to.not.be.eq(localforage.INDEXEDDB);
 
             // These should be rejected in component builds but aren't.
             // TODO: Look into why.
             localforage.setDriver(localforage.INDEXEDDB).then(null, function () {
-                expect(localforage.driver()).to.be(previousDriver);
+                expect(localforage.driver()).to.be.eq(previousDriver);
                 done();
             });
         });
     } else {
         it('can set already active IndexedDB [callback]', function (done) {
             var previousDriver = localforage.driver();
-            expect(previousDriver).to.be(localforage.INDEXEDDB);
+            expect(previousDriver).to.be.eq(localforage.INDEXEDDB);
 
             localforage.setDriver(localforage.INDEXEDDB, function () {
-                expect(localforage.driver()).to.be(previousDriver);
+                expect(localforage.driver()).to.be.eq(previousDriver);
                 done();
             });
         });
         it('can set already active IndexedDB [promise]', function (done) {
             var previousDriver = localforage.driver();
-            expect(previousDriver).to.be(localforage.INDEXEDDB);
+            expect(previousDriver).to.be.eq(localforage.INDEXEDDB);
 
             localforage.setDriver(localforage.INDEXEDDB).then(function () {
-                expect(localforage.driver()).to.be(previousDriver);
+                expect(localforage.driver()).to.be.eq(previousDriver);
                 done();
             });
         });
@@ -95,19 +95,19 @@ describe('Driver API', function () {
     if (!localforage.supports(localforage.LOCALSTORAGE)) {
         it("can't use unsupported localStorage [callback]", function (done) {
             var previousDriver = localforage.driver();
-            expect(previousDriver).to.not.be(localforage.LOCALSTORAGE);
+            expect(previousDriver).to.not.be.eq(localforage.LOCALSTORAGE);
 
             localforage.setDriver(localforage.LOCALSTORAGE, null!, function () {
-                expect(localforage.driver()).to.be(previousDriver);
+                expect(localforage.driver()).to.be.eq(previousDriver);
                 done();
             });
         });
         it("can't use unsupported localStorage [promise]", function (done) {
             var previousDriver = localforage.driver();
-            expect(previousDriver).to.not.be(localforage.LOCALSTORAGE);
+            expect(previousDriver).to.not.be.eq(localforage.LOCALSTORAGE);
 
             localforage.setDriver(localforage.LOCALSTORAGE).then(null, function () {
-                expect(localforage.driver()).to.be(previousDriver);
+                expect(localforage.driver()).to.be.eq(previousDriver);
                 done();
             });
         });
@@ -117,19 +117,19 @@ describe('Driver API', function () {
     ) {
         it('can set already active localStorage [callback]', function (done) {
             var previousDriver = localforage.driver();
-            expect(previousDriver).to.be(localforage.LOCALSTORAGE);
+            expect(previousDriver).to.be.eq(localforage.LOCALSTORAGE);
 
             localforage.setDriver(localforage.LOCALSTORAGE, function () {
-                expect(localforage.driver()).to.be(previousDriver);
+                expect(localforage.driver()).to.be.eq(previousDriver);
                 done();
             });
         });
         it('can set already active localStorage [promise]', function (done) {
             var previousDriver = localforage.driver();
-            expect(previousDriver).to.be(localforage.LOCALSTORAGE);
+            expect(previousDriver).to.be.eq(localforage.LOCALSTORAGE);
 
             localforage.setDriver(localforage.LOCALSTORAGE).then(function () {
-                expect(localforage.driver()).to.be(previousDriver);
+                expect(localforage.driver()).to.be.eq(previousDriver);
                 done();
             });
         });
@@ -138,19 +138,19 @@ describe('Driver API', function () {
     if (!localforage.supports(localforage.WEBSQL)) {
         it("can't use unsupported WebSQL [callback]", function (done) {
             var previousDriver = localforage.driver();
-            expect(previousDriver).to.not.be(localforage.WEBSQL);
+            expect(previousDriver).to.not.be.eq(localforage.WEBSQL);
 
             localforage.setDriver(localforage.WEBSQL, null!, function () {
-                expect(localforage.driver()).to.be(previousDriver);
+                expect(localforage.driver()).to.be.eq(previousDriver);
                 done();
             });
         });
         it("can't use unsupported WebSQL [promise]", function (done) {
             var previousDriver = localforage.driver();
-            expect(previousDriver).to.not.be(localforage.WEBSQL);
+            expect(previousDriver).to.not.be.eq(localforage.WEBSQL);
 
             localforage.setDriver(localforage.WEBSQL).then(null, function () {
-                expect(localforage.driver()).to.be(previousDriver);
+                expect(localforage.driver()).to.be.eq(previousDriver);
                 done();
             });
         });
@@ -158,10 +158,10 @@ describe('Driver API', function () {
         it('can set already active WebSQL [callback]', function (done) {
             localforage.setDriver(localforage.WEBSQL, function () {
                 var previousDriver = localforage.driver();
-                expect(previousDriver).to.be(localforage.WEBSQL);
+                expect(previousDriver).to.be.eq(localforage.WEBSQL);
 
                 localforage.setDriver(localforage.WEBSQL, function () {
-                    expect(localforage.driver()).to.be(previousDriver);
+                    expect(localforage.driver()).to.be.eq(previousDriver);
                     done();
                 });
             });
@@ -169,10 +169,10 @@ describe('Driver API', function () {
         it('can set already active WebSQL [promise]', function (done) {
             localforage.setDriver(localforage.WEBSQL).then(function () {
                 var previousDriver = localforage.driver();
-                expect(previousDriver).to.be(localforage.WEBSQL);
+                expect(previousDriver).to.be.eq(localforage.WEBSQL);
 
                 localforage.setDriver(localforage.WEBSQL).then(function () {
-                    expect(localforage.driver()).to.be(previousDriver);
+                    expect(localforage.driver()).to.be.eq(previousDriver);
                     done();
                 });
             });

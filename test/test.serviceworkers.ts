@@ -86,7 +86,7 @@ DRIVERS.forEach(function (driverName) {
         it('saves data', function (done) {
             var messageChannel = new MessageChannel();
             messageChannel.port1.onmessage = function (event) {
-                expect(event.data.body).to.be('I have been set using ' + driverName);
+                expect(event.data.body).to.be.eq('I have been set using ' + driverName);
                 done();
             };
 

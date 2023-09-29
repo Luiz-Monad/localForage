@@ -21,6 +21,8 @@ declare global {
 
         mochaResults: any;
         oninstall: typeof onmessage;
+
+        requiretest: boolean | undefined;
     }
 
     interface MessageEvent {

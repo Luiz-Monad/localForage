@@ -41,16 +41,16 @@ describe('localForage', function () {
                             (localforage.supports(localforage.WEBSQL) && localforage.WEBSQL) ||
                             (localforage.supports(localforage.LOCALSTORAGE) &&
                                 localforage.LOCALSTORAGE);
-                        expect(localforage.driver()).to.be(appropriateDriver1);
+                        expect(localforage.driver()).to.be.eq(appropriateDriver1);
                     } else {
-                        expect(localforage.driver()).to.be(appropriateDriver);
+                        expect(localforage.driver()).to.be.eq(appropriateDriver);
                     }
                     done();
                 },
                 function (error) {
-                    expect(error).to.be.an(Error);
-                    expect(error.message).to.be('No available storage method found.');
-                    expect(localforage.driver()).to.be(null);
+                    expect(error).to.be.instanceof(Error);
+                    expect(error.message).to.be.eq('No available storage method found.');
+                    expect(localforage.driver()).to.be.eq(null);
                     done();
                 }
             );
@@ -59,16 +59,16 @@ describe('localForage', function () {
 
     it('errors when a requested driver is not found [callback]', function (done) {
         localforage.getDriver('UnknownDriver', null!, function (error) {
-            expect(error).to.be.an(Error);
-            expect(error.message).to.be('Driver not found.');
+            expect(error).to.be.instanceof(Error);
+            expect(error.message).to.be.eq('Driver not found.');
             done();
         });
     });
 
     it('errors when a requested driver is not found [promise]', function (done) {
         localforage.getDriver('UnknownDriver').then(null, function (error) {
-            expect(error).to.be.an(Error);
-            expect(error.message).to.be('Driver not found.');
+            expect(error).to.be.instanceof(Error);
+            expect(error.message).to.be.eq('Driver not found.');
             done();
         });
     });
@@ -82,8 +82,8 @@ describe('localForage', function () {
 
     it('retrieves the serializer [promise]', function (done) {
         var serializerPromise = localforage.getSerializer();
-        expect(serializerPromise).to.be.an('object');
-        expect(serializerPromise.then).to.be.a('function');
+        expect(serializerPromise).to.be.instanceOf(Promise);
+        expect(serializerPromise.then).to.be.instanceOf(Function);
 
         serializerPromise.then(function (serializer) {
             expect(serializer).to.be.an('object');
@@ -100,8 +100,8 @@ describe('localForage', function () {
         } as any as string[];
 
         localforage.setDriver(driverPreferedOrder).then(null, function (error) {
-            expect(error).to.be.an(Error);
-            expect(error.message).to.be('No available storage method found.');
+            expect(error).to.be.instanceof(Error);
+            expect(error.message).to.be.eq('No available storage method found.');
             done();
         });
     });
@@ -144,7 +144,7 @@ describe('localForage', function () {
                 return localforage.ready();
             })
             .then(function () {
-                expect(localforage.driver()).to.be(appropriateDriver);
+                expect(localforage.driver()).to.be.eq(appropriateDriver);
                 done();
             });
     });
@@ -178,7 +178,7 @@ describe('localForage', function () {
                 localforage2.ready(),
                 localforage3.ready()
             ]).then(function () {
-                expect(console.infoLogs.length).to.be(oldLogCount);
+                expect(console.infoLogs.length).to.be.eq(oldLogCount);
             });
         });
     });
@@ -247,7 +247,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         it('has an empty length by default', function (done) {
             localforage.length(function (err, length) {
-                expect(length).to.be(0);
+                expect(length).to.be.eq(0);
                 done();
             });
         });
@@ -277,7 +277,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 it('not check for non Blob', function (done) {
                     localforage.setItem('key', {}).then(
                         function () {
-                            expect(called).to.be(1);
+                            expect(called).to.be.eq(1);
                             done();
                         },
                         function (error) {
@@ -301,7 +301,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 it('check for Blob once', function (done) {
                     localforage.setItem('key', blob).then(
                         function () {
-                            expect(called).to.be(1);
+                            expect(called).to.be.eq(1);
                             done();
                         },
                         function (error) {
@@ -336,7 +336,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 it('retrieves an item from the storage', function (done) {
                     localforage.getItem('key').then(
                         function (value) {
-                            expect(value).to.be('value1');
+                            expect(value).to.be.eq('value1');
                             done();
                         },
                         function (error) {
@@ -369,7 +369,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         })
                         .then(
                             function (value) {
-                                expect(value).to.be('value1b');
+                                expect(value).to.be.eq('value1b');
                                 done();
                             },
                             function (error) {
@@ -449,7 +449,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 it('should retry setItem', function (done) {
                     localforage.setItem('key', {}).then(
                         function () {
-                            expect(called).to.be(1);
+                            expect(called).to.be.eq(1);
                             done();
                         },
                         function (error) {
@@ -466,16 +466,16 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         it('should iterate [callback]', function (done) {
             localforage.setItem('officeX', 'InitechX', function (err, setValue) {
-                expect(setValue).to.be('InitechX');
+                expect(setValue).to.be.eq('InitechX');
 
                 localforage.getItem('officeX', function (err, value) {
-                    expect(value).to.be(setValue);
+                    expect(value).to.be.eq(setValue);
 
                     localforage.setItem('officeY', 'InitechY', function (err, setValue) {
-                        expect(setValue).to.be('InitechY');
+                        expect(setValue).to.be.eq('InitechY');
 
                         localforage.getItem('officeY', function (err, value) {
-                            expect(value).to.be(setValue);
+                            expect(value).to.be.eq(setValue);
 
                             var accumulator: any = {};
                             var iterationNumbers: number[] = [];
@@ -487,8 +487,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                                 },
                                 function () {
                                     try {
-                                        expect(accumulator.officeX).to.be('InitechX');
-                                        expect(accumulator.officeY).to.be('InitechY');
+                                        expect(accumulator.officeX).to.be.eq('InitechX');
+                                        expect(accumulator.officeY).to.be.eq('InitechY');
                                         expect(iterationNumbers).to.eql([1, 2]);
                                         done();
                                     } catch (e) {
@@ -509,19 +509,19 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             return localforage
                 .setItem('officeX', 'InitechX')
                 .then(function (setValue) {
-                    expect(setValue).to.be('InitechX');
+                    expect(setValue).to.be.eq('InitechX');
                     return localforage.getItem('officeX');
                 })
                 .then(function (value) {
-                    expect(value).to.be('InitechX');
+                    expect(value).to.be.eq('InitechX');
                     return localforage.setItem('officeY', 'InitechY');
                 })
                 .then(function (setValue) {
-                    expect(setValue).to.be('InitechY');
+                    expect(setValue).to.be.eq('InitechY');
                     return localforage.getItem('officeY');
                 })
                 .then(function (value) {
-                    expect(value).to.be('InitechY');
+                    expect(value).to.be.eq('InitechY');
 
                     return localforage.iterate(function (value, key, iterationNumber) {
                         accumulator[key] = value;
@@ -529,8 +529,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     });
                 })
                 .then(function () {
-                    expect(accumulator.officeX).to.be('InitechX');
-                    expect(accumulator.officeY).to.be('InitechY');
+                    expect(accumulator.officeX).to.be.eq('InitechX');
+                    expect(accumulator.officeY).to.be.eq('InitechY');
                     expect(iterationNumbers).to.eql([1, 2]);
                     return;
                 });
@@ -540,16 +540,16 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             var breakCondition = 'Some value!';
 
             localforage.setItem('officeX', 'InitechX', function (err, setValue) {
-                expect(setValue).to.be('InitechX');
+                expect(setValue).to.be.eq('InitechX');
 
                 localforage.getItem('officeX', function (err, value) {
-                    expect(value).to.be(setValue);
+                    expect(value).to.be.eq(setValue);
 
                     localforage.setItem('officeY', 'InitechY', function (err, setValue) {
-                        expect(setValue).to.be('InitechY');
+                        expect(setValue).to.be.eq('InitechY');
 
                         localforage.getItem('officeY', function (err, value) {
-                            expect(value).to.be(setValue);
+                            expect(value).to.be.eq(setValue);
 
                             // Loop is broken within first iteration.
                             localforage.iterate(
@@ -560,7 +560,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                                 function (err, loopResult) {
                                     // The value that broken the cycle is returned
                                     // as a result.
-                                    expect(loopResult).to.be(breakCondition);
+                                    expect(loopResult).to.be.eq(breakCondition);
 
                                     done();
                                 }
@@ -577,25 +577,25 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage
                 .setItem('officeX', 'InitechX')
                 .then(function (setValue) {
-                    expect(setValue).to.be('InitechX');
+                    expect(setValue).to.be.eq('InitechX');
                     return localforage.getItem('officeX');
                 })
                 .then(function (value) {
-                    expect(value).to.be('InitechX');
+                    expect(value).to.be.eq('InitechX');
                     return localforage.setItem('officeY', 'InitechY');
                 })
                 .then(function (setValue) {
-                    expect(setValue).to.be('InitechY');
+                    expect(setValue).to.be.eq('InitechY');
                     return localforage.getItem('officeY');
                 })
                 .then(function (value) {
-                    expect(value).to.be('InitechY');
+                    expect(value).to.be.eq('InitechY');
                     return localforage.iterate(function () {
                         return breakCondition;
                     });
                 })
                 .then(function (result) {
-                    expect(result).to.be(breakCondition);
+                    expect(result).to.be.eq(breakCondition);
                     done();
                 });
         });
@@ -617,8 +617,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
                     localforage.iterate(
                         function (value, key, iterationNumber) {
-                            expect(key).to.not.be('local');
-                            expect(value).to.not.be('forage');
+                            expect(key).to.not.be.eq('local');
+                            expect(value).to.not.be.eq('forage');
                             numberOfItems++;
                             iterationNumberConcat += iterationNumber;
                         },
@@ -626,11 +626,11 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             if (!err) {
                                 // While there are 4 items in localStorage,
                                 // only 2 items were set using localForage.
-                                expect(numberOfItems).to.be(2);
+                                expect(numberOfItems).to.be.eq(2);
 
                                 // Only 2 items were set using localForage,
                                 // so we should get '12' and not '1234'
-                                expect(iterationNumberConcat).to.be('12');
+                                expect(iterationNumberConcat).to.be.eq('12');
 
                                 done();
                             }
@@ -644,7 +644,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage.setItem('hello', 'Hello World !', function () {
                 localforage.clear(function () {
                     localforage.getItem('hello', function (secondValue) {
-                        expect(secondValue).to.be(null);
+                        expect(secondValue).to.be.eq(null);
                         done();
                     });
                 });
@@ -660,7 +660,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage.getItem('hello');
                 })
                 .then(function (secondValue) {
-                    expect(secondValue).to.be(null);
+                    expect(secondValue).to.be.eq(null);
                     done();
                 });
         });
@@ -671,24 +671,24 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         // https://github.com/mozilla/localForage/pull/42
         it('returns null for undefined key [callback]', function (done) {
             localforage.getItem('key', function (err, value) {
-                expect(value).to.be(null);
+                expect(value).to.be.eq(null);
                 done();
             });
         });
 
         it('returns null for undefined key [promise]', function (done) {
             localforage.getItem('key').then(function (value) {
-                expect(value).to.be(null);
+                expect(value).to.be.eq(null);
                 done();
             });
         });
 
         it('saves an item [callback]', function (done) {
             localforage.setItem('office', 'Initech', function (err, setValue) {
-                expect(setValue).to.be('Initech');
+                expect(setValue).to.be.eq('Initech');
 
                 localforage.getItem('office', function (err, value) {
-                    expect(value).to.be(setValue);
+                    expect(value).to.be.eq(setValue);
                     done();
                 });
             });
@@ -698,27 +698,27 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage
                 .setItem('office', 'Initech')
                 .then(function (setValue) {
-                    expect(setValue).to.be('Initech');
+                    expect(setValue).to.be.eq('Initech');
 
                     return localforage.getItem('office');
                 })
                 .then(function (value) {
-                    expect(value).to.be('Initech');
+                    expect(value).to.be.eq('Initech');
                     done();
                 });
         });
 
         it('saves an item over an existing key [callback]', function (done) {
             localforage.setItem('4th floor', 'Mozilla', function (err, setValue) {
-                expect(setValue).to.be('Mozilla');
+                expect(setValue).to.be.eq('Mozilla');
 
                 localforage.setItem('4th floor', 'Quora', function (err, newValue) {
-                    expect(newValue).to.not.be(setValue);
-                    expect(newValue).to.be('Quora');
+                    expect(newValue).to.not.be.eq(setValue);
+                    expect(newValue).to.be.eq('Quora');
 
                     localforage.getItem('4th floor', function (err, value) {
-                        expect(value).to.not.be(setValue);
-                        expect(value).to.be(newValue);
+                        expect(value).to.not.be.eq(setValue);
+                        expect(value).to.be.eq(newValue);
                         done();
                     });
                 });
@@ -728,33 +728,33 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage
                 .setItem('4e', 'Mozilla')
                 .then(function (setValue) {
-                    expect(setValue).to.be('Mozilla');
+                    expect(setValue).to.be.eq('Mozilla');
 
                     return localforage.setItem('4e', 'Quora');
                 })
                 .then(function (newValue) {
-                    expect(newValue).to.not.be('Mozilla');
-                    expect(newValue).to.be('Quora');
+                    expect(newValue).to.not.be.eq('Mozilla');
+                    expect(newValue).to.be.eq('Quora');
 
                     return localforage.getItem('4e');
                 })
                 .then(function (value) {
-                    expect(value).to.not.be('Mozilla');
-                    expect(value).to.be('Quora');
+                    expect(value).to.not.be.eq('Mozilla');
+                    expect(value).to.be.eq('Quora');
                     done();
                 });
         });
 
         it('returns null when saving undefined [callback]', function (done) {
             localforage.setItem('undef', undefined, function (err, setValue) {
-                expect(setValue).to.be(null);
+                expect(setValue).to.be.eq(null);
 
                 done();
             });
         });
         it('returns null when saving undefined [promise]', function (done) {
             localforage.setItem('undef', undefined).then(function (setValue) {
-                expect(setValue).to.be(null);
+                expect(setValue).to.be.eq(null);
 
                 done();
             });
@@ -762,14 +762,14 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         it('returns null when saving null [callback]', function (done) {
             localforage.setItem('null', null, function (err, setValue) {
-                expect(setValue).to.be(null);
+                expect(setValue).to.be.eq(null);
 
                 done();
             });
         });
         it('returns null when saving null [promise]', function (done) {
             localforage.setItem('null', null).then(function (setValue) {
-                expect(setValue).to.be(null);
+                expect(setValue).to.be.eq(null);
 
                 done();
             });
@@ -777,14 +777,14 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         it('returns null for a non-existant key [callback]', function (done) {
             localforage.getItem('undef', function (err, value) {
-                expect(value).to.be(null);
+                expect(value).to.be.eq(null);
 
                 done();
             });
         });
         it('returns null for a non-existant key [promise]', function (done) {
             localforage.getItem('undef').then(function (value) {
-                expect(value).to.be(null);
+                expect(value).to.be.eq(null);
 
                 done();
             });
@@ -802,14 +802,14 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         // localStorage fallback. Maybe in the future we won't care...
         it('returns null from an undefined key [callback]', function (done) {
             localforage.key(0, function (err, key) {
-                expect(key).to.be(null);
+                expect(key).to.be.eq(null);
 
                 done();
             });
         });
         it('returns null from an undefined key [promise]', function (done) {
             localforage.key(0).then(function (key) {
-                expect(key).to.be(null);
+                expect(key).to.be.eq(null);
 
                 done();
             });
@@ -818,7 +818,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         it('returns key name [callback]', function (done) {
             localforage.setItem('office', 'Initech').then(function () {
                 localforage.key(0, function (err, key) {
-                    expect(key).to.be('office');
+                    expect(key).to.be.eq('office');
 
                     done();
                 });
@@ -831,7 +831,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage.key(0);
                 })
                 .then(function (key) {
-                    expect(key).to.be('office');
+                    expect(key).to.be.eq('office');
 
                     done();
                 });
@@ -842,10 +842,10 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 localforage.setItem('otherOffice', 'Initrode', function () {
                     localforage.removeItem('office', function () {
                         localforage.getItem('office', function (err, emptyValue) {
-                            expect(emptyValue).to.be(null);
+                            expect(emptyValue).to.be.eq(null);
 
                             localforage.getItem('otherOffice', function (err, value) {
-                                expect(value).to.be('Initrode');
+                                expect(value).to.be.eq('Initrode');
 
                                 done();
                             });
@@ -867,12 +867,12 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage.getItem('office');
                 })
                 .then(function (emptyValue) {
-                    expect(emptyValue).to.be(null);
+                    expect(emptyValue).to.be.eq(null);
 
                     return localforage.getItem('otherOffice');
                 })
                 .then(function (value) {
-                    expect(value).to.be('Initrode');
+                    expect(value).to.be.eq('Initrode');
 
                     done();
                 });
@@ -882,14 +882,14 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage.setItem('office', 'Initech', function () {
                 localforage.setItem('otherOffice', 'Initrode', function () {
                     localforage.length(function (err, length) {
-                        expect(length).to.be(2);
+                        expect(length).to.be.eq(2);
 
                         localforage.clear(function () {
                             localforage.getItem('office', function (err, value) {
-                                expect(value).to.be(null);
+                                expect(value).to.be.eq(null);
 
                                 localforage.length(function (err, length) {
-                                    expect(length).to.be(0);
+                                    expect(length).to.be.eq(0);
 
                                     done();
                                 });
@@ -909,7 +909,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage.length();
                 })
                 .then(function (length) {
-                    expect(length).to.be(2);
+                    expect(length).to.be.eq(2);
 
                     return localforage.clear();
                 })
@@ -917,12 +917,12 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage.getItem('office');
                 })
                 .then(function (value) {
-                    expect(value).to.be(null);
+                    expect(value).to.be.eq(null);
 
                     return localforage.length();
                 })
                 .then(function (length) {
-                    expect(length).to.be(0);
+                    expect(length).to.be.eq(0);
 
                     done();
                 });
@@ -938,7 +938,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         return localforage.clear();
                     })
                     .then(function () {
-                        expect(localStorage.getItem('local')).to.be('forage');
+                        expect(localStorage.getItem('local')).to.be.eq('forage');
 
                         localStorage.clear();
 
@@ -973,7 +973,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         return localforage.length();
                     })
                     .then(function (length) {
-                        expect(length).to.be(1);
+                        expect(length).to.be.eq(1);
 
                         localStorage.clear();
 
@@ -984,10 +984,10 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         it('has a length after saving an item [callback]', function (done) {
             localforage.length(function (err, length) {
-                expect(length).to.be(0);
+                expect(length).to.be.eq(0);
                 localforage.setItem('rapper', 'Black Thought', function () {
                     localforage.length(function (err, length) {
-                        expect(length).to.be(1);
+                        expect(length).to.be.eq(1);
 
                         done();
                     });
@@ -998,7 +998,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage
                 .length()
                 .then(function (length) {
-                    expect(length).to.be(0);
+                    expect(length).to.be.eq(0);
 
                     return localforage.setItem('lame rapper', 'Vanilla Ice');
                 })
@@ -1006,7 +1006,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage.length();
                 })
                 .then(function (length) {
-                    expect(length).to.be(1);
+                    expect(length).to.be.eq(1);
 
                     done();
                 });
@@ -1018,12 +1018,12 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage
                 .setItem(undefined!, 'goodness!')
                 .then(function (value) {
-                    expect(value).to.be('goodness!');
+                    expect(value).to.be.eq('goodness!');
 
                     return localforage.getItem(undefined!);
                 })
                 .then(function (value) {
-                    expect(value).to.be('goodness!');
+                    expect(value).to.be.eq('goodness!');
 
                     return localforage.removeItem(undefined!);
                 })
@@ -1031,7 +1031,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage.length();
                 })
                 .then(function (length) {
-                    expect(length).to.be(0);
+                    expect(length).to.be.eq(0);
                     done();
                 });
         });
@@ -1040,12 +1040,12 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage
                 .setItem(null!, 'goodness!')
                 .then(function (value) {
-                    expect(value).to.be('goodness!');
+                    expect(value).to.be.eq('goodness!');
 
                     return localforage.getItem(null!);
                 })
                 .then(function (value) {
-                    expect(value).to.be('goodness!');
+                    expect(value).to.be.eq('goodness!');
 
                     return localforage.removeItem(null!);
                 })
@@ -1053,7 +1053,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage.length();
                 })
                 .then(function (length) {
-                    expect(length).to.be(0);
+                    expect(length).to.be.eq(0);
                     done();
                 });
         });
@@ -1062,12 +1062,12 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             localforage
                 .setItem(537.35737 as any, 'goodness!')
                 .then(function (value) {
-                    expect(value).to.be('goodness!');
+                    expect(value).to.be.eq('goodness!');
 
                     return localforage.getItem(537.35737 as any);
                 })
                 .then(function (value) {
-                    expect(value).to.be('goodness!');
+                    expect(value).to.be.eq('goodness!');
 
                     return localforage.removeItem(537.35737 as any);
                 })
@@ -1075,29 +1075,29 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage.length();
                 })
                 .then(function (length) {
-                    expect(length).to.be(0);
+                    expect(length).to.be.eq(0);
                     done();
                 });
         });
 
         it('is retrieved by getDriver [callback]', function (done) {
             localforage.getDriver(driverName, function (err, driver) {
-                expect(typeof driver).to.be('object');
+                expect(typeof driver).to.be.eq('object');
                 driverApiMethods.concat('_initStorage').forEach(function (methodName) {
-                    expect(typeof driver[methodName as keyof typeof driver]).to.be('function');
+                    expect(typeof driver[methodName as keyof typeof driver]).to.be.eq('function');
                 });
-                expect(driver._driver).to.be(driverName);
+                expect(driver._driver).to.be.eq(driverName);
                 done();
             });
         });
 
         it('is retrieved by getDriver [promise]', function (done) {
             localforage.getDriver(driverName).then(function (driver) {
-                expect(typeof driver).to.be('object');
+                expect(typeof driver).to.be.eq('object');
                 driverApiMethods.concat('_initStorage').forEach(function (methodName) {
-                    expect(typeof driver[methodName as keyof typeof driver]).to.be('function');
+                    expect(typeof driver[methodName as keyof typeof driver]).to.be.eq('function');
                 });
-                expect(driver._driver).to.be(driverName);
+                expect(driver._driver).to.be.eq(driverName);
                 done();
             });
         });
@@ -1186,16 +1186,16 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 .then(function () {
                     return Promise.all([
                         localforage.getItem('key2').then(function (value) {
-                            expect(value).to.be(null);
+                            expect(value).to.be.eq(null);
                         }),
                         localforage2.getItem('key1').then(function (value) {
-                            expect(value).to.be(null);
+                            expect(value).to.be.eq(null);
                         }),
                         localforage2.getItem('key3').then(function (value) {
-                            expect(value).to.be(null);
+                            expect(value).to.be.eq(null);
                         }),
                         localforage3.getItem('key2').then(function (value) {
-                            expect(value).to.be(null);
+                            expect(value).to.be.eq(null);
                         })
                     ]);
                 })
@@ -1218,13 +1218,13 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 .then(function () {
                     return Promise.all([
                         localforage.getItem('key').then(function (value) {
-                            expect(value).to.be('value1');
+                            expect(value).to.be.eq('value1');
                         }),
                         localforage2.getItem('key').then(function (value) {
-                            expect(value).to.be('value2');
+                            expect(value).to.be.eq('value2');
                         }),
                         localforage3.getItem('key').then(function (value) {
-                            expect(value).to.be('value3');
+                            expect(value).to.be.eq('value3');
                         })
                     ]);
                 })
@@ -1279,7 +1279,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage1.getItem('key');
                 })
                 .then(function (value) {
-                    expect(value).to.be('value1');
+                    expect(value).to.be.eq('value1');
                 });
 
             var promise2 = localforage2
@@ -1288,7 +1288,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage2.getItem('key');
                 })
                 .then(function (value) {
-                    expect(value).to.be('value2');
+                    expect(value).to.be.eq('value2');
                 });
 
             var promise3 = localforage3
@@ -1297,7 +1297,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage3.getItem('key');
                 })
                 .then(function (value) {
-                    expect(value).to.be('value3');
+                    expect(value).to.be.eq('value3');
                 });
 
             return Promise.all([promise1, promise2, promise3]);
@@ -1342,7 +1342,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                                     return localforage1.getItem('key1');
                                 })
                                 .then(function (value) {
-                                    expect(value).to.be('value1');
+                                    expect(value).to.be.eq('value1');
                                 });
                         })
                         .then(function () {
@@ -1352,7 +1352,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                                     return localforage2.getItem('key2');
                                 })
                                 .then(function (value) {
-                                    expect(value).to.be('value2');
+                                    expect(value).to.be.eq('value2');
                                 });
                         })
                         .then(function () {
@@ -1362,7 +1362,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                                     return localforage3.getItem('key3');
                                 })
                                 .then(function (value) {
-                                    expect(value).to.be('value3');
+                                    expect(value).to.be.eq('value3');
                                 });
                         });
                 });
@@ -1414,7 +1414,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             return localforage1.getItem('key1');
                         })
                         .then(function (value) {
-                            expect(value).to.be('value1');
+                            expect(value).to.be.eq('value1');
                         });
 
                     var promise2 = localforage2
@@ -1423,7 +1423,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             return localforage2.getItem('key2');
                         })
                         .then(function (value) {
-                            expect(value).to.be('value2');
+                            expect(value).to.be.eq('value2');
                         });
 
                     var promise3 = localforage3
@@ -1432,7 +1432,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             return localforage3.getItem('key3');
                         })
                         .then(function (value) {
-                            expect(value).to.be('value3');
+                            expect(value).to.be.eq('value3');
                         });
 
                     var promise4 = localforage3b
@@ -1441,7 +1441,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             return localforage3.getItem('key3');
                         })
                         .then(function (value) {
-                            expect(value).to.be('value3');
+                            expect(value).to.be.eq('value3');
                         });
 
                     return Promise.all([promise1, promise2, promise3, promise4]);
@@ -1479,7 +1479,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage1.getItem('key1');
                 })
                 .then(function (value) {
-                    expect(value).to.be('value1');
+                    expect(value).to.be.eq('value1');
                 });
 
             var promise2 = localforage2
@@ -1488,7 +1488,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage2.getItem('key2');
                 })
                 .then(function (value) {
-                    expect(value).to.be('value2');
+                    expect(value).to.be.eq('value2');
                 });
 
             var promise3 = localforage3
@@ -1497,7 +1497,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage3.getItem('key3');
                 })
                 .then(function (value) {
-                    expect(value).to.be('value3');
+                    expect(value).to.be.eq('value3');
                 });
 
             var promise4 = localforage3b
@@ -1506,7 +1506,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage3.getItem('key3');
                 })
                 .then(function (value) {
-                    expect(value).to.be('value3');
+                    expect(value).to.be.eq('value3');
                 });
 
             return Promise.all([promise1, promise2, promise3, promise4]);
@@ -1540,7 +1540,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         it('is used according to setDriver preference order', function (done) {
             localforage.setDriver(driverPreferedOrder).then(function () {
-                expect(localforage.driver()).to.be(driverName);
+                expect(localforage.driver()).to.be.eq(driverName);
                 done();
             });
         });
@@ -1564,14 +1564,14 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         it('resolves the promise of getItem()', function (done) {
             localforage.getItem('key', testObj.throwFunc).then(function () {
-                expect(testObj.throwFuncCalls).to.be(1);
+                expect(testObj.throwFuncCalls).to.be.eq(1);
                 done();
             });
         });
 
         it('resolves the promise of setItem()', function (done) {
             localforage.setItem('key', 'test', testObj.throwFunc).then(function () {
-                expect(testObj.throwFuncCalls).to.be(1);
+                expect(testObj.throwFuncCalls).to.be.eq(1);
                 done();
             });
         });
@@ -1585,28 +1585,28 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         it('resolves the promise of length()', function (done) {
             localforage.length(testObj.throwFunc).then(function () {
-                expect(testObj.throwFuncCalls).to.be(1);
+                expect(testObj.throwFuncCalls).to.be.eq(1);
                 done();
             });
         });
 
         it('resolves the promise of removeItem()', function (done) {
             localforage.removeItem('key', testObj.throwFunc).then(function () {
-                expect(testObj.throwFuncCalls).to.be(1);
+                expect(testObj.throwFuncCalls).to.be.eq(1);
                 done();
             });
         });
 
         it('resolves the promise of key()', function (done) {
             localforage.key(0, testObj.throwFunc).then(function () {
-                expect(testObj.throwFuncCalls).to.be(1);
+                expect(testObj.throwFuncCalls).to.be.eq(1);
                 done();
             });
         });
 
         it('resolves the promise of keys()', function (done) {
             localforage.keys(testObj.throwFunc).then(function () {
-                expect(testObj.throwFuncCalls).to.be(1);
+                expect(testObj.throwFuncCalls).to.be.eq(1);
                 done();
             });
         });
@@ -1662,11 +1662,11 @@ DRIVERS.forEach(function (driverName) {
             // we have to wait till an async method returns
             localforage2.length().then(
                 function () {
-                    expect(localforage2.driver()).to.be(driverName);
+                    expect(localforage2.driver()).to.be.eq(driverName);
                     done();
                 },
                 function () {
-                    expect(localforage2.driver()).to.be(null);
+                    expect(localforage2.driver()).to.be.eq(null);
                     done();
                 }
             );
@@ -1794,7 +1794,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             reject();
                             return;
                         }
-                        expect(db.objectStoreNames.contains(options.storeName)).to.be(false);
+                        expect(db.objectStoreNames.contains(options.storeName)).to.be.eq(false);
                         db.close();
                         resolve();
                     };
@@ -1806,7 +1806,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             "SELECT name FROM sqlite_master WHERE type='table' AND name = ?",
                             [options.storeName],
                             function (t, results) {
-                                expect(results.rows.length).to.be(0);
+                                expect(results.rows.length).to.be.eq(0);
                                 resolve();
                             },
                             function () {
@@ -1835,7 +1835,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             break;
                         }
                     }
-                    expect(foundLocalStorageKey).to.be(false);
+                    expect(foundLocalStorageKey).to.be.eq(false);
                     resolve();
                 } else {
                     throw new Error('Not Implemented Exception');
@@ -1849,7 +1849,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return nodropInstance.getItem('key1');
                 })
                 .then(function (value) {
-                    expect(value).to.be('value0');
+                    expect(value).to.be.eq('value0');
                 });
         });
 
@@ -1859,11 +1859,11 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return dropStoreInstance1.getItem('key1');
                 })
                 .then(function (value) {
-                    expect(value).to.be(null);
+                    expect(value).to.be.eq(null);
                     return dropStoreInstance1.length();
                 })
                 .then(function (length) {
-                    expect(length).to.be(0);
+                    expect(length).to.be.eq(0);
                 })
                 .then(function () {
                     return dropStoreInstance1.setItem('key1', 'newvalue2');
@@ -1872,7 +1872,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return dropStoreInstance1.getItem('key1');
                 })
                 .then(function (value) {
-                    expect(value).to.be('newvalue2');
+                    expect(value).to.be.eq('newvalue2');
                 });
         });
 
@@ -1886,7 +1886,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return nodropInstance.getItem('key1');
                 })
                 .then(function (value) {
-                    expect(value).to.be('value0');
+                    expect(value).to.be.eq('value0');
                 });
         });
 
@@ -1918,7 +1918,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             reject();
                             return;
                         }
-                        expect(db.objectStoreNames.length).to.be(0);
+                        expect(db.objectStoreNames.length).to.be.eq(0);
                         db.close();
                         resolve();
                     };
@@ -1936,7 +1936,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                                         return obj && obj.name && obj.name.indexOf('__') !== 0;
                                     }
                                 );
-                                expect(stores.length).to.be(0);
+                                expect(stores.length).to.be.eq(0);
                                 resolve();
                             },
                             function () {
@@ -1957,7 +1957,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             break;
                         }
                     }
-                    expect(foundLocalStorageKey).to.be(false);
+                    expect(foundLocalStorageKey).to.be.eq(false);
                     resolve();
                 } else {
                     throw new Error('Not Implemented Exception');
@@ -1974,7 +1974,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return dropDbInstance.getItem('key1');
                 })
                 .then(function (value) {
-                    expect(value).to.be(null);
+                    expect(value).to.be.eq(null);
                 });
         });
 
