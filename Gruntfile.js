@@ -137,7 +137,7 @@ module.exports = exports = function (grunt) {
             test_dist: {
                 expand: true,
                 cwd: 'dist/',
-                src: 'localforage*',
+                src: 'localforage*.js',
                 dest: 'build/dist/',
                 filter: 'isFile'
             },
@@ -146,6 +146,13 @@ module.exports = exports = function (grunt) {
                 cwd: 'node_modules/',
                 src: ['mocha/mocha.css'],
                 dest: 'build/bower_components/',
+                filter: 'isFile'
+            },
+            types: {
+                expand: true,
+                cwd: 'build/',
+                src: '**/*.d.ts',
+                dest: 'dist/',
                 filter: 'isFile'
             }
         },
@@ -317,12 +324,16 @@ module.exports = exports = function (grunt) {
         'browserify:no_promises',
         'concat',
         'es3_safe_recast',
-        'uglify'
+        'uglify',
+        'copy:types'
     ]);
     grunt.registerTask('build:test', [
         'ts:test',
         'webpack:test',
-        'copy',
+        'copy:html',
+        'copy:pics',
+        'copy:test_dist',
+        'copy:test_deps',
         'curl',
         'webpack:test_deps',
         'browserify:package_bundling_test',
@@ -334,7 +345,7 @@ module.exports = exports = function (grunt) {
     const testTasks = [
         'build',
         'babel',
-        'eslint',
+        'eslint:test',
         'ts:typing_tests',
         'build:test',
         'connect:test',

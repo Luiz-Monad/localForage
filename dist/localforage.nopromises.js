@@ -95,7 +95,6 @@ if (typeof Promise === 'undefined') {
   // a global promise object, but it would throw anyway later.
   _dereq_('lie/polyfill');
 }
-var Promise$1 = Promise;
 function executeCallback(promise, callback) {
   if (callback) {
     promise.then(function (result) {
@@ -126,9 +125,6 @@ function getCallback() {
     return arguments[arguments.length - 1];
   }
 }
-
-// Some code originally from async_storage.js in
-// [Gaia](https://github.com/mozilla-b2g/gaia).
 var DETECT_BLOB_SUPPORT_STORE = 'local-forage-detect-blob-support';
 var supportsBlobs;
 var dbContexts = {};
@@ -165,9 +161,9 @@ function _binStringToArrayBuffer(bin) {
 // Code borrowed from PouchDB. See:
 // https://github.com/pouchdb/pouchdb/blob/master/packages/node_modules/pouchdb-adapter-idb/src/blobSupport.js
 //
-function _checkBlobSupportWithoutCaching(idb) {
-  return new Promise$1(function (resolve) {
-    var txn = idb.transaction(DETECT_BLOB_SUPPORT_STORE, READ_WRITE);
+function _checkBlobSupportWithoutCaching(idb$$1) {
+  return new Promise(function (resolve) {
+    var txn = idb$$1.transaction(DETECT_BLOB_SUPPORT_STORE, READ_WRITE);
     var blob = createBlob(['']);
     txn.objectStore(DETECT_BLOB_SUPPORT_STORE).put(blob, 'key');
     txn.onabort = function (e) {
@@ -189,11 +185,11 @@ function _checkBlobSupportWithoutCaching(idb) {
   });
 }
 
-function _checkBlobSupport(idb) {
+function _checkBlobSupport(idb$$1) {
   if (typeof supportsBlobs === 'boolean') {
-    return Promise$1.resolve(supportsBlobs);
+    return Promise.resolve(supportsBlobs);
   }
-  return _checkBlobSupportWithoutCaching(idb).then(function (value) {
+  return _checkBlobSupportWithoutCaching(idb$$1).then(function (value) {
     supportsBlobs = value;
     return supportsBlobs;
   });
@@ -202,7 +198,7 @@ function _deferReadiness(dbInfo) {
   var dbContext = dbContexts[dbInfo.name];
   // Create a deferred object representing the current database operation.
   var deferredOperation = {};
-  deferredOperation.promise = new Promise$1(function (resolve, reject) {
+  deferredOperation.promise = new Promise(function (resolve, reject) {
     deferredOperation.resolve = resolve;
     deferredOperation.reject = reject;
   });
@@ -240,7 +236,7 @@ function _rejectReadiness(dbInfo, err) {
   }
 }
 function _getConnection(dbInfo, upgradeNeeded) {
-  return new Promise$1(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     dbContexts[dbInfo.name] = dbContexts[dbInfo.name] || createDbContext();
     if (dbInfo.db) {
       if (upgradeNeeded) {
@@ -330,7 +326,7 @@ function _isUpgradeNeeded(dbInfo, defaultVersion) {
 }
 // encode a blob for indexeddb engines that don't support blobs
 function _encodeBlob(blob) {
-  return new Promise$1(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var reader = new FileReader();
     reader.onerror = reject;
     reader.onloadend = function (e) {
@@ -416,7 +412,7 @@ function createTransaction(dbInfo, mode, callback, retries) {
     callback(null, tx);
   } catch (err) {
     if (retries > 0 && (!dbInfo.db || err.name === 'InvalidStateError' || err.name === 'NotFoundError')) {
-      return Promise$1.resolve().then(function () {
+      return Promise.resolve().then(function () {
         if (!dbInfo.db || err.name === 'NotFoundError' && !dbInfo.db.objectStoreNames.contains(dbInfo.storeName) && dbInfo.version <= dbInfo.db.version) {
           // increase the db version, to create the new ObjectStore
           if (dbInfo.db) {
@@ -478,7 +474,7 @@ function _initStorage(options) {
   function ignoreErrors() {
     // Don't handle errors here,
     // just makes sure related localForages aren't pending.
-    return Promise$1.resolve();
+    return Promise.resolve();
   }
   for (var j = 0; j < dbContext.forages.length; j++) {
     var forage = dbContext.forages[j];
@@ -491,7 +487,7 @@ function _initStorage(options) {
   var forages = dbContext.forages.slice(0);
   // Initialize the connection process only when
   // all the related localForages aren't pending.
-  return Promise$1.all(initPromises).then(function () {
+  return Promise.all(initPromises).then(function () {
     dbInfo.db = dbContext.db;
     // Get the connection or open a new one without upgrade.
     return _getOriginalConnection(dbInfo);
@@ -519,7 +515,7 @@ function _initStorage(options) {
 function getItem(key, callback) {
   var self = this;
   key = normalizeKey(key);
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
         if (err) {
@@ -553,7 +549,7 @@ function getItem(key, callback) {
 // Iterate over all items stored in database.
 function iterate(iterator, callback) {
   var self = this;
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
         if (err) {
@@ -598,7 +594,7 @@ function iterate(iterator, callback) {
 function setItem(key, value, callback) {
   var self = this;
   key = normalizeKey(key);
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     var dbInfo;
     self.ready().then(function () {
       dbInfo = self._dbInfo;
@@ -656,7 +652,7 @@ function setItem(key, value, callback) {
 function removeItem(key, callback) {
   var self = this;
   key = normalizeKey(key);
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
         if (err || !transaction) {
@@ -694,7 +690,7 @@ function removeItem(key, callback) {
 }
 function clear(callback) {
   var self = this;
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
         if (err || !transaction) {
@@ -722,7 +718,7 @@ function clear(callback) {
 }
 function length(callback) {
   var self = this;
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
         if (err) {
@@ -748,7 +744,7 @@ function length(callback) {
 }
 function key(n, callback) {
   var self = this;
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     if (n < 0) {
       resolve(null);
       return;
@@ -799,7 +795,7 @@ function key(n, callback) {
 }
 function keys(callback) {
   var self = this;
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
         if (err) {
@@ -847,10 +843,10 @@ function dropInstance(_options, callback) {
   var self = this;
   var promise;
   if (!options.name) {
-    promise = Promise$1.reject('Invalid arguments');
+    promise = Promise.reject('Invalid arguments');
   } else {
     var isCurrentDb = options.name === currentConfig.name && self._dbInfo.db;
-    var dbPromise = isCurrentDb ? Promise$1.resolve(self._dbInfo.db) : _getOriginalConnection(options).then(function (db) {
+    var dbPromise = isCurrentDb ? Promise.resolve(self._dbInfo.db) : _getOriginalConnection(options).then(function (db) {
       var dbContext = dbContexts[options.name];
       var forages = dbContext.forages;
       dbContext.db = db;
@@ -869,7 +865,7 @@ function dropInstance(_options, callback) {
           var forage = forages[i];
           forage._dbInfo.db = null;
         }
-        var dropDBPromise = new Promise$1(function (resolve, reject) {
+        var dropDBPromise = new Promise(function (resolve, reject) {
           var req = idb.deleteDatabase(options.name);
           req.onerror = function () {
             var db = req.result;
@@ -898,7 +894,7 @@ function dropInstance(_options, callback) {
             _advanceReadiness(_forage._dbInfo);
           }
         })["catch"](function (err) {
-          (_rejectReadiness(options, err) || Promise$1.resolve())["catch"](function () {});
+          (_rejectReadiness(options, err) || Promise.resolve())["catch"](function () {});
           throw err;
         });
       });
@@ -917,7 +913,7 @@ function dropInstance(_options, callback) {
           forage._dbInfo.db = null;
           forage._dbInfo.version = newVersion;
         }
-        var dropObjectPromise = new Promise$1(function (resolve, reject) {
+        var dropObjectPromise = new Promise(function (resolve, reject) {
           var req = idb.open(options.name, newVersion);
           req.onerror = function () {
             var db = req.result;
@@ -942,7 +938,7 @@ function dropInstance(_options, callback) {
             _advanceReadiness(_forage2._dbInfo);
           }
         })["catch"](function (err) {
-          (_rejectReadiness(options, err) || Promise$1.resolve())["catch"](function () {});
+          (_rejectReadiness(options, err) || Promise.resolve())["catch"](function () {});
           throw err;
         });
       });
@@ -969,9 +965,7 @@ function isWebSQLValid() {
   return typeof openDatabase === 'function';
 }
 
-// Sadly, the best way to save binary data in WebSQL/localStorage is serializing
-// it to Base64, so this is how we store it to prevent very strange errors with less
-// verbose ways of binary <-> string data storage.
+/* eslint-disable no-bitwise */
 var BASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 var BLOB_TYPE_PREFIX = '~~local_forage_type~';
 var BLOB_TYPE_PREFIX_REGEX = /^~~local_forage_type~([^~]+)~/;
@@ -1186,7 +1180,7 @@ function _initStorage$1(options) {
       dbInfo[i] = typeof _options[i] !== 'string' ? _options[i].toString() : _options[i];
     }
   }
-  var dbInfoPromise = new Promise$1(function (resolve, reject) {
+  var dbInfoPromise = new Promise(function (resolve, reject) {
     // Open the database; the openDatabase API will automatically
     // create it for us if it doesn't exist.
     try {
@@ -1231,7 +1225,7 @@ function tryExecuteSql(t, dbInfo, sqlStatement, args, callback, errorCallback) {
 function getItem$1(key, callback) {
   var self = this;
   key = normalizeKey(key);
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       var dbInfo = self._dbInfo;
       dbInfo.db.transaction(function (t) {
@@ -1256,7 +1250,7 @@ function getItem$1(key, callback) {
 }
 function iterate$1(iterator, callback) {
   var self = this;
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       var dbInfo = self._dbInfo;
       dbInfo.db.transaction(function (t) {
@@ -1295,7 +1289,7 @@ function iterate$1(iterator, callback) {
 function _setItem(key, value, callback, retriesLeft) {
   var self = this;
   key = normalizeKey(key);
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       // The localStorage API doesn't return undefined values in an
       // "expected" way, so undefined is always cast to null in all
@@ -1348,7 +1342,7 @@ function setItem$1(key, value, callback) {
 function removeItem$1(key, callback) {
   var self = this;
   key = normalizeKey(key);
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       var dbInfo = self._dbInfo;
       dbInfo.db.transaction(function (t) {
@@ -1368,7 +1362,7 @@ function removeItem$1(key, callback) {
 // TODO: Find out if this resets the AUTO_INCREMENT number.
 function clear$1(callback) {
   var self = this;
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       var dbInfo = self._dbInfo;
       dbInfo.db.transaction(function (t) {
@@ -1388,7 +1382,7 @@ function clear$1(callback) {
 // localForage.
 function length$1(callback) {
   var self = this;
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       var dbInfo = self._dbInfo;
       dbInfo.db.transaction(function (t) {
@@ -1415,7 +1409,7 @@ function length$1(callback) {
 // TODO: Don't change ID on `setItem()`.
 function key$1(n, callback) {
   var self = this;
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       var dbInfo = self._dbInfo;
       dbInfo.db.transaction(function (t) {
@@ -1434,7 +1428,7 @@ function key$1(n, callback) {
 }
 function keys$1(callback) {
   var self = this;
-  var promise = new Promise$1(function (resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     self.ready().then(function () {
       var dbInfo = self._dbInfo;
       dbInfo.db.transaction(function (t) {
@@ -1457,7 +1451,7 @@ function keys$1(callback) {
 // https://www.w3.org/TR/webdatabase/#databases
 // > There is no way to enumerate or delete the databases available for an origin from this API.
 function getAllStoreNames(db) {
-  return new Promise$1(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     db.transaction(function (t) {
       t.executeSql('SELECT name FROM sqlite_master ' + "WHERE type='table' AND name <> '__WebKitDatabaseInfoTable__'", [], function (t, results) {
         var storeNames = [];
@@ -1492,9 +1486,9 @@ function dropInstance$1(_options, callback) {
   var self = this;
   var promise;
   if (!options.name) {
-    promise = Promise$1.reject('Invalid arguments');
+    promise = Promise.reject('Invalid arguments');
   } else {
-    promise = new Promise$1(function (resolve) {
+    promise = new Promise(function (resolve) {
       var db;
       if (options.name === currentConfig.name) {
         // use the db reference of the current instance
@@ -1512,10 +1506,10 @@ function dropInstance$1(_options, callback) {
         });
       }
     }).then(function (operationInfo) {
-      return new Promise$1(function (resolve, reject) {
+      return new Promise(function (resolve, reject) {
         operationInfo.db.transaction(function (t) {
           function dropTable(storeName) {
-            return new Promise$1(function (resolve, reject) {
+            return new Promise(function (resolve, reject) {
               t.executeSql("DROP TABLE IF EXISTS ".concat(storeName), [], function () {
                 resolve();
               }, function (t, error) {
@@ -1528,7 +1522,7 @@ function dropInstance$1(_options, callback) {
           for (var i = 0, len = operationInfo.storeNames.length; i < len; i++) {
             operations.push(dropTable(operationInfo.storeNames[i]));
           }
-          Promise$1.all(operations).then(function () {
+          Promise.all(operations).then(function () {
             resolve();
           })["catch"](function (e) {
             reject(e);
@@ -1565,6 +1559,11 @@ function isLocalStorageValid() {
     return false;
   }
 }
+
+// If IndexedDB isn't available, we'll fall back to localStorage.
+// Note that this will have considerable performance and storage
+// side-effects (all data will be serialized on save and only data that
+// can be converted to a string via `JSON.stringify()` will be saved).
 function _getKeyPrefix(options, defaultConfig) {
   var keyPrefix = options.name + '/';
   if (options.storeName !== defaultConfig.storeName) {
@@ -1601,11 +1600,11 @@ function _initStorage$2(options) {
   }
   dbInfo.keyPrefix = _getKeyPrefix(options, self._defaultConfig);
   if (!_isLocalStorageUsable()) {
-    return Promise$1.reject();
+    return Promise.reject();
   }
   self._dbInfo = dbInfo;
   dbInfo.serializer = localforageSerializer;
-  return Promise$1.resolve();
+  return Promise.resolve();
 }
 // Remove all keys from the datastore, effectively destroying all data in
 // the app's key/value store!
@@ -1756,7 +1755,7 @@ function setItem$2(key, value, callback) {
     }
     // Save the original value to pass to the callback.
     var originalValue = value;
-    return new Promise$1(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
       var dbInfo = self._dbInfo;
       dbInfo.serializer.serialize(value, function (value, error) {
         if (error || value instanceof Error) {
@@ -1795,9 +1794,9 @@ function dropInstance$2(_options, callback) {
   var self = this;
   var promise;
   if (!options.name) {
-    promise = Promise$1.reject('Invalid arguments');
+    promise = Promise.reject('Invalid arguments');
   } else {
-    promise = new Promise$1(function (resolve) {
+    promise = new Promise(function (resolve) {
       if (!options.storeName) {
         resolve("".concat(options.name, "/"));
       } else {
@@ -1846,9 +1845,6 @@ var includes = function includes(array, searchElement) {
 var isArray = Array.isArray || function (arg) {
   return Object.prototype.toString.call(arg) === '[object Array]';
 };
-
-// Drivers are stored here when `defineDriver()` is called.
-// They are shared across all instances of localForage.
 var DefinedDrivers = {};
 var DriverSupport = {};
 var DefaultDrivers = {
@@ -1958,7 +1954,7 @@ var LocalForage = /*#__PURE__*/function () {
   }, {
     key: "defineDriver",
     value: function defineDriver(driverObject, callback, errorCallback) {
-      var promise = new Promise$1(function (resolve, reject) {
+      var promise = new Promise(function (resolve, reject) {
         try {
           var driverName = driverObject._driver;
           var complianceError = new Error('Custom driver not compliant; see ' + 'https://mozilla.github.io/localForage/#definedriver');
@@ -1983,7 +1979,7 @@ var LocalForage = /*#__PURE__*/function () {
             var methodNotImplementedFactory = function methodNotImplementedFactory(methodName) {
               return function () {
                 var error = new Error("Method ".concat(methodName, " is not implemented by the current driver"));
-                var promise = Promise$1.reject(error);
+                var promise = Promise.reject(error);
                 executeCallback(promise, arguments[arguments.length - 1]);
                 return promise;
               };
@@ -2031,14 +2027,14 @@ var LocalForage = /*#__PURE__*/function () {
   }, {
     key: "getDriver",
     value: function getDriver(driverName, callback, errorCallback) {
-      var getDriverPromise = DefinedDrivers[driverName] ? Promise$1.resolve(DefinedDrivers[driverName]) : Promise$1.reject(new Error('Driver not found.'));
+      var getDriverPromise = DefinedDrivers[driverName] ? Promise.resolve(DefinedDrivers[driverName]) : Promise.reject(new Error('Driver not found.'));
       executeTwoCallbacks(getDriverPromise, callback, errorCallback);
       return getDriverPromise;
     }
   }, {
     key: "getSerializer",
     value: function getSerializer(callback) {
-      var serializerPromise = Promise$1.resolve(localforageSerializer);
+      var serializerPromise = Promise.resolve(localforageSerializer);
       executeTwoCallbacks(serializerPromise, callback);
       return serializerPromise;
     }
@@ -2085,7 +2081,7 @@ var LocalForage = /*#__PURE__*/function () {
             }
             setDriverToConfig();
             var error = new Error('No available storage method found.');
-            self._driverSet = Promise$1.reject(error);
+            self._driverSet = Promise.reject(error);
             return self._driverSet;
           }
           return driverPromiseLoop();
@@ -2095,8 +2091,8 @@ var LocalForage = /*#__PURE__*/function () {
       // so wait for it to finish in order to avoid a possible
       // race condition to set _dbInfo
       var oldDriverSetDone = this._driverSet !== null ? this._driverSet["catch"](function () {
-        return Promise$1.resolve();
-      }) : Promise$1.resolve();
+        return Promise.resolve();
+      }) : Promise.resolve();
       this._driverSet = oldDriverSetDone.then(function () {
         var driverName = supportedDrivers[0];
         self._dbInfo = null;
@@ -2110,7 +2106,7 @@ var LocalForage = /*#__PURE__*/function () {
       })["catch"](function () {
         setDriverToConfig();
         var error = new Error('No available storage method found.');
-        self._driverSet = Promise$1.reject(error);
+        self._driverSet = Promise.reject(error);
         return self._driverSet;
       });
       executeTwoCallbacks(this._driverSet, callback, errorCallback);
