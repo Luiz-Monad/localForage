@@ -347,9 +347,9 @@ module.exports = exports = function (grunt) {
         const done = this.async();
         const tempErrLogs = fs.createWriteStream('temp.test.log');
         const oldStdErr = process.stderr.write;
-        const totaltestsPassed = 0;
-        const totaltestsFailed = 0;
-        const totalDuration = 0;
+        let totaltestsPassed = 0;
+        let totaltestsFailed = 0;
+        let totalDuration = 0;
         const urls = [
             'http://localhost:9999/test/test.main1.html',
             'http://localhost:9999/test/test.min.html',

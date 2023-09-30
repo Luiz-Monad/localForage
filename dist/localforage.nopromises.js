@@ -408,12 +408,11 @@ function _tryReconnect(dbInfo) {
 // FF doesn't like Promises (micro-tasks) and IDDB store operations,
 // so we have to do it with callbacks
 function createTransaction(dbInfo, mode, callback, retries) {
-  var _a;
   if (retries === undefined) {
     retries = 1;
   }
   try {
-    var tx = (_a = dbInfo.db) === null || _a === void 0 ? void 0 : _a.transaction(dbInfo.storeName, mode);
+    var tx = dbInfo.db.transaction(dbInfo.storeName, mode);
     callback(null, tx);
   } catch (err) {
     if (retries > 0 && (!dbInfo.db || err.name === 'InvalidStateError' || err.name === 'NotFoundError')) {
@@ -894,8 +893,8 @@ function dropInstance(_options, callback) {
         });
         return dropDBPromise.then(function (db) {
           dbContext.db = db;
-          for (var i = 0; i < forages.length; i++) {
-            var _forage = forages[i];
+          for (var _i = 0; _i < forages.length; _i++) {
+            var _forage = forages[_i];
             _advanceReadiness(_forage._dbInfo);
           }
         })["catch"](function (err) {
@@ -920,10 +919,10 @@ function dropInstance(_options, callback) {
         }
         var dropObjectPromise = new Promise$1(function (resolve, reject) {
           var req = idb.open(options.name, newVersion);
-          req.onerror = function (err) {
+          req.onerror = function () {
             var db = req.result;
             db.close();
-            reject(err);
+            reject(req.error);
           };
           req.onupgradeneeded = function () {
             var db = req.result;
@@ -1211,7 +1210,7 @@ function _initStorage$1(options) {
 }
 function tryExecuteSql(t, dbInfo, sqlStatement, args, callback, errorCallback) {
   t.executeSql(sqlStatement, args, callback, function (t, error) {
-    if (error.code === SQLError.SYNTAX_ERR) {
+    if (error.code === error.SYNTAX_ERR) {
       t.executeSql('SELECT name FROM sqlite_master ' + "WHERE type='table' AND name = ?", [dbInfo.storeName], function (t, results) {
         if (!results.rows.length) {
           // if the table is missing (was deleted)
@@ -1238,7 +1237,7 @@ function getItem$1(key, callback) {
       dbInfo.db.transaction(function (t) {
         tryExecuteSql(t, dbInfo, "SELECT * FROM ".concat(dbInfo.storeName, " WHERE key = ? LIMIT 1"), [key], function (t, results) {
           var sresult = results.rows.length ? results.rows.item(0).value : null;
-          var result;
+          var result = null;
           // Check to see if this is serialized content we need to
           // unpack.
           if (sresult) {
@@ -1267,8 +1266,8 @@ function iterate$1(iterator, callback) {
           for (var i = 0; i < length; i++) {
             var item = rows.item(i);
             var sresult = item.value;
-            var oresult;
-            var result;
+            var oresult = null;
+            var result = null;
             // Check to see if this is serialized content
             // we need to unpack.
             if (sresult) {
@@ -1321,7 +1320,7 @@ function _setItem(key, value, callback, retriesLeft) {
           }, function (sqlError) {
             // The transaction failed; check
             // to see if it's a quota error.
-            if (sqlError.code === SQLError.QUOTA_ERR) {
+            if (sqlError.code === sqlError.QUOTA_ERR) {
               // We reject the callback outright for now, but
               // it's worth trying to re-run the transaction.
               // Even if the user accepts the prompt to use
@@ -1633,7 +1632,7 @@ function getItem$2(key, callback) {
   var promise = self.ready().then(function () {
     var dbInfo = self._dbInfo;
     var sresult = localStorage.getItem(dbInfo.keyPrefix + key);
-    var result;
+    var result = null;
     // If a result was found, parse it from the serialized
     // string into a JS object. If result isn't truthy, the key
     // is likely undefined and we'll pass it straight to the
@@ -1667,8 +1666,8 @@ function iterate$2(iterator, callback) {
         continue;
       }
       var svalue = localStorage.getItem(key);
-      var ovalue;
-      var value;
+      var ovalue = null;
+      var value = null;
       // If a result was found, parse it from the serialized
       // string into a JS object. If result isn't truthy, the
       // key is likely undefined and we'll pass it straight
@@ -1989,8 +1988,8 @@ var LocalForage = /*#__PURE__*/function () {
                 return promise;
               };
             };
-            for (var _i = 0, _len = OptionalDriverMethods.length; _i < _len; _i++) {
-              var optionalDriverMethod = OptionalDriverMethods[_i];
+            for (var _i2 = 0, _len = OptionalDriverMethods.length; _i2 < _len; _i2++) {
+              var optionalDriverMethod = OptionalDriverMethods[_i2];
               if (!driverObject[optionalDriverMethod]) {
                 driverObject[optionalDriverMethod] = methodNotImplementedFactory(optionalDriverMethod);
               }
