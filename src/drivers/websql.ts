@@ -106,7 +106,7 @@ function tryExecuteSql(
     errorCallback: SQLStatementErrorCallback
 ) {
     t.executeSql(sqlStatement, args, callback, function (t, error) {
-        if (error.code === SQLError.SYNTAX_ERR) {
+        if (error.code === error.SYNTAX_ERR) {
             t.executeSql(
                 'SELECT name FROM sqlite_master ' + "WHERE type='table' AND name = ?",
                 [dbInfo.storeName],
@@ -287,7 +287,7 @@ function _setItem<T>(
                             function (sqlError) {
                                 // The transaction failed; check
                                 // to see if it's a quota error.
-                                if (sqlError.code === SQLError.QUOTA_ERR) {
+                                if (sqlError.code === sqlError.QUOTA_ERR) {
                                     // We reject the callback outright for now, but
                                     // it's worth trying to re-run the transaction.
                                     // Even if the user accepts the prompt to use

@@ -21,6 +21,11 @@ declare global {
     interface Window {}
 
     declare var openDatabase: Database['openDatabase'];
+    interface SQLError {
+        //static class bug in the lib
+        QUOTA_ERR: number;
+        SYNTAX_ERR: number;
+    }
 }
 
 export {};

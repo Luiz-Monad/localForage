@@ -360,8 +360,9 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 var db: Database;
 
                 function getQuotaErrorCode(transaction: Database['transaction']) {
-                    return new Promise<any>(function (resolve) {
-                        transaction(
+                    return new Promise<any>(function (resolve, reject) {
+                        transaction.call(
+                            db,
                             function (t) {
                                 t.executeSql('');
                             },
@@ -388,6 +389,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         getQuotaErrorCode(transaction).then(function (QUOTA_ERR) {
                             var error = new Error() as any as SQLError;
                             error.code = QUOTA_ERR;
+                            error.QUOTA_ERR = QUOTA_ERR;
                             errFn!(error);
                         });
                     };
@@ -986,7 +988,9 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
             it('exposes the serializer on the dbInfo object', function () {
                 return localforage.ready().then(function () {
-                    if (window.callWhenReadyTest) return;
+                    if (window.callWhenReadyTest) {
+                        return;
+                    }
                     expect(localforageLOCAL._dbInfo.serializer).to.be.an('object');
                 });
             });

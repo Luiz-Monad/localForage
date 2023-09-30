@@ -40,22 +40,22 @@ namespace LocalForageTest {
         let newNum: number = num;
     });
 
-    localForage.iterate((str: string | undefined, key: string, num: number) => {
-        let newStr: string | undefined = str;
+    localForage.iterate((str: string | null, key: string, num: number) => {
+        let newStr: string | null = str;
         let newKey: string = key;
         let newNum: number = num;
     });
 
     localForage
-        .iterate((str: string | undefined, key: string, num: number) => {
-            let newStr: string | undefined = str;
+        .iterate((str: string | null, key: string, num: number) => {
+            let newStr: string | null = str;
             let newKey: string = key;
             let newNum: number = num;
             if (newStr === 'END') {
                 return newNum;
             }
         })
-        .then((result: number | void) => {
+        .then((result: number | void | null) => {
             if (result) {
                 let numResult: number = result;
             }
@@ -63,29 +63,29 @@ namespace LocalForageTest {
 
     localForage
         .iterate<string, number | void>((str, key: string, num: number) => {
-            let newStr: string | undefined = str;
+            let newStr: string | null = str;
             let newKey: string = key;
             let newNum: number = num;
             if (newStr === 'END') {
                 return newNum;
             }
         })
-        .then((result: number | void) => {
+        .then((result: number | void | null) => {
             if (result) {
                 let numResult: number = result;
             }
         });
 
     localForage
-        .iterate<string, number | void>((str: string | undefined, key: string, num: number) => {
-            let newStr: string | undefined = str;
+        .iterate<string, number | void>((str: string | null, key: string, num: number) => {
+            let newStr: string | null = str;
             let newKey: string = key;
             let newNum: number = num;
             if (newStr === 'END') {
                 return newNum;
             }
         })
-        .then((result: number | void) => {
+        .then((result: number | void | null) => {
             if (result) {
                 let numResult: number = result;
             }
@@ -119,8 +119,8 @@ namespace LocalForageTest {
         let newStr: string | null | undefined = str;
     });
 
-    localForage.getItem<string>('key').then((str?: string) => {
-        let newStr: string | undefined = str;
+    localForage.getItem<string>('key').then((str: string | null) => {
+        let newStr: string | null = str;
     });
 
     localForage.setItem('key', 'value', (err: any, str: string | null) => {
