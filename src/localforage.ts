@@ -71,12 +71,13 @@ function callWhenReady(localForageInstance: DriverMethods, libraryMethod: Driver
     };
 }
 
-function extend<T extends {}, U, V>(target: T, source: U, source2?: V): T & U & V {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function extend<T, U, V>(target: T, source: U, source2?: V): T & U & V {
     for (let i = 1; i < arguments.length; i++) {
         const arg = arguments[i];
 
         if (arg) {
-            for (let key in arg) {
+            for (const key in arg) {
                 if (arg.hasOwnProperty(key)) {
                     if (isArray(arg[key])) {
                         arguments[0][key] = arg[key].slice();
@@ -101,7 +102,7 @@ class LocalForage implements ILocalForage {
     private _driver?: string;
 
     constructor(options?: Options) {
-        for (let driverTypeKey in DefaultDrivers) {
+        for (const driverTypeKey in DefaultDrivers) {
             if (DefaultDrivers.hasOwnProperty(driverTypeKey)) {
                 const driver = DefaultDrivers[driverTypeKey as keyof typeof DefaultDrivers];
                 const driverName = driver._driver;
@@ -147,7 +148,7 @@ class LocalForage implements ILocalForage {
                 return new Error("Can't call config() after localforage " + 'has been used.');
             }
 
-            for (let i in options) {
+            for (const i in options) {
                 if (i === 'storeName') {
                     options[i] = options[i]?.replace(/\W/g, '_');
                 }
@@ -333,7 +334,7 @@ class LocalForage implements ILocalForage {
 
                 function driverPromiseLoop(): Promise<void> {
                     while (currentDriverIndex < supportedDrivers.length) {
-                        let driverName = supportedDrivers[currentDriverIndex];
+                        const driverName = supportedDrivers[currentDriverIndex];
                         currentDriverIndex++;
 
                         self._dbInfo = null!;

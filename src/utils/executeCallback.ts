@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { Callback } from '../types';
 
 function executeCallback<T>(promise: Promise<T>, callback?: Callback<T>) {

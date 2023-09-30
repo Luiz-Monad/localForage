@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 mocha.setup({ asyncOnly: true });
 
-var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
+const DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
 
 DRIVERS.forEach(function (driverName) {
     if (
@@ -38,11 +38,11 @@ DRIVERS.forEach(function (driverName) {
         }
 
         it('saves data', function () {
-            return new Promise<void>(function (resolve, reject) {
-                var webWorker = new Worker('/test/webworker-client.js');
+            return new Promise<void>(function (resolve) {
+                const webWorker = new Worker('/test/webworker-client.js');
 
                 webWorker.addEventListener('message', function (e) {
-                    var body = e.data.body;
+                    const body = e.data.body;
 
                     window.console.log(body);
                     expect(body).to.be.eq('I have been set');

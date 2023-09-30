@@ -1,6 +1,6 @@
 /*jshint node:true */
 
-var SAUCELAB_BROWSERS = [
+const SAUCELAB_BROWSERS = [
     {
         base: 'SauceLabs',
         browserName: 'chrome',

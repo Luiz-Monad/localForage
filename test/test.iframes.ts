@@ -6,7 +6,7 @@ describe('Inside iFrames', function () {
     'use strict';
 
     before(function () {
-        var iFrame = window.document.createElement('iframe');
+        const iFrame = window.document.createElement('iframe');
         iFrame.name = 'iframe';
         iFrame.id = 'iframe';
         // TODO: Get this to be cross-origin.
@@ -16,13 +16,13 @@ describe('Inside iFrames', function () {
     });
 
     after(function () {
-        var iFrame = window.document.getElementById('iframe');
+        const iFrame = window.document.getElementById('iframe');
         iFrame?.parentNode?.removeChild(iFrame);
     });
 
     it('can run localForage in an iFrame', function (done) {
-        var timer = setInterval(function () {
-            var element = (
+        const timer = setInterval(function () {
+            const element = (
                 window.document.getElementById('iframe')! as any
             ).contentWindow.document.getElementById('my-text');
             if (element && element.innerHTML) {

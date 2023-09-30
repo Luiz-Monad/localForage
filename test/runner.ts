@@ -9,9 +9,9 @@ interface Title {
 }
 
 function runTestSuit() {
-    var runner = mocha.run();
+    const runner = mocha.run();
 
-    var failedTests: any[] = [];
+    const failedTests: any[] = [];
 
     runner.on('end', function () {
         window.mochaResults = runner.stats;
@@ -19,7 +19,7 @@ function runTestSuit() {
     });
 
     function flattenTitles(test: Title) {
-        var titles = [];
+        const titles = [];
 
         while (test.parent.title) {
             titles.push(test.parent.title);
@@ -47,16 +47,14 @@ if (!Array.prototype.forEach) {
         if (typeof callback !== 'function') {
             throw new TypeError(callback + ' is not a function!');
         }
-        var len = this.length;
-        for (var i = 0; i < len; i++) {
+        const len = this.length;
+        for (let i = 0; i < len; i++) {
             callback.call(thisArg, this[i], i, this);
         }
     };
 }
 
-declare var requirejs: any;
-
-var require: any = global.require;
+const require: any = global.require;
 if (require) {
     requirejs.config({
         paths: {

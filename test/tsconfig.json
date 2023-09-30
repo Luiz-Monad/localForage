@@ -1,5 +1,6 @@
 {
-    "include": ["../test/**/*", "../src/*.d.ts"],
+    "include": ["../test/**/*"],
+    "exclude": ["node_modules/@types/node/globals.d.ts"],
     "compilerOptions": {
         "target": "ES2015",
         "module": "ESNext",
@@ -25,6 +26,7 @@
 
         "baseUrl": "../build/",
         "paths": {
+            "types": ["./types.d.ts"],
             "drivers/indexeddb": ["./drivers/indexeddb"],
             "drivers/websql": ["./drivers/websql"],
             "drivers/localstorage": ["./drivers/localstorage"]

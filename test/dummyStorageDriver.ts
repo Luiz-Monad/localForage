@@ -1,4 +1,4 @@
-import { Callback, DbIterator, Driver, Forage, InstanceOptions, Options } from '../src/types';
+import { Callback, DbIterator, Driver, Forage, InstanceOptions, Options } from 'types';
 
 interface Module extends Driver, Forage<DbInfo> {}
 
@@ -6,15 +6,15 @@ interface DbInfo extends Options {
     db: Record<string, string>;
 }
 
-var dummyStorage: Record<string, Record<string, string>> = {};
+const dummyStorage: Record<string, Record<string, string>> = {};
 
 // Config the localStorage backend, using options set in the config.
 function _initStorage(this: Module, options: Options) {
-    var self = this;
+    const self = this;
 
-    var dbInfo = {} as DbInfo;
+    const dbInfo = {} as DbInfo;
     if (options) {
-        for (var i in options) {
+        for (const i in options) {
             (dbInfo as any)[i] = (options as any)[i];
         }
     }
@@ -25,31 +25,31 @@ function _initStorage(this: Module, options: Options) {
     return Promise.resolve();
 }
 
-var SERIALIZED_MARKER = '__lfsc__:';
-var SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER.length;
+const SERIALIZED_MARKER = '__lfsc__:';
+const SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER.length;
 
 // OMG the serializations!
-var TYPE_ARRAYBUFFER = 'arbf';
-var TYPE_BLOB = 'blob';
-var TYPE_INT8ARRAY = 'si08';
-var TYPE_UINT8ARRAY = 'ui08';
-var TYPE_UINT8CLAMPEDARRAY = 'uic8';
-var TYPE_INT16ARRAY = 'si16';
-var TYPE_INT32ARRAY = 'si32';
-var TYPE_UINT16ARRAY = 'ur16';
-var TYPE_UINT32ARRAY = 'ui32';
-var TYPE_FLOAT32ARRAY = 'fl32';
-var TYPE_FLOAT64ARRAY = 'fl64';
-var TYPE_SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
+const TYPE_ARRAYBUFFER = 'arbf';
+const TYPE_BLOB = 'blob';
+const TYPE_INT8ARRAY = 'si08';
+const TYPE_UINT8ARRAY = 'ui08';
+const TYPE_UINT8CLAMPEDARRAY = 'uic8';
+const TYPE_INT16ARRAY = 'si16';
+const TYPE_INT32ARRAY = 'si32';
+const TYPE_UINT16ARRAY = 'ur16';
+const TYPE_UINT32ARRAY = 'ui32';
+const TYPE_FLOAT32ARRAY = 'fl32';
+const TYPE_FLOAT64ARRAY = 'fl64';
+const TYPE_SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
 
 function clear(this: Module, callback?: Callback<void>) {
-    var self = this;
-    var promise = new Promise<void>(function (resolve, reject) {
+    const self = this;
+    const promise = new Promise<void>(function (resolve, reject) {
         self.ready()
             .then(function () {
-                var db = self._dbInfo.db;
+                const db = self._dbInfo.db;
 
-                for (var key in db) {
+                for (const key in db) {
                     if (db.hasOwnProperty(key)) {
                         delete db[key];
                         // db[key] = undefined;
@@ -66,7 +66,7 @@ function clear(this: Module, callback?: Callback<void>) {
 }
 
 function getItem<T>(this: Module, key: string, callback?: Callback<T | null>) {
-    var self = this;
+    const self = this;
 
     // Cast the key to a string, as that's all we can set as a key.
     if (typeof key !== 'string') {
@@ -74,13 +74,13 @@ function getItem<T>(this: Module, key: string, callback?: Callback<T | null>) {
         key = String(key);
     }
 
-    var promise = new Promise<T | null>(function (resolve, reject) {
+    const promise = new Promise<T | null>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 try {
-                    var db = self._dbInfo.db;
-                    var sresult = db[key];
-                    var result: T | null = null;
+                    const db = self._dbInfo.db;
+                    const sresult = db[key];
+                    let result: T | null = null;
 
                     if (sresult) {
                         result = _deserialize(sresult) as T;
@@ -103,18 +103,18 @@ function iterate<T, U>(
     iterator: DbIterator<T, U>,
     callback?: Callback<U | null | void>
 ) {
-    var self = this;
-    var iterationNumber = 1;
+    const self = this;
+    let iterationNumber = 1;
 
-    var promise = new Promise<U | null | void>(function (resolve, reject) {
+    const promise = new Promise<U | null | void>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 try {
-                    var db = self._dbInfo.db;
+                    const db = self._dbInfo.db;
 
-                    for (var key in db) {
-                        var sresult = db[key];
-                        var result: T | null = null;
+                    for (const key in db) {
+                        const sresult = db[key];
+                        let result: T | null = null;
 
                         if (sresult) {
                             result = _deserialize(sresult) as T;
@@ -136,15 +136,15 @@ function iterate<T, U>(
 }
 
 function key(this: Module, n: number, callback?: Callback<string | null>) {
-    var self = this;
-    var promise = new Promise<string | null>(function (resolve, reject) {
+    const self = this;
+    const promise = new Promise<string | null>(function (resolve, reject) {
         self.ready()
             .then(function () {
-                var db = self._dbInfo.db;
-                var result: string | null = null;
-                var index = 0;
+                const db = self._dbInfo.db;
+                let result: string | null = null;
+                let index = 0;
 
-                for (var key in db) {
+                for (const key in db) {
                     if (db.hasOwnProperty(key) && db[key] !== undefined) {
                         if (n === index) {
                             result = key;
@@ -164,14 +164,14 @@ function key(this: Module, n: number, callback?: Callback<string | null>) {
 }
 
 function keys(this: Module, callback?: Callback<string[]>) {
-    var self = this;
-    var promise = new Promise<string[]>(function (resolve, reject) {
+    const self = this;
+    const promise = new Promise<string[]>(function (resolve, reject) {
         self.ready()
             .then(function () {
-                var db = self._dbInfo.db;
-                var keys: string[] = [];
+                const db = self._dbInfo.db;
+                const keys: string[] = [];
 
-                for (var key in db) {
+                for (const key in db) {
                     if (db.hasOwnProperty(key)) {
                         keys.push(key);
                     }
@@ -187,8 +187,8 @@ function keys(this: Module, callback?: Callback<string[]>) {
 }
 
 function length(this: Module, callback?: Callback<number>) {
-    var self = this;
-    var promise = new Promise<number>(function (resolve, reject) {
+    const self = this;
+    const promise = new Promise<number>(function (resolve, reject) {
         self.keys()
             .then(function (keys) {
                 resolve(keys.length);
@@ -201,7 +201,7 @@ function length(this: Module, callback?: Callback<number>) {
 }
 
 function removeItem(this: Module, key: string, callback: Callback<void>) {
-    var self = this;
+    const self = this;
 
     // Cast the key to a string, as that's all we can set as a key.
     if (typeof key !== 'string') {
@@ -209,10 +209,10 @@ function removeItem(this: Module, key: string, callback: Callback<void>) {
         key = String(key);
     }
 
-    var promise = new Promise<void>(function (resolve, reject) {
+    const promise = new Promise<void>(function (resolve, reject) {
         self.ready()
             .then(function () {
-                var db = self._dbInfo.db;
+                const db = self._dbInfo.db;
                 if (db.hasOwnProperty(key)) {
                     delete db[key];
                     // db[key] = undefined;
@@ -228,7 +228,7 @@ function removeItem(this: Module, key: string, callback: Callback<void>) {
 }
 
 function setItem<T>(this: Module, key: string, value: T | null, callback: Callback<T | null>) {
-    var self = this;
+    const self = this;
 
     // Cast the key to a string, as that's all we can set as a key.
     if (typeof key !== 'string') {
@@ -236,7 +236,7 @@ function setItem<T>(this: Module, key: string, value: T | null, callback: Callba
         key = String(key);
     }
 
-    var promise = new Promise<T | null>(function (resolve, reject) {
+    const promise = new Promise<T | null>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 // Convert undefined values to null.
@@ -246,14 +246,14 @@ function setItem<T>(this: Module, key: string, value: T | null, callback: Callba
                 }
 
                 // Save the original value to pass to the callback.
-                var originalValue = value;
+                const originalValue = value;
 
                 _serialize(value, function (value, error) {
                     if (error) {
                         reject(error);
                     } else {
                         try {
-                            var db = self._dbInfo.db;
+                            const db = self._dbInfo.db;
                             db[key] = value as string;
                             resolve(originalValue);
                         } catch (e) {
@@ -274,7 +274,7 @@ function _serialize<T>(
     value: ArrayBufferView | ArrayBuffer | Blob | T | null,
     callback: (onDone: string | Error | null, onError?: unknown) => void
 ) {
-    var valueString = '';
+    let valueString = '';
     if (value) {
         valueString = value.toString();
     }
@@ -293,8 +293,8 @@ function _serialize<T>(
 
         // Convert binary arrays to a string and prefix the string with
         // a special marker.
-        var buffer;
-        var marker = SERIALIZED_MARKER;
+        let buffer;
+        let marker = SERIALIZED_MARKER;
 
         if (value instanceof ArrayBuffer) {
             buffer = value;
@@ -330,10 +330,10 @@ function _serialize<T>(
         const blobValue = value as Blob;
 
         // Conver the blob to a binaryArray and then to a string.
-        var fileReader = new FileReader();
+        const fileReader = new FileReader();
 
         fileReader.onload = function () {
-            var str = _bufferToString(this.result as ArrayBuffer);
+            const str = _bufferToString(this.result as ArrayBuffer);
 
             callback(SERIALIZED_MARKER + TYPE_BLOB + str);
         };
@@ -362,14 +362,14 @@ function _deserialize<T>(value: string): ArrayBuffer | Blob | T {
     // The following code deals with deserializing some kind of Blob or
     // TypedArray. First we separate out the type of data we're dealing
     // with from the data itself.
-    var serializedString = value.substring(TYPE_SERIALIZED_MARKER_LENGTH);
-    var type = value.substring(SERIALIZED_MARKER_LENGTH, TYPE_SERIALIZED_MARKER_LENGTH);
+    const serializedString = value.substring(TYPE_SERIALIZED_MARKER_LENGTH);
+    const type = value.substring(SERIALIZED_MARKER_LENGTH, TYPE_SERIALIZED_MARKER_LENGTH);
 
     // Fill the string into a ArrayBuffer.
     // 2 bytes for each char.
-    var buffer = new ArrayBuffer(serializedString.length * 2);
-    var bufferView = new Uint16Array(buffer);
-    for (var i = serializedString.length - 1; i >= 0; i--) {
+    const buffer = new ArrayBuffer(serializedString.length * 2);
+    const bufferView = new Uint16Array(buffer);
+    for (let i = serializedString.length - 1; i >= 0; i--) {
         bufferView[i] = serializedString.charCodeAt(i);
     }
 
@@ -405,15 +405,15 @@ function _deserialize<T>(value: string): ArrayBuffer | Blob | T {
 
 // _bufferToString just like in LocalStorage
 function _bufferToString(buffer: ArrayBuffer) {
-    var str = '';
-    var uint16Array = new Uint16Array(buffer);
+    let str = '';
+    const uint16Array = new Uint16Array(buffer);
 
     try {
         str = String.fromCharCode.apply(null, uint16Array as any);
     } catch (e) {
         // This is a fallback implementation in case the first one does
         // not work. This is required to get the phantomjs passing...
-        for (var i = 0; i < uint16Array.length; i++) {
+        for (let i = 0; i < uint16Array.length; i++) {
             str += String.fromCharCode(uint16Array[i]);
         }
     }
@@ -428,17 +428,19 @@ function executeCallback<T>(promise: Promise<T>, callback?: Callback<T>) {
                 callback(null, result);
             },
             function (error) {
+                // eslint-disable-next-line @typescript-eslint/ban-types
                 (callback as Function)(error);
             }
         );
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function dropInstance(this: Module, _options: Partial<InstanceOptions>, callback?: Callback<void>) {
     return new Promise<void>(() => {});
 }
 
-var dummyStorageDriver: Driver = {
+const dummyStorageDriver: Driver = {
     _driver: 'dummyStorageDriver',
     _initStorage: _initStorage,
     _support: true,

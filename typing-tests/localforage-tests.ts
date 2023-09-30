@@ -1,6 +1,11 @@
-﻿import LocalForageValue from '../src/localforage';
-import LocalForageSerializerValue from '../src/utils/serializer';
-import { InstanceOptions, OptionalDropInstanceDriver, Options } from '../src/types';
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-var */
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-namespace */
+import LocalForageValue from 'localforage';
+import LocalForageSerializerValue from 'utils/serializer';
+import { InstanceOptions, OptionalDropInstanceDriver, Options } from 'types';
 
 type LocalForageOptions = Options;
 type LocalForageDbInstanceOptions = Partial<InstanceOptions>;

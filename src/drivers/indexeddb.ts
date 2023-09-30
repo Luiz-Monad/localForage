@@ -54,10 +54,10 @@ const READ_WRITE = 'readwrite';
 // From http://stackoverflow.com/questions/14967647/ (continues on next line)
 // encode-decode-image-with-base64-breaks-image (2013-04-21)
 function _binStringToArrayBuffer(bin: string) {
-    var length = bin.length;
-    var buf = new ArrayBuffer(length);
-    var arr = new Uint8Array(buf);
-    for (var i = 0; i < length; i++) {
+    const length = bin.length;
+    const buf = new ArrayBuffer(length);
+    const arr = new Uint8Array(buf);
+    for (let i = 0; i < length; i++) {
         arr[i] = bin.charCodeAt(i);
     }
     return buf;
@@ -80,8 +80,8 @@ function _binStringToArrayBuffer(bin: string) {
 //
 function _checkBlobSupportWithoutCaching(idb: IDBDatabase) {
     return new Promise(function (resolve) {
-        var txn = idb.transaction(DETECT_BLOB_SUPPORT_STORE, READ_WRITE);
-        var blob = createBlob(['']);
+        const txn = idb.transaction(DETECT_BLOB_SUPPORT_STORE, READ_WRITE);
+        const blob = createBlob(['']);
         txn.objectStore(DETECT_BLOB_SUPPORT_STORE).put(blob, 'key');
 
         txn.onabort = function (e) {
@@ -93,8 +93,8 @@ function _checkBlobSupportWithoutCaching(idb: IDBDatabase) {
         };
 
         txn.oncomplete = function () {
-            var matchedChrome = navigator.userAgent.match(/Chrome\/(\d+)/);
-            var matchedEdge = navigator.userAgent.match(/Edge\//);
+            const matchedChrome = navigator.userAgent.match(/Chrome\/(\d+)/);
+            const matchedEdge = navigator.userAgent.match(/Edge\//);
             // MS Edge pretends to be Chrome 42:
             // https://msdn.microsoft.com/en-us/library/hh869301%28v=vs.85%29.aspx
             resolve(matchedEdge || !matchedChrome || parseInt(matchedChrome[1], 10) >= 43);
@@ -115,10 +115,10 @@ function _checkBlobSupport(idb: IDBDatabase) {
 }
 
 function _deferReadiness(dbInfo: DbInfo) {
-    var dbContext = dbContexts[dbInfo.name];
+    const dbContext = dbContexts[dbInfo.name];
 
     // Create a deferred object representing the current database operation.
-    var deferredOperation = {} as Defer;
+    const deferredOperation = {} as Defer;
 
     deferredOperation.promise = new Promise(function (resolve, reject) {
         deferredOperation.resolve = resolve;
@@ -139,10 +139,10 @@ function _deferReadiness(dbInfo: DbInfo) {
 }
 
 function _advanceReadiness(dbInfo: DbInfo) {
-    var dbContext = dbContexts[dbInfo.name];
+    const dbContext = dbContexts[dbInfo.name];
 
     // Dequeue a deferred operation.
-    var deferredOperation = dbContext.deferredOperations.pop();
+    const deferredOperation = dbContext.deferredOperations.pop();
 
     // Resolve its promise (which is part of the database readiness
     // chain of promises).
@@ -153,10 +153,10 @@ function _advanceReadiness(dbInfo: DbInfo) {
 }
 
 function _rejectReadiness(dbInfo: DbInfo, err: any) {
-    var dbContext = dbContexts[dbInfo.name];
+    const dbContext = dbContexts[dbInfo.name];
 
     // Dequeue a deferred operation.
-    var deferredOperation = dbContext.deferredOperations.pop();
+    const deferredOperation = dbContext.deferredOperations.pop();
 
     // Reject its promise (which is part of the database readiness
     // chain of promises).
@@ -179,17 +179,17 @@ function _getConnection(dbInfo: DbInfo, upgradeNeeded: boolean) {
             }
         }
 
-        var dbArgs: [string, number?] = [dbInfo.name];
+        const dbArgs: [string, number?] = [dbInfo.name];
 
         if (upgradeNeeded) {
             dbArgs.push(dbInfo.version);
         }
 
-        var openreq = idb.open.apply(idb, dbArgs);
+        const openreq = idb.open.apply(idb, dbArgs);
 
         if (upgradeNeeded) {
             openreq.onupgradeneeded = function (e) {
-                var db = openreq.result;
+                const db = openreq.result;
                 try {
                     db.createObjectStore(dbInfo.storeName);
                     if (e.oldVersion <= 1) {
@@ -223,7 +223,7 @@ function _getConnection(dbInfo: DbInfo, upgradeNeeded: boolean) {
         };
 
         openreq.onsuccess = function () {
-            var db = openreq.result;
+            const db = openreq.result;
             db.onversionchange = function (e) {
                 // Triggered when the database is modified (e.g. adding an objectStore) or
                 // deleted (even when initiated by other sessions in different tabs).
@@ -251,9 +251,9 @@ function _isUpgradeNeeded(dbInfo: DbInfo, defaultVersion?: number) {
         return true;
     }
 
-    var isNewStore = !dbInfo.db.objectStoreNames.contains(dbInfo.storeName);
-    var isDowngrade = dbInfo.version < dbInfo.db.version;
-    var isUpgrade = dbInfo.version > dbInfo.db.version;
+    const isNewStore = !dbInfo.db.objectStoreNames.contains(dbInfo.storeName);
+    const isDowngrade = dbInfo.version < dbInfo.db.version;
+    const isUpgrade = dbInfo.version > dbInfo.db.version;
 
     if (isDowngrade) {
         // If the version is not the default one
@@ -279,7 +279,7 @@ function _isUpgradeNeeded(dbInfo: DbInfo, defaultVersion?: number) {
         // This will trigger an "upgradeneeded" event which is required
         // for creating a store.
         if (isNewStore) {
-            var incVersion = dbInfo.db.version + 1;
+            const incVersion = dbInfo.db.version + 1;
             if (incVersion > dbInfo.version) {
                 dbInfo.version = incVersion;
             }
@@ -294,10 +294,10 @@ function _isUpgradeNeeded(dbInfo: DbInfo, defaultVersion?: number) {
 // encode a blob for indexeddb engines that don't support blobs
 function _encodeBlob(blob: Blob) {
     return new Promise<EncodedBlob>(function (resolve, reject) {
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.onerror = reject;
         reader.onloadend = function (e) {
-            var base64 = btoa((e.target?.result || '') as string);
+            const base64 = btoa((e.target?.result || '') as string);
             resolve({
                 __local_forage_encoded_blob: true,
                 data: base64,
@@ -310,7 +310,7 @@ function _encodeBlob(blob: Blob) {
 
 // decode an encoded blob
 function _decodeBlob(encodedBlob: EncodedBlob) {
-    var arrayBuff = _binStringToArrayBuffer(atob(encodedBlob.data));
+    const arrayBuff = _binStringToArrayBuffer(atob(encodedBlob.data));
     return createBlob([arrayBuff], { type: encodedBlob.type });
 }
 
@@ -324,10 +324,10 @@ function _isEncodedBlob(value?: EncodedBlob) {
 // ready when it's been initialized (default) *and* there are no pending
 // operations on the database (initiated by some other instances).
 function _fullyReady(this: Module, callback?: Callback<void>): Promise<void> {
-    var self = this;
+    const self = this;
 
-    var promise = self._initReady!().then(function () {
-        var dbContext = dbContexts[self._dbInfo.name];
+    const promise = self._initReady!().then(function () {
+        const dbContext = dbContexts[self._dbInfo.name];
 
         if (dbContext && dbContext.dbReady) {
             return dbContext.dbReady;
@@ -344,10 +344,10 @@ function _fullyReady(this: Module, callback?: Callback<void>): Promise<void> {
 function _tryReconnect(dbInfo: DbInfo) {
     _deferReadiness(dbInfo);
 
-    var dbContext = dbContexts[dbInfo.name];
-    var forages = dbContext.forages;
+    const dbContext = dbContexts[dbInfo.name];
+    const forages = dbContext.forages;
 
-    for (var i = 0; i < forages.length; i++) {
+    for (let i = 0; i < forages.length; i++) {
         const forage = forages[i];
         if (forage._dbInfo.db) {
             forage._dbInfo.db.close();
@@ -369,7 +369,7 @@ function _tryReconnect(dbInfo: DbInfo) {
             // store the latest db reference
             // in case the db was upgraded
             dbInfo.db = dbContext.db = db;
-            for (var i = 0; i < forages.length; i++) {
+            for (let i = 0; i < forages.length; i++) {
                 forages[i]._dbInfo.db = db;
             }
         })
@@ -392,7 +392,7 @@ function createTransaction(
     }
 
     try {
-        var tx = dbInfo.db!.transaction(dbInfo.storeName, mode);
+        const tx = dbInfo.db!.transaction(dbInfo.storeName, mode);
         callback(null, tx);
     } catch (err: any) {
         if (
@@ -443,19 +443,19 @@ function createDbContext(): Context {
 // Open the IndexedDB database (automatically creates one if one didn't
 // previously exist), using any options set in the config.
 function _initStorage(this: Module, options: Options) {
-    var self = this;
-    var dbInfo = {
+    const self = this;
+    const dbInfo = {
         db: null
     } as DbInfo;
 
     if (options) {
-        for (var i in options) {
+        for (const i in options) {
             (dbInfo as any)[i] = (options as any)[i];
         }
     }
 
     // Get the current context of the database;
-    var dbContext = dbContexts[dbInfo.name];
+    let dbContext = dbContexts[dbInfo.name];
 
     // ...or create a new context.
     if (!dbContext) {
@@ -474,7 +474,7 @@ function _initStorage(this: Module, options: Options) {
     }
 
     // Create an array of initialization states of the related localForages.
-    var initPromises = [];
+    const initPromises = [];
 
     function ignoreErrors() {
         // Don't handle errors here,
@@ -482,8 +482,8 @@ function _initStorage(this: Module, options: Options) {
         return Promise.resolve();
     }
 
-    for (var j = 0; j < dbContext.forages.length; j++) {
-        var forage = dbContext.forages[j];
+    for (let j = 0; j < dbContext.forages.length; j++) {
+        const forage = dbContext.forages[j];
         if (forage !== self) {
             // Don't wait for itself...
             initPromises.push(forage._initReady!().catch(ignoreErrors));
@@ -491,7 +491,7 @@ function _initStorage(this: Module, options: Options) {
     }
 
     // Take a snapshot of the related localForages.
-    var forages = dbContext.forages.slice(0);
+    const forages = dbContext.forages.slice(0);
 
     // Initialize the connection process only when
     // all the related localForages aren't pending.
@@ -513,8 +513,8 @@ function _initStorage(this: Module, options: Options) {
             dbInfo.db = dbContext.db = db;
             self._dbInfo = dbInfo;
             // Share the final connection amongst related localForages.
-            for (var k = 0; k < forages.length; k++) {
-                var forage = forages[k];
+            for (let k = 0; k < forages.length; k++) {
+                const forage = forages[k];
                 if (forage !== self) {
                     // Self is already up-to-date.
                     forage._dbInfo.db = dbInfo.db;
@@ -525,11 +525,11 @@ function _initStorage(this: Module, options: Options) {
 }
 
 function getItem<T>(this: Module, key: string, callback?: Callback<T | null>) {
-    var self = this;
+    const self = this;
 
     key = normalizeKey(key);
 
-    var promise = new Promise<T | null>(function (resolve, reject) {
+    const promise = new Promise<T | null>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
@@ -538,11 +538,11 @@ function getItem<T>(this: Module, key: string, callback?: Callback<T | null>) {
                     }
 
                     try {
-                        var store = transaction!.objectStore(self._dbInfo.storeName);
-                        var req = store.get(key);
+                        const store = transaction!.objectStore(self._dbInfo.storeName);
+                        const req = store.get(key);
 
                         req.onsuccess = function () {
-                            var value = req.result;
+                            let value = req.result;
                             if (value === undefined) {
                                 value = null;
                             }
@@ -573,9 +573,9 @@ function iterate<T, U>(
     iterator: DbIterator<T, U>,
     callback?: Callback<U | null | void>
 ) {
-    var self = this;
+    const self = this;
 
-    var promise = new Promise<U | null | void>(function (resolve, reject) {
+    const promise = new Promise<U | null | void>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
@@ -584,19 +584,19 @@ function iterate<T, U>(
                     }
 
                     try {
-                        var store = transaction!.objectStore(self._dbInfo.storeName);
-                        var req = store.openCursor();
-                        var iterationNumber = 1;
+                        const store = transaction!.objectStore(self._dbInfo.storeName);
+                        const req = store.openCursor();
+                        let iterationNumber = 1;
 
                         req.onsuccess = function () {
-                            var cursor = req.result;
+                            const cursor = req.result;
 
                             if (cursor) {
-                                var value = cursor.value;
+                                let value = cursor.value;
                                 if (_isEncodedBlob(value)) {
                                     value = _decodeBlob(value);
                                 }
-                                var result = iterator(
+                                const result = iterator(
                                     value,
                                     cursor.key as string,
                                     iterationNumber++
@@ -634,12 +634,12 @@ function iterate<T, U>(
 type ObjectLike<T> = T | Blob | EncodedBlob | null;
 
 function setItem<T>(this: Module, key: string, value: T | null, callback?: Callback<T | null>) {
-    var self = this;
+    const self = this;
 
     key = normalizeKey(key);
 
-    var promise = new Promise<T | null>(function (resolve, reject) {
-        var dbInfo;
+    const promise = new Promise<T | null>(function (resolve, reject) {
+        let dbInfo;
         self.ready()
             .then(function () {
                 dbInfo = self._dbInfo;
@@ -663,7 +663,7 @@ function setItem<T>(this: Module, key: string, value: T | null, callback?: Callb
                     }
 
                     try {
-                        var store = transaction.objectStore(self._dbInfo.storeName);
+                        const store = transaction.objectStore(self._dbInfo.storeName);
 
                         // The reason we don't _save_ null is because IE 10 does
                         // not support saving the `null` type in IndexedDB. How
@@ -673,7 +673,7 @@ function setItem<T>(this: Module, key: string, value: T | null, callback?: Callb
                             value = undefined!;
                         }
 
-                        var req = store.put(value, key);
+                        const req = store.put(value, key);
 
                         transaction.oncomplete = function () {
                             // Cast to undefined so the value passed to
@@ -689,7 +689,7 @@ function setItem<T>(this: Module, key: string, value: T | null, callback?: Callb
                             resolve(value as T);
                         };
                         transaction.onabort = transaction.onerror = function () {
-                            var err = req.error ? req.error : req.transaction?.error;
+                            const err = req.error ? req.error : req.transaction?.error;
                             reject(err);
                         };
                     } catch (e) {
@@ -705,11 +705,11 @@ function setItem<T>(this: Module, key: string, value: T | null, callback?: Callb
 }
 
 function removeItem(this: Module, key: string, callback: Callback<void>) {
-    var self = this;
+    const self = this;
 
     key = normalizeKey(key);
 
-    var promise = new Promise<void>(function (resolve, reject) {
+    const promise = new Promise<void>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
@@ -718,13 +718,13 @@ function removeItem(this: Module, key: string, callback: Callback<void>) {
                     }
 
                     try {
-                        var store = transaction.objectStore(self._dbInfo.storeName);
+                        const store = transaction.objectStore(self._dbInfo.storeName);
                         // We use a Grunt task to make this safe for IE and some
                         // versions of Android (including those used by Cordova).
                         // Normally IE won't like `.delete()` and will insist on
                         // using `['delete']()`, but we have a build step that
                         // fixes this for us now.
-                        var req = store.delete(key);
+                        const req = store.delete(key);
                         transaction.oncomplete = function () {
                             resolve();
                         };
@@ -736,7 +736,7 @@ function removeItem(this: Module, key: string, callback: Callback<void>) {
                         // The request will be also be aborted if we've exceeded our storage
                         // space.
                         transaction.onabort = function () {
-                            var err = req.error ? req.error : req.transaction?.error;
+                            const err = req.error ? req.error : req.transaction?.error;
                             reject(err);
                         };
                     } catch (e) {
@@ -752,9 +752,9 @@ function removeItem(this: Module, key: string, callback: Callback<void>) {
 }
 
 function clear(this: Module, callback: Callback<void>) {
-    var self = this;
+    const self = this;
 
-    var promise = new Promise<void>(function (resolve, reject) {
+    const promise = new Promise<void>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
@@ -763,15 +763,15 @@ function clear(this: Module, callback: Callback<void>) {
                     }
 
                     try {
-                        var store = transaction.objectStore(self._dbInfo.storeName);
-                        var req = store.clear();
+                        const store = transaction.objectStore(self._dbInfo.storeName);
+                        const req = store.clear();
 
                         transaction.oncomplete = function () {
                             resolve();
                         };
 
                         transaction.onabort = transaction.onerror = function () {
-                            var err = req.error ? req.error : req.transaction?.error;
+                            const err = req.error ? req.error : req.transaction?.error;
                             reject(err);
                         };
                     } catch (e) {
@@ -787,9 +787,9 @@ function clear(this: Module, callback: Callback<void>) {
 }
 
 function length(this: Module, callback?: Callback<number>) {
-    var self = this;
+    const self = this;
 
-    var promise = new Promise<number>(function (resolve, reject) {
+    const promise = new Promise<number>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
@@ -798,8 +798,8 @@ function length(this: Module, callback?: Callback<number>) {
                     }
 
                     try {
-                        var store = transaction!.objectStore(self._dbInfo.storeName);
-                        var req = store.count();
+                        const store = transaction!.objectStore(self._dbInfo.storeName);
+                        const req = store.count();
 
                         req.onsuccess = function () {
                             resolve(req.result);
@@ -821,9 +821,9 @@ function length(this: Module, callback?: Callback<number>) {
 }
 
 function key(this: Module, n: number, callback?: Callback<string | null>) {
-    var self = this;
+    const self = this;
 
-    var promise = new Promise<string | null>(function (resolve, reject) {
+    const promise = new Promise<string | null>(function (resolve, reject) {
         if (n < 0) {
             resolve(null);
 
@@ -838,12 +838,12 @@ function key(this: Module, n: number, callback?: Callback<string | null>) {
                     }
 
                     try {
-                        var store = transaction!.objectStore(self._dbInfo.storeName);
-                        var advanced = false;
-                        var req = store.openKeyCursor();
+                        const store = transaction!.objectStore(self._dbInfo.storeName);
+                        const req = store.openKeyCursor();
+                        let advanced = false;
 
                         req.onsuccess = function () {
-                            var cursor = req.result;
+                            const cursor = req.result;
                             if (!cursor) {
                                 // this means there weren't enough keys
                                 resolve(null);
@@ -884,9 +884,9 @@ function key(this: Module, n: number, callback?: Callback<string | null>) {
 }
 
 function keys(this: Module, callback?: Callback<string[]>) {
-    var self = this;
+    const self = this;
 
-    var promise = new Promise<string[]>(function (resolve, reject) {
+    const promise = new Promise<string[]>(function (resolve, reject) {
         self.ready()
             .then(function () {
                 createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
@@ -895,12 +895,12 @@ function keys(this: Module, callback?: Callback<string[]>) {
                     }
 
                     try {
-                        var store = transaction!.objectStore(self._dbInfo.storeName);
-                        var req = store.openKeyCursor();
-                        var keys: string[] = [];
+                        const store = transaction!.objectStore(self._dbInfo.storeName);
+                        const req = store.openKeyCursor();
+                        const keys: string[] = [];
 
                         req.onsuccess = function () {
-                            var cursor = req.result;
+                            const cursor = req.result;
 
                             if (!cursor) {
                                 resolve(keys);
@@ -933,21 +933,21 @@ function dropInstance(
 ) {
     callback = getCallback.apply(this, arguments as any);
 
-    var currentConfig = this.config();
+    const currentConfig = this.config();
     _options = (typeof _options !== 'function' && _options) || {};
     if (!_options.name) {
         _options.name = _options.name || currentConfig.name;
         _options.storeName = _options.storeName || currentConfig.storeName;
     }
-    var options: DbInfo = {
+    const options: DbInfo = {
         name: _options.name,
         storeName: _options.storeName!,
         db: null,
         version: 0
     };
 
-    var self = this;
-    var promise;
+    const self = this;
+    let promise;
     if (!options.name) {
         promise = Promise.reject('Invalid arguments');
     } else {
@@ -959,7 +959,7 @@ function dropInstance(
                   const dbContext = dbContexts[options.name];
                   const forages = dbContext.forages;
                   dbContext.db = db;
-                  for (var i = 0; i < forages.length; i++) {
+                  for (let i = 0; i < forages.length; i++) {
                       forages[i]._dbInfo.db = db;
                   }
                   return db;
@@ -1051,7 +1051,7 @@ function dropInstance(
                     };
 
                     req.onupgradeneeded = () => {
-                        var db = req.result;
+                        const db = req.result;
                         db.deleteObjectStore(options.storeName);
                     };
 
@@ -1083,7 +1083,7 @@ function dropInstance(
     return promise;
 }
 
-var asyncStorage: Driver = {
+const asyncStorage: Driver = {
     _driver: 'asyncStorage',
     _initStorage: _initStorage,
     _support: isIndexedDBValid(),

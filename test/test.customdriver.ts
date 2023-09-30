@@ -5,7 +5,7 @@ mocha.setup({ asyncOnly: true });
 
 describe('When Custom Drivers are used', function () {
     'use strict';
-    var errorMessage =
+    const errorMessage =
         'Custom driver not compliant; see ' + 'https://mozilla.github.io/localForage/#definedriver';
 
     it('fails to define a no-name custom driver', function () {
@@ -117,7 +117,7 @@ describe('When Custom Drivers are used', function () {
     });
 
     it("defines a driver synchronously when it doesn't have _supports()", function () {
-        var customDriver = {
+        const customDriver = {
             _driver: 'dummyStorageDriver' + +new Date(),
             _initStorage: () => {},
             // _support: function() { return true; }
@@ -138,7 +138,7 @@ describe('When Custom Drivers are used', function () {
     });
 
     it('defines a driver synchronously when it has boolean _supports()', function () {
-        var customDriver = {
+        const customDriver = {
             _driver: 'dummyStorageDriver' + +new Date(),
             _initStorage: () => {},
             _support: true,
@@ -159,7 +159,7 @@ describe('When Custom Drivers are used', function () {
     });
 
     it('defines a driver asynchronously when _supports() returns a Promise<boolean>', function () {
-        var customDriver = {
+        const customDriver = {
             _driver: 'dummyStorageDriver' + +new Date(),
             _initStorage: () => {},
             _support: () => Promise.resolve(true),
@@ -217,7 +217,7 @@ describe('When Custom Drivers are used', function () {
 
     describe('when dropInstance is not defined', function () {
         it('rejects when it is used', function () {
-            var customDriver = {
+            const customDriver = {
                 _driver: 'dummyStorageDriver' + +new Date(),
                 _initStorage: () => {},
                 _support: () => Promise.resolve(true),
@@ -249,7 +249,7 @@ describe('When Custom Drivers are used', function () {
 
     describe('when dropInstance is defined', function () {
         it('is does not reject', function () {
-            var customDriver = {
+            const customDriver = {
                 _driver: 'dummyStorageDriver' + +new Date(),
                 _initStorage: () => {},
                 _support: () => Promise.resolve(true),

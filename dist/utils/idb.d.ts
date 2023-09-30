@@ -1,2 +1,2 @@
-declare var idb: IDBFactory;
+declare const idb: IDBFactory;
 export default idb;

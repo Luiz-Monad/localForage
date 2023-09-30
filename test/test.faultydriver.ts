@@ -5,7 +5,7 @@ mocha.setup({ asyncOnly: true });
 describe('When Driver Fails to Initialize', function () {
     'use strict';
 
-    var FAULTYDRIVERS = [localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE]
+    const FAULTYDRIVERS = [localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE]
         .filter(localforage.supports)
         .filter(function (driverName) {
             // FF doesn't allow you to override `localStorage.setItem`

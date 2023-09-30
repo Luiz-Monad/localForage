@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 mocha.setup({ asyncOnly: true });
 
-var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
+const DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
 
 DRIVERS.forEach(function (driverName) {
     if (
@@ -74,7 +74,7 @@ DRIVERS.forEach(function (driverName) {
 
         it('saves data', function () {
             return new Promise<void>(function (resolve, reject) {
-                var messageChannel = new MessageChannel();
+                const messageChannel = new MessageChannel();
                 messageChannel.port1.onmessage = function (event) {
                     expect(event.data.body).to.be.eq('I have been set using ' + driverName);
                     resolve();

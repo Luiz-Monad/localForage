@@ -13,7 +13,7 @@ function createBlob(parts: BlobPart[] | undefined, properties?: BlobPropertyBag)
         if (e.name !== 'TypeError') {
             throw e;
         }
-        var Builder =
+        const Builder =
             typeof BlobBuilder !== 'undefined'
                 ? BlobBuilder
                 : typeof MSBlobBuilder !== 'undefined'
@@ -21,8 +21,8 @@ function createBlob(parts: BlobPart[] | undefined, properties?: BlobPropertyBag)
                 : typeof MozBlobBuilder !== 'undefined'
                 ? MozBlobBuilder
                 : WebKitBlobBuilder;
-        var builder = new Builder!();
-        for (var i = 0; i < parts.length; i += 1) {
+        const builder = new Builder!();
+        for (let i = 0; i < parts.length; i += 1) {
             builder.append(parts[i]);
         }
         return builder.getBlob(properties.type);

@@ -1,37 +1,45 @@
-import { LocalForageComplete } from '../src/types';
+/* eslint-disable @typescript-eslint/ban-types */
+import { LocalForageComplete } from 'types';
 
 declare global {
-    declare var Modernizr: any;
-
-    declare var define: Function & { amd?: any };
-    declare var require: Function | undefined;
-    declare var importScripts: Function;
-
     type LocalForageDriver = LocalForageComplete;
-    declare var localforage: LocalForageComplete;
+    declare const localforage: LocalForageComplete;
+
+    declare const Modernizr: any;
+    declare const requirejs: any;
 
     interface Window {
         localforage: LocalForageDriver;
 
+        mochaResults: any;
+        requireTest: boolean | undefined;
+        callWhenReadyTest: boolean | undefined;
+    }
+
+    interface Console {
+        infoLogs: { args: any[] }[];
+    }
+}
+
+// polyfill types
+declare global {
+    // eslint-disable-next-line no-var
+    declare var require: Function | undefined; //must be var because of scope exporting.
+    declare const importScripts: Function;
+
+    interface Window {
         indexedDB: IDBFactory | undefined;
         webkitIndexedDB: IDBFactory | undefined;
         mozIndexedDB: IDBFactory | undefined;
         OIndexedDB: IDBFactory | undefined;
         msIndexedDB: IDBFactory | undefined;
 
-        mochaResults: any;
         oninstall: typeof onmessage;
         attachEvent: Function;
-        requireTest: boolean | undefined;
-        callWhenReadyTest: boolean | undefined;
     }
 
     interface MessageEvent {
         waitUntil(promise: Promise);
-    }
-
-    interface Console {
-        infoLogs: { args: any[] }[];
     }
 
     namespace Chai {
@@ -44,6 +52,35 @@ declare global {
         interface HookFunction {
             skip: PendingTestFunction;
         }
+    }
+}
+
+// copy from src/globals.d.ts
+declare global {
+    declare let indexedDB: IDBFactory | undefined;
+    declare let webkitIndexedDB: IDBFactory | undefined;
+    declare let mozIndexedDB: IDBFactory | undefined;
+    declare let OIndexedDB: IDBFactory | undefined;
+    declare let msIndexedDB: IDBFactory | undefined;
+
+    declare let BlobBuilder: BlobBuilder | undefined;
+    declare let MSBlobBuilder: BlobBuilder | undefined;
+    declare let MozBlobBuilder: BlobBuilder | undefined;
+    declare let WebKitBlobBuilder: BlobBuilder | undefined;
+
+    type BlobBuilder = {
+        new (): BlobBuilder;
+        getBlob(type?: string): Blob;
+        append(part: BlobPart): void;
+    };
+
+    interface Window {}
+
+    declare const openDatabase: WindowDatabase['openDatabase'];
+    interface SQLError {
+        //static class bug in the lib
+        QUOTA_ERR: number;
+        SYNTAX_ERR: number;
     }
 }
 

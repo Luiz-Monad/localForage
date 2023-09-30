@@ -4,37 +4,37 @@ import createBlob from './createBlob';
 // Sadly, the best way to save binary data in WebSQL/localStorage is serializing
 // it to Base64, so this is how we store it to prevent very strange errors with less
 // verbose ways of binary <-> string data storage.
-var BASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const BASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
-var BLOB_TYPE_PREFIX = '~~local_forage_type~';
-var BLOB_TYPE_PREFIX_REGEX = /^~~local_forage_type~([^~]+)~/;
+const BLOB_TYPE_PREFIX = '~~local_forage_type~';
+const BLOB_TYPE_PREFIX_REGEX = /^~~local_forage_type~([^~]+)~/;
 
-var SERIALIZED_MARKER = '__lfsc__:';
-var SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER.length;
+const SERIALIZED_MARKER = '__lfsc__:';
+const SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER.length;
 
 // OMG the serializations!
-var TYPE_ARRAYBUFFER = 'arbf';
-var TYPE_BLOB = 'blob';
-var TYPE_INT8ARRAY = 'si08';
-var TYPE_UINT8ARRAY = 'ui08';
-var TYPE_UINT8CLAMPEDARRAY = 'uic8';
-var TYPE_INT16ARRAY = 'si16';
-var TYPE_INT32ARRAY = 'si32';
-var TYPE_UINT16ARRAY = 'ur16';
-var TYPE_UINT32ARRAY = 'ui32';
-var TYPE_FLOAT32ARRAY = 'fl32';
-var TYPE_FLOAT64ARRAY = 'fl64';
-var TYPE_SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
+const TYPE_ARRAYBUFFER = 'arbf';
+const TYPE_BLOB = 'blob';
+const TYPE_INT8ARRAY = 'si08';
+const TYPE_UINT8ARRAY = 'ui08';
+const TYPE_UINT8CLAMPEDARRAY = 'uic8';
+const TYPE_INT16ARRAY = 'si16';
+const TYPE_INT32ARRAY = 'si32';
+const TYPE_UINT16ARRAY = 'ur16';
+const TYPE_UINT32ARRAY = 'ui32';
+const TYPE_FLOAT32ARRAY = 'fl32';
+const TYPE_FLOAT64ARRAY = 'fl64';
+const TYPE_SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
 
-var toString = Object.prototype.toString;
+const toString = Object.prototype.toString;
 
 function stringToBuffer(serializedString: string) {
     // Fill the string into a ArrayBuffer.
-    var bufferLength = serializedString.length * 0.75;
-    var len = serializedString.length;
-    var i;
-    var p = 0;
-    var encoded1, encoded2, encoded3, encoded4;
+    let bufferLength = serializedString.length * 0.75;
+    const len = serializedString.length;
+    let i;
+    let p = 0;
+    let encoded1, encoded2, encoded3, encoded4;
 
     if (serializedString[serializedString.length - 1] === '=') {
         bufferLength--;
@@ -43,8 +43,8 @@ function stringToBuffer(serializedString: string) {
         }
     }
 
-    var buffer = new ArrayBuffer(bufferLength);
-    var bytes = new Uint8Array(buffer);
+    const buffer = new ArrayBuffer(bufferLength);
+    const bytes = new Uint8Array(buffer);
 
     for (i = 0; i < len; i += 4) {
         encoded1 = BASE_CHARS.indexOf(serializedString[i]);
@@ -64,9 +64,9 @@ function stringToBuffer(serializedString: string) {
 // storage library.
 function bufferToString(buffer: ArrayBuffer) {
     // base64-arraybuffer
-    var bytes = new Uint8Array(buffer);
-    var base64String = '';
-    var i;
+    const bytes = new Uint8Array(buffer);
+    let base64String = '';
+    let i;
 
     for (i = 0; i < bytes.length; i += 3) {
         /*jslint bitwise: true */
@@ -92,7 +92,7 @@ function serialize<T>(
     value: ArrayBufferView | ArrayBuffer | Blob | T | null,
     callback: (onDone: string | Error | null, onError?: unknown) => void
 ) {
-    var valueType = '';
+    let valueType = '';
     if (value) {
         valueType = toString.call(value);
     }
@@ -111,8 +111,8 @@ function serialize<T>(
 
         // Convert binary arrays to a string and prefix the string with
         // a special marker.
-        var buffer;
-        var marker = SERIALIZED_MARKER;
+        let buffer;
+        let marker = SERIALIZED_MARKER;
 
         if (value instanceof ArrayBuffer) {
             buffer = value;
@@ -148,11 +148,11 @@ function serialize<T>(
         const blobValue = value as Blob;
 
         // Conver the blob to a binaryArray and then to a string.
-        var fileReader = new FileReader();
+        const fileReader = new FileReader();
 
         fileReader.onload = function () {
             // Backwards-compatible prefix for the blob type.
-            var str =
+            const str =
                 BLOB_TYPE_PREFIX +
                 blobValue.type +
                 '~' +
@@ -192,18 +192,18 @@ function deserialize<T>(value: string): ArrayBuffer | Blob | T {
     // The following code deals with deserializing some kind of Blob or
     // TypedArray. First we separate out the type of data we're dealing
     // with from the data itself.
-    var serializedString = value.substring(TYPE_SERIALIZED_MARKER_LENGTH);
-    var type = value.substring(SERIALIZED_MARKER_LENGTH, TYPE_SERIALIZED_MARKER_LENGTH);
+    let serializedString = value.substring(TYPE_SERIALIZED_MARKER_LENGTH);
+    const type = value.substring(SERIALIZED_MARKER_LENGTH, TYPE_SERIALIZED_MARKER_LENGTH);
 
-    var blobType;
+    let blobType;
     // Backwards-compatible blob type serialization strategy.
     // DBs created with older versions of localForage will simply not have the blob type.
     if (type === TYPE_BLOB && BLOB_TYPE_PREFIX_REGEX.test(serializedString)) {
-        var matcher = serializedString.match(BLOB_TYPE_PREFIX_REGEX)!;
+        const matcher = serializedString.match(BLOB_TYPE_PREFIX_REGEX)!;
         blobType = matcher[1];
         serializedString = serializedString.substring(matcher[0].length);
     }
-    var buffer = stringToBuffer(serializedString);
+    const buffer = stringToBuffer(serializedString);
 
     // Return the right type based on the code/type set during
     // serialization.
@@ -235,7 +235,7 @@ function deserialize<T>(value: string): ArrayBuffer | Blob | T {
     }
 }
 
-var localforageSerializer = {
+const localforageSerializer = {
     serialize: serialize,
     deserialize: deserialize,
     stringToBuffer: stringToBuffer,

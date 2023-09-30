@@ -2,10 +2,10 @@
     "root": true,
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": ["./tsconfig.json", "./test/tsconfig.json"]
+        "project": ["./tsconfig.json", "./test/tsconfig.json", "./typing-tests/tsconfig.json"]
     },
     "plugins": ["@typescript-eslint"],
-    "extends": "eslint:recommended",
+    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
     "env": {
         "browser": true,
         "es6": true,
@@ -16,35 +16,46 @@
         "no-unused-vars": "off",
         "no-prototype-builtins": "off",
         "no-dupe-class-members": "off",
-        "semi": [2, "always"],
-        "no-bitwise": 2,
-        "curly": 2,
-        "eqeqeq": 2,
-        "no-eq-null": 2,
-        "wrap-iife": [2, "inside"],
-        "@typescript-eslint/no-use-before-define": [
-            2,
-            {
-                "functions": false
-            }
-        ],
-        "new-cap": 2,
-        "no-caller": 2,
-        "no-console": 0,
-        "no-new": 2,
+        "semi": ["error", "always"],
+        "no-bitwise": "error",
+        "curly": "error",
+        "eqeqeq": "error",
+        "no-eq-null": "error",
+        "wrap-iife": ["error", "inside"],
+        "new-cap": "error",
+        "no-caller": "error",
+        "no-console": "off",
+        "no-new": "error",
         "quotes": [
-            2,
+            "error",
             "single",
             {
                 "avoidEscape": true
             }
         ],
-        "space-before-function-paren": [2, "never"],
-        "comma-dangle": [2, "never"],
-        "eol-last": 2,
-        "keyword-spacing": [2, {}],
-        "space-before-blocks": [2, "always"],
-        "consistent-this": [2, "self"]
+        "space-before-function-paren": [
+            "warn",
+            {
+                "anonymous": "always",
+                "named": "never",
+                "asyncArrow": "always"
+            }
+        ],
+        "comma-dangle": ["error", "never"],
+        "eol-last": "error",
+        "keyword-spacing": ["error", {}],
+        "space-before-blocks": ["error", "always"],
+        "consistent-this": ["error", "self"],
+        "prefer-spread": "off",
+        "prefer-rest-params": "off",
+        "@typescript-eslint/no-use-before-define": [
+            "error",
+            {
+                "functions": false
+            }
+        ],
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-this-alias": "warn"
     },
     "globals": {
         "define": true,

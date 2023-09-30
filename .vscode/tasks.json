@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "grunt",
+            "task": "eslint",
+            "problemMatcher": ["$eslint-stylish"],
+            "label": "grunt: eslint"
+        },
+        {
+            "type": "grunt",
+            "task": "ts",
+            "problemMatcher": ["$tsc"],
+            "label": "grunt: ts"
+        }
+    ]
+}

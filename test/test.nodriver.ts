@@ -5,7 +5,7 @@ mocha.setup({ asyncOnly: true });
 describe('When No Drivers Are Available', function () {
     'use strict';
 
-    var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
+    const DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
 
     xit('agrees with Modernizr on storage drivers support', async function () {
         /* Used version of Modernizr doesn't support dissabling INDEXEDDB */

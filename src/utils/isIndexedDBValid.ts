@@ -10,13 +10,13 @@ function isIndexedDBValid() {
         //
         // We test for openDatabase because IE Mobile identifies itself
         // as Safari. Oh the lulz...
-        var isSafari =
+        const isSafari =
             typeof openDatabase !== 'undefined' &&
             /(Safari|iPhone|iPad|iPod)/.test(navigator.userAgent) &&
             !/Chrome/.test(navigator.userAgent) &&
             !/BlackBerry/.test(navigator.platform);
 
-        var hasFetch =
+        const hasFetch =
             typeof fetch === 'function' && fetch.toString().indexOf('[native code') !== -1;
 
         // Safari <10.1 does not meet our requirements for IDB support

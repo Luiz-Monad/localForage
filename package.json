@@ -17,7 +17,7 @@
     },
     "scripts": {
         "build": "node -e \"require('grunt').cli()\" null build",
-        "prettify": "prettier --write \"src/**/*.js\" \"test/**/*.js\"",
+        "prettify": "prettier --write .",
         "publish-docs": "node -e \"require('grunt').cli()\" null copy build-rules-html publish-rules",
         "serve": "node -e \"require('grunt').cli()\" null serve",
         "test": "node -e \"require('grunt').cli()\" null test"
@@ -38,7 +38,9 @@
         "bundle-collapser": "^1.4.0",
         "chai": "^4.3.10",
         "cors": "^2.8.5",
+        "eslint": "^8.50.0",
         "eslint-config-prettier": "^9.0.0",
+        "eslint-plugin-prettier": "^5.0.0",
         "grunt": "^1.6.1",
         "grunt-babel": "^8.0.0",
         "grunt-browserify": "^6.0.0",

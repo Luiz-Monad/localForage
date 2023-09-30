@@ -2,13 +2,13 @@ import { expect } from 'chai';
 
 mocha.setup({ asyncOnly: true });
 
-var DRIVERS = [localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE];
+const DRIVERS = [localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE];
 
-var SUPPORTED_DRIVERS = DRIVERS.filter(function (driverName) {
+const SUPPORTED_DRIVERS = DRIVERS.filter(function (driverName) {
     return localforage.supports(driverName);
 });
 
-var driverApiMethods = ['getItem', 'setItem', 'clear', 'length', 'removeItem', 'key', 'keys'];
+const driverApiMethods = ['getItem', 'setItem', 'clear', 'length', 'removeItem', 'key', 'keys'];
 
 const indexedDB =
     // eslint-disable-next-line no-use-before-define
@@ -27,7 +27,7 @@ describe('localForage API', function () {
 });
 
 describe('localForage', function () {
-    var appropriateDriver =
+    const appropriateDriver =
         (localforage.supports(localforage.INDEXEDDB) && localforage.INDEXEDDB) ||
         (localforage.supports(localforage.WEBSQL) && localforage.WEBSQL) ||
         (localforage.supports(localforage.LOCALSTORAGE) && localforage.LOCALSTORAGE);
@@ -39,7 +39,7 @@ describe('localForage', function () {
             return localforage.ready().then(
                 function () {
                     if (window.requireTest) {
-                        var appropriateDriver1 =
+                        const appropriateDriver1 =
                             (localforage.supports(localforage.WEBSQL) && localforage.WEBSQL) ||
                             (localforage.supports(localforage.LOCALSTORAGE) &&
                                 localforage.LOCALSTORAGE);
@@ -80,7 +80,7 @@ describe('localForage', function () {
     });
 
     it('retrieves the serializer [promise]', function () {
-        var serializerPromise = localforage.getSerializer();
+        const serializerPromise = localforage.getSerializer();
         expect(serializerPromise).to.be.instanceOf(Promise);
         expect(serializerPromise.then).to.be.instanceOf(Function);
 
@@ -90,7 +90,7 @@ describe('localForage', function () {
     });
 
     it('does not support object parameter to setDriver', function () {
-        var driverPreferedOrder = {
+        const driverPreferedOrder = {
             '0': localforage.INDEXEDDB,
             '1': localforage.WEBSQL,
             '2': localforage.LOCALSTORAGE,
@@ -104,7 +104,7 @@ describe('localForage', function () {
     });
 
     it('skips drivers that fail to initilize', function () {
-        var failingStorageDriver = (function () {
+        const failingStorageDriver = (function () {
             function driverDummyMethod() {
                 return Promise.reject(new Error('Driver Method Failed.'));
             }
@@ -125,7 +125,7 @@ describe('localForage', function () {
             };
         })();
 
-        var driverPreferedOrder = [
+        const driverPreferedOrder = [
             failingStorageDriver._driver,
             localforage.INDEXEDDB,
             localforage.WEBSQL,
@@ -146,11 +146,11 @@ describe('localForage', function () {
     });
 
     describe('createInstance()', function () {
-        var oldConsoleInfo: typeof console.info;
+        let oldConsoleInfo: typeof console.info;
 
         before(function () {
             oldConsoleInfo = console.info;
-            var logs: typeof console.infoLogs = [];
+            const logs: typeof console.infoLogs = [];
             console.info = function () {
                 console.infoLogs.push({
                     args: arguments as any
@@ -165,9 +165,9 @@ describe('localForage', function () {
         });
 
         it('does not log unnecessary messages', function () {
-            var oldLogCount = console.infoLogs.length;
-            var localforage2 = localforage.createInstance();
-            var localforage3 = localforage.createInstance();
+            const oldLogCount = console.infoLogs.length;
+            const localforage2 = localforage.createInstance();
+            const localforage3 = localforage.createInstance();
 
             return Promise.all([
                 localforage.ready(),
@@ -180,8 +180,10 @@ describe('localForage', function () {
     });
 });
 
+const require: any = global.require;
+
 SUPPORTED_DRIVERS.forEach(function (driverName) {
-    if (global.require && 'asyncStorage' === driverName) {
+    if (require && 'asyncStorage' === driverName) {
         console.warn('asyncStorage with requirejs not working well');
         return;
     }
@@ -251,10 +253,10 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             const localforageIDB = localforage as any as import('drivers/indexeddb').Module;
 
             describe('Blob support', function () {
-                var transaction: IDBDatabase['transaction'];
-                var called: number;
-                var db: IDBDatabase;
-                var blob = new Blob([''], { type: 'image/png' });
+                let transaction: IDBDatabase['transaction'];
+                let called: number;
+                let db: IDBDatabase;
+                const blob = new Blob([''], { type: 'image/png' });
 
                 before(function () {
                     db = localforageIDB._dbInfo.db!;
@@ -355,12 +357,12 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             const localforageWSQL = localforage as any as import('drivers/websql').Module;
 
             describe('on QUOTA ERROR', function () {
-                var transaction: Database['transaction'];
-                var called: number;
-                var db: Database;
+                let transaction: Database['transaction'];
+                let called: number;
+                let db: Database;
 
                 function getQuotaErrorCode(transaction: Database['transaction']) {
-                    return new Promise<any>(function (resolve, reject) {
+                    return new Promise<any>(function (resolve) {
                         transaction.call(
                             db,
                             function (t) {
@@ -387,7 +389,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         db.transaction = transaction;
 
                         getQuotaErrorCode(transaction).then(function (QUOTA_ERR) {
-                            var error = new Error() as any as SQLError;
+                            const error = new Error() as any as SQLError;
                             error.code = QUOTA_ERR;
                             error.QUOTA_ERR = QUOTA_ERR;
                             errFn!(error);
@@ -420,8 +422,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         return localforage.getItem('officeY', function (err, value) {
                             expect(value).to.be.eq(setValue);
 
-                            var accumulator: any = {};
-                            var iterationNumbers: number[] = [];
+                            const accumulator: any = {};
+                            const iterationNumbers: number[] = [];
 
                             return localforage.iterate(
                                 function (value, key, iterationNumber) {
@@ -441,8 +443,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('should iterate [promise]', function () {
-            var accumulator: any = {};
-            var iterationNumbers: number[] = [];
+            const accumulator: any = {};
+            const iterationNumbers: number[] = [];
 
             return localforage
                 .setItem('officeX', 'InitechX')
@@ -474,7 +476,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('should break iteration with defined return value [callback]', function () {
-            var breakCondition = 'Some value!';
+            const breakCondition = 'Some value!';
 
             return localforage.setItem('officeX', 'InitechX', function (err, setValue) {
                 expect(setValue).to.be.eq('InitechX');
@@ -507,7 +509,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('should break iteration with defined return value [promise]', function () {
-            var breakCondition = 'Some value!';
+            const breakCondition = 'Some value!';
 
             return localforage
                 .setItem('officeX', 'InitechX')
@@ -544,8 +546,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                 .then(function () {
                     // Loop through all key/value pairs; {local: 'forage'} set
                     // manually should not be returned.
-                    var numberOfItems = 0;
-                    var iterationNumberConcat = '';
+                    let numberOfItems = 0;
+                    let iterationNumberConcat = '';
 
                     localStorage.setItem('locals', 'forages');
 
@@ -1015,8 +1017,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         this.timeout(30000);
 
-        var localforage2 = {} as LocalForageDriver;
-        var localforage3 = {} as LocalForageDriver;
+        let localforage2 = {} as LocalForageDriver;
+        let localforage3 = {} as LocalForageDriver;
 
         before(function () {
             return prepareStorage('storage2').then(function () {
@@ -1114,25 +1116,25 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('chains operation on multiple stores', function () {
-            var localforage1 = localforage.createInstance({
+            const localforage1 = localforage.createInstance({
                 name: 'storage3',
                 storeName: 'store1',
                 size: 1024
             });
 
-            var localforage2 = localforage.createInstance({
+            const localforage2 = localforage.createInstance({
                 name: 'storage3',
                 storeName: 'store2',
                 size: 1024
             });
 
-            var localforage3 = localforage.createInstance({
+            const localforage3 = localforage.createInstance({
                 name: 'storage3',
                 storeName: 'store3',
                 size: 1024
             });
 
-            var promise1 = localforage1
+            const promise1 = localforage1
                 .setItem('key', 'value1')
                 .then(function () {
                     return localforage1.getItem('key');
@@ -1141,7 +1143,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     expect(value).to.be.eq('value1');
                 });
 
-            var promise2 = localforage2
+            const promise2 = localforage2
                 .setItem('key', 'value2')
                 .then(function () {
                     return localforage2.getItem('key');
@@ -1150,7 +1152,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     expect(value).to.be.eq('value2');
                 });
 
-            var promise3 = localforage3
+            const promise3 = localforage3
                 .setItem('key', 'value3')
                 .then(function () {
                     return localforage3.getItem('key');
@@ -1163,9 +1165,9 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('can create multiple instances of the same store', function () {
-            var localforage1 = {} as LocalForageDriver;
-            var localforage2 = {} as LocalForageDriver;
-            var localforage3 = {} as LocalForageDriver;
+            let localforage1 = {} as LocalForageDriver;
+            let localforage2 = {} as LocalForageDriver;
+            let localforage3 = {} as LocalForageDriver;
 
             return Promise.resolve()
                 .then(function () {
@@ -1228,10 +1230,10 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('can create multiple instances of the same store and do concurrent operations', function () {
-            var localforage1 = {} as LocalForageDriver;
-            var localforage2 = {} as LocalForageDriver;
-            var localforage3 = {} as LocalForageDriver;
-            var localforage3b = {} as LocalForageDriver;
+            let localforage1 = {} as LocalForageDriver;
+            let localforage2 = {} as LocalForageDriver;
+            let localforage3 = {} as LocalForageDriver;
+            let localforage3b = {} as LocalForageDriver;
 
             return Promise.resolve()
                 .then(function () {
@@ -1267,7 +1269,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     return localforage3b.ready();
                 })
                 .then(function () {
-                    var promise1 = localforage1
+                    const promise1 = localforage1
                         .setItem('key1', 'value1')
                         .then(function () {
                             return localforage1.getItem('key1');
@@ -1276,7 +1278,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             expect(value).to.be.eq('value1');
                         });
 
-                    var promise2 = localforage2
+                    const promise2 = localforage2
                         .setItem('key2', 'value2')
                         .then(function () {
                             return localforage2.getItem('key2');
@@ -1285,7 +1287,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             expect(value).to.be.eq('value2');
                         });
 
-                    var promise3 = localforage3
+                    const promise3 = localforage3
                         .setItem('key3', 'value3')
                         .then(function () {
                             return localforage3.getItem('key3');
@@ -1294,7 +1296,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                             expect(value).to.be.eq('value3');
                         });
 
-                    var promise4 = localforage3b
+                    const promise4 = localforage3b
                         .setItem('key3', 'value3')
                         .then(function () {
                             return localforage3.getItem('key3');
@@ -1308,31 +1310,31 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('can create multiple instances of the same store concurrently', function () {
-            var localforage1 = localforage.createInstance({
+            const localforage1 = localforage.createInstance({
                 name: 'commonStorage3',
                 storeName: 'commonStore',
                 size: 1024
             });
 
-            var localforage2 = localforage.createInstance({
+            const localforage2 = localforage.createInstance({
                 name: 'commonStorage3',
                 storeName: 'commonStore',
                 size: 1024
             });
 
-            var localforage3 = localforage.createInstance({
+            const localforage3 = localforage.createInstance({
                 name: 'commonStorage3',
                 storeName: 'commonStore',
                 size: 1024
             });
 
-            var localforage3b = localforage.createInstance({
+            const localforage3b = localforage.createInstance({
                 name: 'commonStorage3',
                 storeName: 'commonStore',
                 size: 1024
             });
 
-            var promise1 = localforage1
+            const promise1 = localforage1
                 .setItem('key1', 'value1')
                 .then(function () {
                     return localforage1.getItem('key1');
@@ -1341,7 +1343,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     expect(value).to.be.eq('value1');
                 });
 
-            var promise2 = localforage2
+            const promise2 = localforage2
                 .setItem('key2', 'value2')
                 .then(function () {
                     return localforage2.getItem('key2');
@@ -1350,7 +1352,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     expect(value).to.be.eq('value2');
                 });
 
-            var promise3 = localforage3
+            const promise3 = localforage3
                 .setItem('key3', 'value3')
                 .then(function () {
                     return localforage3.getItem('key3');
@@ -1359,7 +1361,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     expect(value).to.be.eq('value3');
                 });
 
-            var promise4 = localforage3b
+            const promise4 = localforage3b
                 .setItem('key3', 'value3')
                 .then(function () {
                     return localforage3.getItem('key3');
@@ -1375,7 +1377,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
     describe(driverName + ' driver', function () {
         'use strict';
 
-        var driverPreferedOrder: string[];
+        let driverPreferedOrder: string[];
 
         before(function () {
             // add some unsupported drivers before
@@ -1407,7 +1409,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
     describe(driverName + ' driver when the callback throws an Error', function () {
         'use strict';
 
-        var testObj = {
+        const testObj = {
             throwFunc: function () {
                 testObj.throwFuncCalls++;
                 throw new Error('Thrown test error');
@@ -1467,7 +1469,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         this.timeout(30000);
 
-        var _oldReady: typeof localforage.ready;
+        let _oldReady: typeof localforage.ready;
 
         beforeEach(function () {
             _oldReady = localforage.ready;
@@ -1494,7 +1496,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 DRIVERS.forEach(function (driverName) {
     describe(driverName + ' driver instance', function () {
         it('creates a new instance and sets the driver', function () {
-            var localforage2 = localforage.createInstance({
+            const localforage2 = localforage.createInstance({
                 name: 'storage2',
                 driver: driverName,
                 // We need a small value here
@@ -1532,60 +1534,60 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
             };
         }
 
-        var dropStoreDbName = 'dropStoreDb';
+        const dropStoreDbName = 'dropStoreDb';
 
-        var nodropInstance = {} as LocalForageDriver;
-        var nodropInstanceOptions = setCommonOpts({
+        let nodropInstance = {} as LocalForageDriver;
+        const nodropInstanceOptions = setCommonOpts({
             name: dropStoreDbName,
             storeName: 'nodropStore'
         });
 
-        var dropStoreInstance1 = {} as LocalForageDriver;
-        var dropStoreInstance1Options = setCommonOpts({
+        let dropStoreInstance1 = {} as LocalForageDriver;
+        const dropStoreInstance1Options = setCommonOpts({
             name: dropStoreDbName,
             storeName: 'dropStore'
         });
 
-        var dropStoreInstance2 = {} as LocalForageDriver;
-        var dropStoreInstance2Options = setCommonOpts({
+        let dropStoreInstance2 = {} as LocalForageDriver;
+        const dropStoreInstance2Options = setCommonOpts({
             name: dropStoreDbName,
             storeName: 'dropStore2'
         });
 
-        var dropStoreInstance3 = {} as LocalForageDriver;
-        var dropStoreInstance3Options = setCommonOpts({
+        let dropStoreInstance3 = {} as LocalForageDriver;
+        const dropStoreInstance3Options = setCommonOpts({
             name: dropStoreDbName,
             storeName: 'dropStore3'
         });
 
-        var dropDbInstance = {} as LocalForageDriver;
-        var dropDbInstanceOptions = setCommonOpts({
+        let dropDbInstance = {} as LocalForageDriver;
+        const dropDbInstanceOptions = setCommonOpts({
             name: 'dropDb',
             storeName: 'dropStore'
         });
 
-        var dropDb2Instance = {} as LocalForageDriver;
-        var dropDb2InstanceOptions = setCommonOpts({
+        let dropDb2Instance = {} as LocalForageDriver;
+        const dropDb2InstanceOptions = setCommonOpts({
             name: 'dropDb2',
             storeName: 'dropStore'
         });
 
-        var dropDb3name = 'dropDb3';
+        const dropDb3name = 'dropDb3';
 
-        var dropDb3Instance1 = {} as LocalForageDriver;
-        var dropDb3Instance1Options = setCommonOpts({
+        let dropDb3Instance1 = {} as LocalForageDriver;
+        const dropDb3Instance1Options = setCommonOpts({
             name: dropDb3name,
             storeName: 'dropStore1'
         });
 
-        var dropDb3Instance2 = {} as LocalForageDriver;
-        var dropDb3Instance2Options = setCommonOpts({
+        let dropDb3Instance2 = {} as LocalForageDriver;
+        const dropDb3Instance2Options = setCommonOpts({
             name: dropDb3name,
             storeName: 'dropStore2'
         });
 
-        var dropDb3Instance3 = {} as LocalForageDriver;
-        var dropDb3Instance3Options = setCommonOpts({
+        let dropDb3Instance3 = {} as LocalForageDriver;
+        const dropDb3Instance3Options = setCommonOpts({
             name: dropDb3name,
             storeName: 'dropStore3'
         });
@@ -1633,9 +1635,9 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         function expectStoreToNotExistAsync(options: { name: string; storeName: string }) {
             return new Promise<void>(function (resolve, reject) {
                 if (driverName === localforage.INDEXEDDB) {
-                    var req = indexedDB.open(options.name);
+                    const req = indexedDB.open(options.name);
                     req.onsuccess = function () {
-                        var db = req.result;
+                        const db = req.result;
                         if (!db) {
                             reject();
                             return;
@@ -1646,7 +1648,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     };
                     req.onerror = req.onblocked = reject;
                 } else if (driverName === localforage.WEBSQL) {
-                    var db = openDatabase(options.name, '', '', 0);
+                    const db = openDatabase(options.name, '', '', 0);
                     db.transaction(function (t) {
                         t.executeSql(
                             "SELECT name FROM sqlite_master WHERE type='table' AND name = ?",
@@ -1662,8 +1664,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         );
                     }, reject);
                 } else if (driverName === localforage.LOCALSTORAGE) {
-                    var keyPrefix = (function _getKeyPrefix(options, defaultConfig) {
-                        var keyPrefix = options.name + '/';
+                    const keyPrefix = (function _getKeyPrefix(options, defaultConfig) {
+                        let keyPrefix = options.name + '/';
 
                         if (options.storeName !== defaultConfig.storeName) {
                             keyPrefix += options.storeName + '/';
@@ -1674,8 +1676,8 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         storeName: 'keyvaluepairs'
                     });
 
-                    var foundLocalStorageKey = false;
-                    for (var i = 0, length = localStorage.length; i < length; i++) {
+                    let foundLocalStorageKey = false;
+                    for (let i = 0, length = localStorage.length; i < length; i++) {
                         if (localStorage.key(i)?.indexOf(keyPrefix) === 0) {
                             foundLocalStorageKey = true;
                             break;
@@ -1723,7 +1725,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('drops an other instance without affecting the rest', function () {
-            var opts = {
+            const opts = {
                 name: dropStoreInstance2Options.name,
                 storeName: dropStoreInstance2Options.storeName
             };
@@ -1737,7 +1739,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('the dropped instance is completely removed', function () {
-            var opts = {
+            const opts = {
                 name: dropStoreInstance3Options.name,
                 storeName: dropStoreInstance3Options.storeName
             };
@@ -1747,7 +1749,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('resolves when trying to drop a store that does not exit', function () {
-            var opts = {
+            const opts = {
                 name: dropStoreInstance3Options.name,
                 storeName: 'NotExistingStore' + Date.now()
             };
@@ -1757,9 +1759,9 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         function expectDBToNotExistAsync(options: { name: string }) {
             return new Promise<void>(function (resolve, reject) {
                 if (driverName === localforage.INDEXEDDB) {
-                    var req = indexedDB.open(options.name);
+                    const req = indexedDB.open(options.name);
                     req.onsuccess = function () {
-                        var db = req.result;
+                        const db = req.result;
                         if (!db) {
                             reject();
                             return;
@@ -1770,13 +1772,13 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                     };
                     req.onerror = req.onblocked = reject;
                 } else if (driverName === localforage.WEBSQL) {
-                    var db = openDatabase(options.name, '', '', 0);
+                    const db = openDatabase(options.name, '', '', 0);
                     db.transaction(function (t) {
                         t.executeSql(
                             "SELECT name FROM sqlite_master WHERE type='table'",
                             [],
                             function (t, results) {
-                                var stores = Array.prototype.filter.call(
+                                const stores = Array.prototype.filter.call(
                                     results.rows,
                                     function (obj) {
                                         return obj && obj.name && obj.name.indexOf('__') !== 0;
@@ -1792,12 +1794,12 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
                         );
                     }, reject);
                 } else if (driverName === localforage.LOCALSTORAGE) {
-                    var keyPrefix = (function _getKeyPrefix(options) {
+                    const keyPrefix = (function _getKeyPrefix(options) {
                         return options.name + '/';
                     })(options);
 
-                    var foundLocalStorageKey = false;
-                    for (var i = 0, length = localStorage.length; i < length; i++) {
+                    let foundLocalStorageKey = false;
+                    for (let i = 0, length = localStorage.length; i < length; i++) {
                         if (localStorage.key(i)?.indexOf(keyPrefix) === 0) {
                             foundLocalStorageKey = true;
                             break;
@@ -1812,7 +1814,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         }
 
         it('the dropped "DB" can be recreated', function () {
-            var opts = {
+            const opts = {
                 name: dropDbInstanceOptions.name
             };
             return dropDbInstance.dropInstance!(opts)
@@ -1825,7 +1827,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('the dropped "DB" is completely removed', function () {
-            var opts = {
+            const opts = {
                 name: dropDb2InstanceOptions.name
             };
             return dropDb2Instance.dropInstance!(opts).then(function () {
@@ -1834,7 +1836,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('resolves when trying to drop a store of a "DB" that does not exit', function () {
-            var opts = {
+            const opts = {
                 name: 'NotExistingDB' + Date.now(),
                 storeName: 'NotExistingStore' + Date.now()
             };
@@ -1842,14 +1844,14 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('resolves when trying to drop a "DB" that does not exist', function () {
-            var opts = {
+            const opts = {
                 name: 'NotExistingDB' + Date.now()
             };
             return dropStoreInstance3.dropInstance!(opts);
         });
 
         it('drops a "DB" that we previously dropped a store', function () {
-            var opts = {
+            const opts = {
                 name: dropStoreInstance3Options.name
             };
             return dropStoreInstance3.dropInstance!(opts).then(function () {
@@ -1858,7 +1860,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('drops a "DB" after dropping all its stores', function () {
-            var opts = {
+            const opts = {
                 name: dropDb3name
             };
             // Before trying to drop a different store/DB

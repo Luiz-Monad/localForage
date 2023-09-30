@@ -396,8 +396,8 @@ function _tryReconnect(dbInfo) {
     // store the latest db reference
     // in case the db was upgraded
     dbInfo.db = dbContext.db = db;
-    for (var i = 0; i < forages.length; i++) {
-      forages[i]._dbInfo.db = db;
+    for (var _i = 0; _i < forages.length; _i++) {
+      forages[_i]._dbInfo.db = db;
     }
   })["catch"](function (err) {
     _rejectReadiness(dbInfo, err);
@@ -506,11 +506,11 @@ function _initStorage(options) {
     self._dbInfo = dbInfo;
     // Share the final connection amongst related localForages.
     for (var k = 0; k < forages.length; k++) {
-      var forage = forages[k];
-      if (forage !== self) {
+      var _forage = forages[k];
+      if (_forage !== self) {
         // Self is already up-to-date.
-        forage._dbInfo.db = dbInfo.db;
-        forage._dbInfo.version = dbInfo.version;
+        _forage._dbInfo.db = dbInfo.db;
+        _forage._dbInfo.version = dbInfo.version;
       }
     }
   });
@@ -759,8 +759,8 @@ function key(n, callback) {
         }
         try {
           var store = transaction.objectStore(self._dbInfo.storeName);
-          var advanced = false;
           var req = store.openKeyCursor();
+          var advanced = false;
           req.onsuccess = function () {
             var cursor = req.result;
             if (!cursor) {
@@ -807,14 +807,14 @@ function keys(callback) {
         try {
           var store = transaction.objectStore(self._dbInfo.storeName);
           var req = store.openKeyCursor();
-          var keys = [];
+          var _keys = [];
           req.onsuccess = function () {
             var cursor = req.result;
             if (!cursor) {
-              resolve(keys);
+              resolve(_keys);
               return;
             }
-            keys.push(cursor.key);
+            _keys.push(cursor.key);
             cursor["continue"]();
           };
           req.onerror = function () {
@@ -892,9 +892,9 @@ function dropInstance(_options, callback) {
         });
         return dropDBPromise.then(function (db) {
           dbContext.db = db;
-          for (var _i = 0; _i < forages.length; _i++) {
-            var _forage = forages[_i];
-            _advanceReadiness(_forage._dbInfo);
+          for (var _i2 = 0; _i2 < forages.length; _i2++) {
+            var _forage2 = forages[_i2];
+            _advanceReadiness(_forage2._dbInfo);
           }
         })["catch"](function (err) {
           (_rejectReadiness(options, err) || Promise.resolve())["catch"](function () {});
@@ -936,9 +936,9 @@ function dropInstance(_options, callback) {
         return dropObjectPromise.then(function (db) {
           dbContext.db = db;
           for (var j = 0; j < forages.length; j++) {
-            var _forage2 = forages[j];
-            _forage2._dbInfo.db = db;
-            _advanceReadiness(_forage2._dbInfo);
+            var _forage3 = forages[j];
+            _forage3._dbInfo.db = db;
+            _advanceReadiness(_forage3._dbInfo);
           }
         })["catch"](function (err) {
           (_rejectReadiness(options, err) || Promise.resolve())["catch"](function () {});
@@ -1619,9 +1619,9 @@ function clear$2(callback) {
   var promise = self.ready().then(function () {
     var keyPrefix = self._dbInfo.keyPrefix;
     for (var i = localStorage.length - 1; i >= 0; i--) {
-      var key = localStorage.key(i);
-      if (key.indexOf(keyPrefix) === 0) {
-        localStorage.removeItem(key);
+      var _key = localStorage.key(i);
+      if (_key.indexOf(keyPrefix) === 0) {
+        localStorage.removeItem(_key);
       }
     }
   });
@@ -1666,11 +1666,11 @@ function iterate$2(iterator, callback) {
     // See: github.com/mozilla/localForage/pull/435#discussion_r38061530
     var iterationNumber = 1;
     for (var i = 0; i < length; i++) {
-      var key = localStorage.key(i);
-      if (key.indexOf(keyPrefix) !== 0) {
+      var _key2 = localStorage.key(i);
+      if (_key2.indexOf(keyPrefix) !== 0) {
         continue;
       }
-      var svalue = localStorage.getItem(key);
+      var svalue = localStorage.getItem(_key2);
       var ovalue = null;
       var value = null;
       // If a result was found, parse it from the serialized
@@ -1680,7 +1680,7 @@ function iterate$2(iterator, callback) {
       if (svalue) {
         ovalue = dbInfo.serializer.deserialize(svalue);
       }
-      value = iterator(ovalue, key.substring(keyPrefixLength), iterationNumber++);
+      value = iterator(ovalue, _key2.substring(keyPrefixLength), iterationNumber++);
       if (value !== void 0) {
         return value;
       }
@@ -1810,9 +1810,9 @@ function dropInstance$2(_options, callback) {
       }
     }).then(function (keyPrefix) {
       for (var i = localStorage.length - 1; i >= 0; i--) {
-        var key = localStorage.key(i);
-        if (key.indexOf(keyPrefix) === 0) {
-          localStorage.removeItem(key);
+        var _key3 = localStorage.key(i);
+        if (_key3.indexOf(keyPrefix) === 0) {
+          localStorage.removeItem(_key3);
         }
       }
     });
@@ -1882,16 +1882,17 @@ function callWhenReady(localForageInstance, libraryMethod) {
     });
   };
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function extend(target, source, source2) {
   for (var i = 1; i < arguments.length; i++) {
     var arg = arguments[i];
     if (arg) {
-      for (var _key in arg) {
-        if (arg.hasOwnProperty(_key)) {
-          if (isArray(arg[_key])) {
-            arguments[0][_key] = arg[_key].slice();
+      for (var _key4 in arg) {
+        if (arg.hasOwnProperty(_key4)) {
+          if (isArray(arg[_key4])) {
+            arguments[0][_key4] = arg[_key4].slice();
           } else {
-            arguments[0][_key] = arg[_key];
+            arguments[0][_key4] = arg[_key4];
           }
         }
       }
@@ -1993,8 +1994,8 @@ var LocalForage = /*#__PURE__*/function () {
                 return promise;
               };
             };
-            for (var _i2 = 0, _len = OptionalDriverMethods.length; _i2 < _len; _i2++) {
-              var optionalDriverMethod = OptionalDriverMethods[_i2];
+            for (var _i3 = 0, _len = OptionalDriverMethods.length; _i3 < _len; _i3++) {
+              var optionalDriverMethod = OptionalDriverMethods[_i3];
               if (!driverObject[optionalDriverMethod]) {
                 driverObject[optionalDriverMethod] = methodNotImplementedFactory(optionalDriverMethod);
               }

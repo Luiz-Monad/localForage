@@ -23,13 +23,15 @@
         "checkJs": true,
 
         "rootDir": "../",
-        "outDir": ""
+        "outDir": "",
+
+        "baseUrl": "../build/",
+        "paths": {
+            "localforage": ["./localforage.d.ts"],
+            "types": ["./types.d.ts"],
+            "utils/serializer": ["./utils/serializer"]
+        }
     },
-    "files": [
-        "../build/types.d.ts",
-        "../build/localforage.d.ts",
-        "../src/globals.d.ts",
-        "./localforage-tests.ts"
-    ],
+    "files": ["../src/globals.d.ts", "./localforage-tests.ts"],
     "exclude": ["../node_modules/**/*", "./build/**/*", "./test/**/*"]
 }

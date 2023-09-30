@@ -1,9 +1,10 @@
+import 'mocha';
 mocha.setup('bdd');
 
-var require: any = global.require;
+const require: any = global.require;
 
 beforeEach(function (done) {
-    var previousDriver = localforage.driver();
+    let previousDriver = localforage.driver();
 
     function rerequirelocalforage() {
         // The API method stubs inserted by callWhenReady must be tested before

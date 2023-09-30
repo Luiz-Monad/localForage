@@ -12,7 +12,7 @@ function createBlob(parts: BlobPart[] | undefined, properties?: BlobPropertyBag)
         if (e.name !== 'TypeError') {
             throw e;
         }
-        var Builder =
+        const Builder =
             typeof BlobBuilder !== 'undefined'
                 ? BlobBuilder
                 : typeof MSBlobBuilder !== 'undefined'
@@ -20,15 +20,15 @@ function createBlob(parts: BlobPart[] | undefined, properties?: BlobPropertyBag)
                 : typeof MozBlobBuilder !== 'undefined'
                 ? MozBlobBuilder
                 : WebKitBlobBuilder;
-        var builder = new Builder!();
-        for (var i = 0; i < parts.length; i += 1) {
+        const builder = new Builder!();
+        for (let i = 0; i < parts.length; i += 1) {
             builder.append(parts[i]);
         }
         return builder.getBlob(properties.type);
     }
 }
 
-var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
+const DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
 
 DRIVERS.forEach(function (driverName) {
     if (
@@ -225,7 +225,7 @@ DRIVERS.forEach(function (driverName) {
                 });
         });
 
-        var arrayToSave = [2, 'one', true];
+        const arrayToSave = [2, 'one', true];
         it('saves an array [callback]', function (done) {
             localforage.setItem('array', arrayToSave, function (err, setValue) {
                 expect(setValue!.length).to.be.eq(arrayToSave.length);
@@ -256,7 +256,7 @@ DRIVERS.forEach(function (driverName) {
                 });
         });
 
-        var objectToSave = {
+        const objectToSave = {
             floating: 43.01,
             nested: {
                 array: [1, 2, 3]
@@ -321,8 +321,8 @@ DRIVERS.forEach(function (driverName) {
 
         // Skip binary (ArrayBuffer) data tests if Array Buffer isn't supported.
         if (typeof ArrayBuffer !== 'undefined') {
-            var runBinaryTest = function (url: string, done: Mocha.Done) {
-                var request = new XMLHttpRequest();
+            const runBinaryTest = function (url: string, done: Mocha.Done) {
+                const request = new XMLHttpRequest();
 
                 request.open('GET', url, true);
                 request.responseType = 'arraybuffer';
@@ -330,7 +330,7 @@ DRIVERS.forEach(function (driverName) {
                 // When the AJAX state changes, save the photo locally.
                 request.onreadystatechange = function () {
                     if (request.readyState === request.DONE) {
-                        var response = request.response;
+                        const response = request.response;
                         localforage
                             .setItem('ab', response, function (err, sab) {
                                 expect(sab.toString()).to.be.eq('[object ArrayBuffer]');
@@ -373,10 +373,10 @@ DRIVERS.forEach(function (driverName) {
         // Skip binary(Blob) data tests if Blob isn't supported.
         if (typeof Blob === 'function') {
             it('saves binary (Blob) data', function (done) {
-                var fileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                var mimeString = 'text/html';
+                const fileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                const mimeString = 'text/html';
 
-                var testBlob = createBlob(fileParts, { type: mimeString });
+                const testBlob = createBlob(fileParts, { type: mimeString });
 
                 localforage
                     .setItem('blob', testBlob, function (err, blob) {
@@ -401,10 +401,10 @@ DRIVERS.forEach(function (driverName) {
 
         if (typeof Blob === 'function') {
             it('saves binary (Blob) data, iterate back', function (done) {
-                var fileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                var mimeString = 'text/html';
+                const fileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                const mimeString = 'text/html';
 
-                var testBlob = createBlob(fileParts, { type: mimeString });
+                const testBlob = createBlob(fileParts, { type: mimeString });
 
                 localforage
                     .setItem('blob', testBlob, function (err, blob) {
@@ -433,7 +433,7 @@ DRIVERS.forEach(function (driverName) {
     describe('Typed Array handling in ' + driverName, function () {
         if (typeof Int8Array !== 'undefined') {
             it('saves an Int8Array', function (done) {
-                var array = new Int8Array(8);
+                const array = new Int8Array(8);
                 array[2] = 65;
                 array[4] = 0;
 
@@ -454,7 +454,7 @@ DRIVERS.forEach(function (driverName) {
 
         if (typeof Uint8Array !== 'undefined') {
             it('saves an Uint8Array', function (done) {
-                var array = new Uint8Array(8);
+                const array = new Uint8Array(8);
                 array[0] = 65;
                 array[4] = 0;
 
@@ -475,7 +475,7 @@ DRIVERS.forEach(function (driverName) {
 
         if (typeof Uint8ClampedArray !== 'undefined') {
             it('saves an Uint8ClampedArray', function (done) {
-                var array = new Uint8ClampedArray(8);
+                const array = new Uint8ClampedArray(8);
                 array[0] = 0;
                 array[1] = 93;
                 array[2] = 350;
@@ -499,7 +499,7 @@ DRIVERS.forEach(function (driverName) {
 
         if (typeof Int16Array !== 'undefined') {
             it('saves an Int16Array', function (done) {
-                var array = new Int16Array(8);
+                const array = new Int16Array(8);
                 array[0] = 65;
                 array[4] = 0;
 
@@ -520,7 +520,7 @@ DRIVERS.forEach(function (driverName) {
 
         if (typeof Uint16Array !== 'undefined') {
             it('saves an Uint16Array', function (done) {
-                var array = new Uint16Array(8);
+                const array = new Uint16Array(8);
                 array[0] = 65;
                 array[4] = 0;
 
@@ -541,7 +541,7 @@ DRIVERS.forEach(function (driverName) {
 
         if (typeof Int32Array !== 'undefined') {
             it('saves an Int32Array', function (done) {
-                var array = new Int32Array(8);
+                const array = new Int32Array(8);
                 array[0] = 65;
                 array[4] = 0;
 
@@ -562,7 +562,7 @@ DRIVERS.forEach(function (driverName) {
 
         if (typeof Uint32Array !== 'undefined') {
             it('saves an Uint32Array', function (done) {
-                var array = new Uint32Array(8);
+                const array = new Uint32Array(8);
                 array[0] = 65;
                 array[4] = 0;
 
@@ -583,7 +583,7 @@ DRIVERS.forEach(function (driverName) {
 
         if (typeof Float32Array !== 'undefined') {
             it('saves a Float32Array', function (done) {
-                var array = new Float32Array(8);
+                const array = new Float32Array(8);
                 array[0] = 6.5;
                 array[4] = 0.1;
 
@@ -604,7 +604,7 @@ DRIVERS.forEach(function (driverName) {
 
         if (typeof Float64Array !== 'undefined') {
             it('saves a Float64Array', function (done) {
-                var array = new Float64Array(8);
+                const array = new Float64Array(8);
                 array[0] = 6.5;
                 array[4] = 0.1;
 

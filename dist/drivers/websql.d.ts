@@ -10,5 +10,5 @@ interface DbInfo extends Options {
     size: number;
     serializer: typeof serializer;
 }
-declare var webSQLStorage: Driver;
+declare const webSQLStorage: Driver;
 export default webSQLStorage;

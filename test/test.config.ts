@@ -5,14 +5,14 @@ mocha.setup({ asyncOnly: true });
 describe('Config API', function () {
     'use strict';
 
-    var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
-    var supportedDrivers: string[] = [];
+    const DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
+    let supportedDrivers: string[] = [];
 
     before(function () {
         this.defaultConfig = localforage.config();
 
         supportedDrivers = [];
-        for (var i = 0; i <= DRIVERS.length; i++) {
+        for (let i = 0; i <= DRIVERS.length; i++) {
             if (localforage.supports(DRIVERS[i])) {
                 supportedDrivers.push(DRIVERS[i]);
             }
@@ -39,7 +39,7 @@ describe('Config API', function () {
 
     it('returns error if API call was already made', function () {
         return localforage.length(function () {
-            var configResult = localforage.config({
+            const configResult = localforage.config({
                 description: '123',
                 driver: 'I a not set driver',
                 name: 'My Cool App',
@@ -47,7 +47,7 @@ describe('Config API', function () {
                 version: 2.0
             })!;
 
-            var error = "Error: Can't call config() after localforage " + 'has been used.';
+            const error = "Error: Can't call config() after localforage " + 'has been used.';
 
             expect(configResult).to.not.be.eq(true);
             expect(configResult.toString()).to.be.eq(error);
@@ -66,7 +66,7 @@ describe('Config API', function () {
     });
 
     it('sets new values and returns them properly', function () {
-        var secondSupportedDriver = supportedDrivers.length >= 2 ? supportedDrivers[1] : null;
+        const secondSupportedDriver = supportedDrivers.length >= 2 ? supportedDrivers[1] : null;
 
         localforage.config({
             description: 'The offline datastore for my cool app',
@@ -95,9 +95,9 @@ describe('Config API', function () {
 
     if (supportedDrivers.length >= 2) {
         it('sets new driver using preference order', function () {
-            var otherSupportedDrivers = supportedDrivers.slice(1);
+            const otherSupportedDrivers = supportedDrivers.slice(1);
 
-            var configResult = localforage.config({
+            const configResult = localforage.config({
                 driver: otherSupportedDrivers
             });
 
@@ -110,8 +110,8 @@ describe('Config API', function () {
     }
 
     it('it does not set an unsupported driver', function () {
-        var oldDriver = localforage.driver();
-        var configResult = localforage.config({
+        const oldDriver = localforage.driver();
+        const configResult = localforage.config({
             driver: 'I am a not supported driver'
         });
 
@@ -128,7 +128,7 @@ describe('Config API', function () {
     });
 
     it('it does not set an unsupported driver using preference order', function () {
-        var oldDriver = localforage.driver();
+        const oldDriver = localforage.driver();
         localforage.config({
             driver: ['I am a not supported driver', 'I am a an other not supported driver']
         });
@@ -174,11 +174,11 @@ describe('Config API', function () {
                     window.mozIndexedDB ||
                     window.OIndexedDB ||
                     window.msIndexedDB;
-                var req = indexedDB.open('My Cool App', 2.0);
+                const req = indexedDB.open('My Cool App', 2.0);
 
                 return new Promise<void>(function (resolve) {
                     req.onsuccess = function () {
-                        var dbValue = req.result
+                        const dbValue = req.result
                             .transaction('myStoreName', 'readonly')
                             .objectStore('myStoreName')
                             .get('some key');
@@ -195,7 +195,7 @@ describe('Config API', function () {
                                 'SELECT * FROM myStoreName WHERE key = ? ' + 'LIMIT 1',
                                 ['some key'],
                                 function (t, results) {
-                                    var dbValue = JSON.parse(results.rows.item(0).value);
+                                    const dbValue = JSON.parse(results.rows.item(0).value);
 
                                     expect(dbValue).to.be.eq(value);
                                     resolve();
@@ -204,7 +204,7 @@ describe('Config API', function () {
                         });
                 });
             } else if (localforage.driver() === localforage.LOCALSTORAGE) {
-                var dbValue = JSON.parse(localStorage['My Cool App/myStoreName/some key']);
+                const dbValue = JSON.parse(localStorage['My Cool App/myStoreName/some key']);
 
                 expect(dbValue).to.be.eq(value);
                 return Promise.resolve();
@@ -235,11 +235,11 @@ describe('Config API', function () {
     });
 
     it('returns error if database version is not a number', async function () {
-        var configResult = localforage.config({
+        const configResult = localforage.config({
             version: '2.0' as any
         })!;
 
-        var error = 'Error: Database version must be a number.';
+        const error = 'Error: Database version must be a number.';
 
         expect(configResult).to.not.be.eq(true);
         expect(configResult.toString()).to.be.eq(error);

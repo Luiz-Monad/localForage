@@ -20,5 +20,5 @@ function getIDB(): IDBFactory | undefined {
     }
 }
 
-var idb = getIDB()!;
+const idb = getIDB()!;
 export default idb;

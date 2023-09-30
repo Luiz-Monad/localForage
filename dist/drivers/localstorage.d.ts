@@ -6,5 +6,5 @@ interface DbInfo extends Options {
     serializer: typeof serializer;
     keyPrefix: string;
 }
-declare var localStorageWrapper: Driver;
+declare const localStorageWrapper: Driver;
 export default localStorageWrapper;

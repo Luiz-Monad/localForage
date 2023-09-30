@@ -7,5 +7,5 @@ interface DbInfo extends Options {
     db: IDBDatabase | null;
     version: number;
 }
-declare var asyncStorage: Driver;
+declare const asyncStorage: Driver;
 export default asyncStorage;

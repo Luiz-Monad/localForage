@@ -2,9 +2,9 @@ const path = require('path');
 const glob = require('glob');
 const saucelabsBrowsers = require(path.resolve('test', 'saucelabs-browsers.ts'));
 
-const sourceFiles = ['Gruntfile.js', 'src/*.ts', 'src/**/*.ts'];
+const sourceFiles = ['src/*.ts', 'src/**/*.ts'];
 
-const testFiles = ['Gruntfile.js', 'test/*.ts', 'test/**/*.ts'];
+const testFiles = ['test/*.ts', 'test/**/*.ts'];
 
 module.exports = exports = function (grunt) {
     'use strict';
