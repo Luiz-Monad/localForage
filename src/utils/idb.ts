@@ -1,4 +1,3 @@
-
 function getIDB(): IDBFactory | undefined {
     try {
         if (typeof indexedDB !== 'undefined') {

@@ -1,11 +1,7 @@
 /* global navigator:true, window:true, Modernizr:true, describe:true, expect:true, it:true, xit:true, before:true, beforeEach:true, after:true*/
-var DRIVERS = [
-    localforage.INDEXEDDB,
-    localforage.LOCALSTORAGE,
-    localforage.WEBSQL
-];
+var DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
 
-DRIVERS.forEach(function(driverName) {
+DRIVERS.forEach(function (driverName) {
     if (
         (!Modernizr.indexeddb && driverName === localforage.INDEXEDDB) ||
         (!Modernizr.localstorage && driverName === localforage.LOCALSTORAGE) ||
@@ -16,7 +12,7 @@ DRIVERS.forEach(function(driverName) {
         return;
     }
 
-    describe('Service Worker support in ' + driverName, function() {
+    describe('Service Worker support in ' + driverName, function () {
         'use strict';
 
         // Use this until a test is added to Modernizr
@@ -40,21 +36,21 @@ DRIVERS.forEach(function(driverName) {
             return;
         }
 
-        before(function(done) {
+        before(function (done) {
             navigator.serviceWorker
                 .register('/test/serviceworker-client.js')
-                .then(function() {
+                .then(function () {
                     return localforage.setDriver(driverName);
                 })
                 .then(done);
         });
 
-        after(function(done) {
+        after(function (done) {
             navigator.serviceWorker.ready
-                .then(function(registration) {
+                .then(function (registration) {
                     return registration.unregister();
                 })
-                .then(function(bool) {
+                .then(function (bool) {
                     if (bool) {
                         done();
                     } else {
@@ -63,43 +59,38 @@ DRIVERS.forEach(function(driverName) {
                 });
         });
 
-        beforeEach(function(done) {
+        beforeEach(function (done) {
             localforage.clear(done);
         });
 
-        if (
-            driverName === localforage.LOCALSTORAGE ||
-            driverName === localforage.WEBSQL
-        ) {
+        if (driverName === localforage.LOCALSTORAGE || driverName === localforage.WEBSQL) {
             it.skip(driverName + ' is not supported in service workers');
             return;
         }
 
-        xit('should set a value on registration', function(done) {
+        xit('should set a value on registration', function (done) {
             navigator.serviceWorker.ready
-                .then(function() {
+                .then(function () {
                     return localforage.getItem('service worker registration');
                 })
-                .then(function(result) {
+                .then(function (result) {
                     expect(result).to.equal('serviceworker present');
                     done();
                 })
-                .catch(function(error) {
+                .catch(function (error) {
                     done(error);
                 });
         });
 
-        it('saves data', function(done) {
+        it('saves data', function (done) {
             var messageChannel = new MessageChannel();
-            messageChannel.port1.onmessage = function(event) {
-                expect(event.data.body).to.be(
-                    'I have been set using ' + driverName
-                );
+            messageChannel.port1.onmessage = function (event) {
+                expect(event.data.body).to.be('I have been set using ' + driverName);
                 done();
             };
 
             navigator.serviceWorker.ready
-                .then(function(registration) {
+                .then(function (registration) {
                     registration.active.postMessage(
                         {
                             driver: driverName,
@@ -108,7 +99,7 @@ DRIVERS.forEach(function(driverName) {
                         [messageChannel.port2]
                     );
                 })
-                .catch(function(error) {
+                .catch(function (error) {
                     done(error);
                 });
         });

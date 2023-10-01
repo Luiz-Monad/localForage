@@ -1,4 +1,4 @@
-import { Database } from 'websql'
+import { Database } from 'websql';
 
 declare global {
     declare let indexedDB: IDBFactory | undefined;
@@ -14,15 +14,14 @@ declare global {
     declare let WebKitBlobBuilder: BlobBuilder | undefined;
 
     type BlobBuilder = {
-        new(): BlobBuilder;
+        new (): BlobBuilder;
         getBlob(type?: string): Blob;
         append(part: BlobPart): void;
-    }
+    };
 
-    interface Window {
-    }
+    interface Window {}
 
-    declare var openDatabase: Database['openDatabase']
+    declare var openDatabase: Database['openDatabase'];
 }
 
-export { }
+export {};

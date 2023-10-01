@@ -10,22 +10,12 @@
         "home": "https://github.com/mozilla/localForage",
         "docs": "http://mozilla.github.io/localForage",
         "irc": "irc://irc.mozilla.org/#apps",
-        "irc-contacts": [
-            "tofumatt"
-        ]
+        "irc-contacts": ["tofumatt"]
     },
     "bugs": {
         "list": "https://github.com/mozilla/localForage/issues",
         "report": "https://github.com/mozilla/localForage/issues/new",
         "goodfirstbug": "https://github.com/mozilla/localForage/labels/help%20wanted"
-
     },
-    "keywords": [
-        "javascript",
-        "indexeddb",
-        "localstorage",
-        "offline",
-        "storage",
-        "websql"
-    ]
+    "keywords": ["javascript", "indexeddb", "localstorage", "offline", "storage", "websql"]
 }

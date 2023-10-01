@@ -23,11 +23,11 @@ If you'd like to contribute to localForage, it's as simple as opening a pull
 request on GitHub. After that someone will code review your work and either
 ask you to fix any errors or merge the code into master. Here are a few tips:
 
-* **all drivers must have the same public API**: refer to [the API tests](https://github.com/mozilla/localForage/blob/master/test/test.api.coffee) for how we ensure this, but simply put: all drivers should share the _exact same_ outward-facing API
-* **do your work on a feature branch**: this keeps things clean and easy
-* **try to rebase master into your branch**: this keeps the commit history clean and avoids merge commits inside feature branches
-* **write tests**: if you're adding new features, _please_ write tests; likewise, if you're fixing a bug that wasn't previously caught by a test, please add one
-* **run `grunt build` before you commit**: this will build out the files in the `dist/` folder and ensure your tests pass
+-   **all drivers must have the same public API**: refer to [the API tests](https://github.com/mozilla/localForage/blob/master/test/test.api.coffee) for how we ensure this, but simply put: all drivers should share the _exact same_ outward-facing API
+-   **do your work on a feature branch**: this keeps things clean and easy
+-   **try to rebase master into your branch**: this keeps the commit history clean and avoids merge commits inside feature branches
+-   **write tests**: if you're adding new features, _please_ write tests; likewise, if you're fixing a bug that wasn't previously caught by a test, please add one
+-   **run `grunt build` before you commit**: this will build out the files in the `dist/` folder and ensure your tests pass
 
 Please commit changes at the top-level folder along with your changes in the
 `src/` folder--**do not make these changes separate commits**. These are the

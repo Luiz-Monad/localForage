@@ -1,25 +1,24 @@
 /* global describe:true, expect:true, it:true, dummyStorageDriver:true */
-describe('When Custom Drivers are used', function() {
+describe('When Custom Drivers are used', function () {
     'use strict';
     var errorMessage =
-        'Custom driver not compliant; see ' +
-        'https://mozilla.github.io/localForage/#definedriver';
+        'Custom driver not compliant; see ' + 'https://mozilla.github.io/localForage/#definedriver';
 
-    it('fails to define a no-name custom driver', function(done) {
+    it('fails to define a no-name custom driver', function (done) {
         localforage.defineDriver(
             {
-                _initStorage: function() {},
-                iterate: function() {},
-                getItem: function() {},
-                setItem: function() {},
-                removeItem: function() {},
-                clear: function() {},
-                length: function() {},
-                key: function() {},
-                keys: function() {}
+                _initStorage: function () {},
+                iterate: function () {},
+                getItem: function () {},
+                setItem: function () {},
+                removeItem: function () {},
+                clear: function () {},
+                length: function () {},
+                key: function () {},
+                keys: function () {}
             },
             null,
-            function(err) {
+            function (err) {
                 expect(err).to.be.an(Error);
                 expect(err.message).to.be(errorMessage);
                 done();
@@ -27,39 +26,39 @@ describe('When Custom Drivers are used', function() {
         );
     });
 
-    it('fails to define a no-name custom driver [promise]', function(done) {
+    it('fails to define a no-name custom driver [promise]', function (done) {
         localforage
             .defineDriver({
-                _initStorage: function() {},
-                iterate: function() {},
-                getItem: function() {},
-                setItem: function() {},
-                removeItem: function() {},
-                clear: function() {},
-                length: function() {},
-                key: function() {},
-                keys: function() {}
+                _initStorage: function () {},
+                iterate: function () {},
+                getItem: function () {},
+                setItem: function () {},
+                removeItem: function () {},
+                clear: function () {},
+                length: function () {},
+                key: function () {},
+                keys: function () {}
             })
-            .then(null, function(err) {
+            .then(null, function (err) {
                 expect(err).to.be.an(Error);
                 expect(err.message).to.be(errorMessage);
                 done();
             });
     });
 
-    it('fails to define a custom driver with missing methods', function(done) {
+    it('fails to define a custom driver with missing methods', function (done) {
         localforage.defineDriver(
             {
                 _driver: 'missingMethodsDriver',
-                _initStorage: function() {},
-                iterate: function() {},
-                getItem: function() {},
-                setItem: function() {},
-                removeItem: function() {},
-                clear: function() {}
+                _initStorage: function () {},
+                iterate: function () {},
+                getItem: function () {},
+                setItem: function () {},
+                removeItem: function () {},
+                clear: function () {}
             },
             null,
-            function(err) {
+            function (err) {
                 expect(err).to.be.an(Error);
                 expect(err.message).to.be(errorMessage);
                 done();
@@ -67,200 +66,190 @@ describe('When Custom Drivers are used', function() {
         );
     });
 
-    it('fails to define a custom driver with missing methods [promise]', function(done) {
+    it('fails to define a custom driver with missing methods [promise]', function (done) {
         localforage
             .defineDriver({
                 _driver: 'missingMethodsDriver',
-                _initStorage: function() {},
-                iterate: function() {},
-                getItem: function() {},
-                setItem: function() {},
-                removeItem: function() {},
-                clear: function() {}
+                _initStorage: function () {},
+                iterate: function () {},
+                getItem: function () {},
+                setItem: function () {},
+                removeItem: function () {},
+                clear: function () {}
             })
-            .then(null, function(err) {
+            .then(null, function (err) {
                 expect(err).to.be.an(Error);
                 expect(err.message).to.be(errorMessage);
                 done();
             });
     });
 
-    it('defines a compliant custom driver', function(done) {
-        localforage.defineDriver(dummyStorageDriver, function() {
+    it('defines a compliant custom driver', function (done) {
+        localforage.defineDriver(dummyStorageDriver, function () {
             done();
         });
     });
 
-    it('defines a compliant custom driver [promise]', function(done) {
-        localforage.defineDriver(dummyStorageDriver).then(function() {
+    it('defines a compliant custom driver [promise]', function (done) {
+        localforage.defineDriver(dummyStorageDriver).then(function () {
             done();
         });
     });
 
-    it('sets a custom driver', function(done) {
-        localforage.defineDriver(dummyStorageDriver, function() {
-            localforage.setDriver(dummyStorageDriver._driver, function() {
+    it('sets a custom driver', function (done) {
+        localforage.defineDriver(dummyStorageDriver, function () {
+            localforage.setDriver(dummyStorageDriver._driver, function () {
                 expect(localforage.driver()).to.be(dummyStorageDriver._driver);
                 done();
             });
         });
     });
 
-    it('sets a custom driver [promise]', function(done) {
+    it('sets a custom driver [promise]', function (done) {
         localforage
             .defineDriver(dummyStorageDriver)
-            .then(function() {
+            .then(function () {
                 return localforage.setDriver(dummyStorageDriver._driver);
             })
-            .then(function() {
+            .then(function () {
                 expect(localforage.driver()).to.be(dummyStorageDriver._driver);
                 done();
             });
     });
 
-    it("defines a driver synchronously when it doesn't have _supports()", function(done) {
+    it("defines a driver synchronously when it doesn't have _supports()", function (done) {
         var customDriver = {
             _driver: 'dummyStorageDriver' + +new Date(),
-            _initStorage: function() {},
+            _initStorage: function () {},
             // _support: function() { return true; }
-            iterate: function() {},
-            getItem: function() {},
-            setItem: function() {},
-            removeItem: function() {},
-            clear: function() {},
-            length: function() {},
-            key: function() {},
-            keys: function() {}
+            iterate: function () {},
+            getItem: function () {},
+            setItem: function () {},
+            removeItem: function () {},
+            clear: function () {},
+            length: function () {},
+            key: function () {},
+            keys: function () {}
         };
 
         localforage.defineDriver(customDriver);
-        localforage.setDriver(customDriver._driver).then(function() {
+        localforage.setDriver(customDriver._driver).then(function () {
             expect(localforage.driver()).to.be(customDriver._driver);
             done();
         });
     });
 
-    it('defines a driver synchronously when it has boolean _supports()', function(done) {
+    it('defines a driver synchronously when it has boolean _supports()', function (done) {
         var customDriver = {
             _driver: 'dummyStorageDriver' + +new Date(),
-            _initStorage: function() {},
+            _initStorage: function () {},
             _support: true,
-            iterate: function() {},
-            getItem: function() {},
-            setItem: function() {},
-            removeItem: function() {},
-            clear: function() {},
-            length: function() {},
-            key: function() {},
-            keys: function() {}
+            iterate: function () {},
+            getItem: function () {},
+            setItem: function () {},
+            removeItem: function () {},
+            clear: function () {},
+            length: function () {},
+            key: function () {},
+            keys: function () {}
         };
 
         localforage.defineDriver(customDriver);
-        localforage.setDriver(customDriver._driver).then(function() {
+        localforage.setDriver(customDriver._driver).then(function () {
             expect(localforage.driver()).to.be(customDriver._driver);
             done();
         });
     });
 
-    it('defines a driver asynchronously when _supports() returns a Promise<boolean>', function(done) {
+    it('defines a driver asynchronously when _supports() returns a Promise<boolean>', function (done) {
         var customDriver = {
             _driver: 'dummyStorageDriver' + +new Date(),
-            _initStorage: function() {},
-            _support: function() {
+            _initStorage: function () {},
+            _support: function () {
                 return Promise.resolve(true);
             },
-            iterate: function() {},
-            getItem: function() {},
-            setItem: function() {},
-            removeItem: function() {},
-            clear: function() {},
-            length: function() {},
-            key: function() {},
-            keys: function() {}
+            iterate: function () {},
+            getItem: function () {},
+            setItem: function () {},
+            removeItem: function () {},
+            clear: function () {},
+            length: function () {},
+            key: function () {},
+            keys: function () {}
         };
 
         localforage
             .defineDriver(customDriver)
-            .then(function() {
+            .then(function () {
                 return localforage.setDriver(customDriver._driver);
             })
-            .then(function() {
+            .then(function () {
                 expect(localforage.driver()).to.be(customDriver._driver);
                 done();
             });
     });
 
-    it('sets and uses a custom driver', function(done) {
-        localforage.defineDriver(dummyStorageDriver, function() {
-            localforage.setDriver(dummyStorageDriver._driver, function(err) {
+    it('sets and uses a custom driver', function (done) {
+        localforage.defineDriver(dummyStorageDriver, function () {
+            localforage.setDriver(dummyStorageDriver._driver, function (err) {
                 expect(err).to.be(undefined);
-                localforage.setItem(
-                    'testCallbackKey',
-                    'testCallbackValue',
-                    function(err) {
+                localforage.setItem('testCallbackKey', 'testCallbackValue', function (err) {
+                    expect(err).to.be(null);
+                    localforage.getItem('testCallbackKey', function (err, value) {
                         expect(err).to.be(null);
-                        localforage.getItem('testCallbackKey', function(
-                            err,
-                            value
-                        ) {
-                            expect(err).to.be(null);
-                            expect(value).to.be('testCallbackValue');
-                            done();
-                        });
-                    }
-                );
+                        expect(value).to.be('testCallbackValue');
+                        done();
+                    });
+                });
             });
         });
     });
 
-    it('sets and uses a custom driver [promise]', function(done) {
+    it('sets and uses a custom driver [promise]', function (done) {
         localforage
             .defineDriver(dummyStorageDriver)
-            .then(function() {
+            .then(function () {
                 return localforage.setDriver(dummyStorageDriver._driver);
             })
-            .then(function() {
-                return localforage.setItem(
-                    'testPromiseKey',
-                    'testPromiseValue'
-                );
+            .then(function () {
+                return localforage.setItem('testPromiseKey', 'testPromiseValue');
             })
-            .then(function() {
+            .then(function () {
                 return localforage.getItem('testPromiseKey');
             })
-            .then(function(value) {
+            .then(function (value) {
                 expect(value).to.be('testPromiseValue');
                 done();
             });
     });
 
-    describe('when dropInstance is not defined', function() {
-        it('rejects when it is used', function(done) {
+    describe('when dropInstance is not defined', function () {
+        it('rejects when it is used', function (done) {
             var customDriver = {
                 _driver: 'dummyStorageDriver' + +new Date(),
-                _initStorage: function() {},
-                _support: function() {
+                _initStorage: function () {},
+                _support: function () {
                     return Promise.resolve(true);
                 },
-                iterate: function() {},
-                getItem: function() {},
-                setItem: function() {},
-                removeItem: function() {},
-                clear: function() {},
-                length: function() {},
-                key: function() {},
-                keys: function() {}
+                iterate: function () {},
+                getItem: function () {},
+                setItem: function () {},
+                removeItem: function () {},
+                clear: function () {},
+                length: function () {},
+                key: function () {},
+                keys: function () {}
             };
 
             localforage
                 .defineDriver(customDriver)
-                .then(function() {
+                .then(function () {
                     return localforage.setDriver(customDriver._driver);
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.dropInstance();
                 })
-                .catch(function(err) {
+                .catch(function (err) {
                     expect(err.message).to.be(
                         'Method dropInstance is not implemented by the current driver'
                     );
@@ -269,34 +258,34 @@ describe('When Custom Drivers are used', function() {
         });
     });
 
-    describe('when dropInstance is defined', function() {
-        it('is does not reject', function(done) {
+    describe('when dropInstance is defined', function () {
+        it('is does not reject', function (done) {
             var customDriver = {
                 _driver: 'dummyStorageDriver' + +new Date(),
-                _initStorage: function() {},
-                _support: function() {
+                _initStorage: function () {},
+                _support: function () {
                     return Promise.resolve(true);
                 },
-                iterate: function() {},
-                getItem: function() {},
-                setItem: function() {},
-                removeItem: function() {},
-                clear: function() {},
-                length: function() {},
-                key: function() {},
-                keys: function() {},
-                dropInstance: function() {}
+                iterate: function () {},
+                getItem: function () {},
+                setItem: function () {},
+                removeItem: function () {},
+                clear: function () {},
+                length: function () {},
+                key: function () {},
+                keys: function () {},
+                dropInstance: function () {}
             };
 
             localforage
                 .defineDriver(customDriver)
-                .then(function() {
+                .then(function () {
                     return localforage.setDriver(customDriver._driver);
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.dropInstance();
                 })
-                .then(function() {
+                .then(function () {
                     done();
                 });
         });

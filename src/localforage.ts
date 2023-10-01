@@ -14,14 +14,17 @@ interface Option {
     version?: number;
 }
 
-type DriverKeys = Exclude<keyof (typeof idbDriver | typeof websqlDriver | typeof localstorageDriver), '_driver' | '_support'>;
+type DriverKeys = Exclude<
+    keyof (typeof idbDriver | typeof websqlDriver | typeof localstorageDriver),
+    '_driver' | '_support'
+>;
 type Driver = Record<DriverKeys, (...args: any[]) => Promise<any>> & {
     _driver: string;
     _support: boolean;
 };
 
-interface Ready {    
-    ready: (callback?: (() => void)) => Promise<void>;
+interface Ready {
+    ready: (callback?: () => void) => Promise<void>;
 }
 
 // Drivers are stored here when `defineDriver()` is called.
@@ -44,16 +47,18 @@ const DefaultDriverOrder = [
 
 const OptionalDriverMethods = ['dropInstance'] as DriverKeys[];
 
-const LibraryMethods = ([
-    'clear',
-    'getItem',
-    'iterate',
-    'key',
-    'keys',
-    'length',
-    'removeItem',
-    'setItem'
-] as DriverKeys[]).concat(OptionalDriverMethods);
+const LibraryMethods = (
+    [
+        'clear',
+        'getItem',
+        'iterate',
+        'key',
+        'keys',
+        'length',
+        'removeItem',
+        'setItem'
+    ] as DriverKeys[]
+).concat(OptionalDriverMethods);
 
 const DefaultConfig = {
     description: '',
@@ -67,13 +72,10 @@ const DefaultConfig = {
 };
 
 function callWhenReady(localForageInstance: Driver & Ready, libraryMethod: DriverKeys) {
-    localForageInstance[libraryMethod] = function() {
+    localForageInstance[libraryMethod] = function () {
         const _args = arguments as any;
-        return localForageInstance.ready().then(function() {
-            return localForageInstance[libraryMethod].apply(
-                localForageInstance,
-                _args
-            );
+        return localForageInstance.ready().then(function () {
+            return localForageInstance[libraryMethod].apply(localForageInstance, _args);
         });
     };
 }
@@ -146,9 +148,7 @@ class LocalForage {
             // If localforage is ready and fully initialized, we can't set
             // any new configuration values. Instead, we return an error.
             if (this._ready) {
-                return new Error(
-                    "Can't call config() after localforage " + 'has been used.'
-                );
+                return new Error("Can't call config() after localforage " + 'has been used.');
             }
 
             for (let i in options) {
@@ -179,8 +179,12 @@ class LocalForage {
 
     // Used to define a custom driver, shared across all instances of
     // localForage.
-    defineDriver(driverObject: Driver, callback?: ((value: unknown) => void), errorCallback?: ((reason: any) => void)) {
-        const promise = new Promise<void>(function(resolve, reject) {
+    defineDriver(
+        driverObject: Driver,
+        callback?: (value: unknown) => void,
+        errorCallback?: (reason: any) => void
+    ) {
+        const promise = new Promise<void>(function (resolve, reject) {
             try {
                 const driverName = driverObject._driver;
                 const complianceError = new Error(
@@ -201,10 +205,7 @@ class LocalForage {
 
                     // when the property is there,
                     // it should be a method even when optional
-                    const isRequired = !includes(
-                        OptionalDriverMethods,
-                        driverMethodName
-                    );
+                    const isRequired = !includes(OptionalDriverMethods, driverMethodName);
                     if (
                         (isRequired || driverObject[driverMethodName]) &&
                         typeof driverObject[driverMethodName] !== 'function'
@@ -214,44 +215,32 @@ class LocalForage {
                     }
                 }
 
-                const configureMissingMethods = function() {
-                    const methodNotImplementedFactory = function(methodName: string) {
-                        return function() {
+                const configureMissingMethods = function () {
+                    const methodNotImplementedFactory = function (methodName: string) {
+                        return function () {
                             const error = new Error(
                                 `Method ${methodName} is not implemented by the current driver`
                             );
                             const promise = Promise.reject(error);
-                            executeCallback(
-                                promise,
-                                arguments[arguments.length - 1]
-                            );
+                            executeCallback(promise, arguments[arguments.length - 1]);
                             return promise;
                         };
                     };
 
-                    for (
-                        let i = 0, len = OptionalDriverMethods.length;
-                        i < len;
-                        i++
-                    ) {
+                    for (let i = 0, len = OptionalDriverMethods.length; i < len; i++) {
                         const optionalDriverMethod = OptionalDriverMethods[i];
                         if (!driverObject[optionalDriverMethod]) {
-                            driverObject[
-                                optionalDriverMethod
-                            ] = methodNotImplementedFactory(
-                                optionalDriverMethod
-                            );
+                            driverObject[optionalDriverMethod] =
+                                methodNotImplementedFactory(optionalDriverMethod);
                         }
                     }
                 };
 
                 configureMissingMethods();
 
-                const setDriverSupport = function(support: boolean) {
+                const setDriverSupport = function (support: boolean) {
                     if (DefinedDrivers[driverName]) {
-                        console.info(
-                            `Redefining LocalForage driver: ${driverName}`
-                        );
+                        console.info(`Redefining LocalForage driver: ${driverName}`);
                     }
                     DefinedDrivers[driverName] = driverObject;
                     DriverSupport[driverName] = support;
@@ -262,11 +251,11 @@ class LocalForage {
                 };
 
                 if ('_support' in driverObject) {
-                    if (
-                        driverObject._support &&
-                        typeof driverObject._support === 'function'
-                    ) {
-                        (driverObject._support as () => Promise<boolean>)().then(setDriverSupport, reject);
+                    if (driverObject._support && typeof driverObject._support === 'function') {
+                        (driverObject._support as () => Promise<boolean>)().then(
+                            setDriverSupport,
+                            reject
+                        );
                     } else {
                         setDriverSupport(!!driverObject._support);
                     }
@@ -286,7 +275,11 @@ class LocalForage {
         return this._driver || null;
     }
 
-    getDriver(driverName: string, callback?: ((value: Driver) => void), errorCallback?: ((reason: any) => void)) {
+    getDriver(
+        driverName: string,
+        callback?: (value: Driver) => void,
+        errorCallback?: (reason: any) => void
+    ) {
         const getDriverPromise = DefinedDrivers[driverName]
             ? Promise.resolve(DefinedDrivers[driverName])
             : Promise.reject(new Error('Driver not found.'));
@@ -295,13 +288,13 @@ class LocalForage {
         return getDriverPromise;
     }
 
-    getSerializer(callback?: ((value: typeof serializer) => void)) {
+    getSerializer(callback?: (value: typeof serializer) => void) {
         const serializerPromise = Promise.resolve(serializer);
         executeTwoCallbacks(serializerPromise, callback);
         return serializerPromise;
     }
 
-    ready(callback?: (() => void)) {
+    ready(callback?: () => void) {
         const self = this;
 
         const promise = self._driverSet!.then(() => {
@@ -316,7 +309,11 @@ class LocalForage {
         return promise;
     }
 
-    setDriver(drivers: string | string[] | null, callback?: ((value: unknown) => void), errorCallback?: ((reason: any) => void)) {
+    setDriver(
+        drivers: string | string[] | null,
+        callback?: (value: unknown) => void,
+        errorCallback?: (reason: any) => void
+    ) {
         const self = this;
 
         if (!isArray(drivers)) {
@@ -338,7 +335,7 @@ class LocalForage {
         }
 
         function initDriver(supportedDrivers: string[]) {
-            return function() {
+            return function () {
                 let currentDriverIndex = 0;
 
                 function driverPromiseLoop(): Promise<void> {
@@ -356,9 +353,7 @@ class LocalForage {
                     }
 
                     setDriverToConfig();
-                    const error = new Error(
-                        'No available storage method found.'
-                    );
+                    const error = new Error('No available storage method found.');
                     self._driverSet = Promise.reject(error);
                     return self._driverSet;
                 }
@@ -381,7 +376,7 @@ class LocalForage {
                 self._dbInfo = null;
                 self._ready = null;
 
-                return self.getDriver(driverName).then(driver => {
+                return self.getDriver(driverName).then((driver) => {
                     self._driver = driver._driver;
                     setDriverToConfig();
                     self._wrapLibraryMethodsWithReady();

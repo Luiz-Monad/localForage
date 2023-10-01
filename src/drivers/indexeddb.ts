@@ -14,7 +14,7 @@ interface Module {
     _dbInfo: DbInfo;
     ready: () => Promise<void>;
     _initReady?: () => Promise<void>;
-    config: () => DbInfo;    
+    config: () => DbInfo;
 }
 
 interface Option {
@@ -43,9 +43,9 @@ interface Defer {
 }
 
 interface EncodedBlob {
-    __local_forage_encoded_blob: boolean,
-    data: string,
-    type: string
+    __local_forage_encoded_blob: boolean;
+    data: string;
+    type: string;
 }
 
 // Some code originally from async_storage.js in
@@ -91,12 +91,12 @@ function _binStringToArrayBuffer(bin: string) {
 // https://github.com/pouchdb/pouchdb/blob/master/packages/node_modules/pouchdb-adapter-idb/src/blobSupport.js
 //
 function _checkBlobSupportWithoutCaching(idb: IDBDatabase) {
-    return new Promise(function(resolve) {
+    return new Promise(function (resolve) {
         var txn = idb.transaction(DETECT_BLOB_SUPPORT_STORE, READ_WRITE);
         var blob = createBlob(['']);
         txn.objectStore(DETECT_BLOB_SUPPORT_STORE).put(blob, 'key');
 
-        txn.onabort = function(e) {
+        txn.onabort = function (e) {
             // If the transaction aborts now its due to not being able to
             // write to the database, likely due to the disk being full
             e.preventDefault();
@@ -104,18 +104,14 @@ function _checkBlobSupportWithoutCaching(idb: IDBDatabase) {
             resolve(false);
         };
 
-        txn.oncomplete = function() {
+        txn.oncomplete = function () {
             var matchedChrome = navigator.userAgent.match(/Chrome\/(\d+)/);
             var matchedEdge = navigator.userAgent.match(/Edge\//);
             // MS Edge pretends to be Chrome 42:
             // https://msdn.microsoft.com/en-us/library/hh869301%28v=vs.85%29.aspx
-            resolve(
-                matchedEdge ||
-                    !matchedChrome ||
-                    parseInt(matchedChrome[1], 10) >= 43
-            );
+            resolve(matchedEdge || !matchedChrome || parseInt(matchedChrome[1], 10) >= 43);
         };
-    }).catch(function() {
+    }).catch(function () {
         return false; // error, so assume unsupported
     });
 }
@@ -124,7 +120,7 @@ function _checkBlobSupport(idb: IDBDatabase) {
     if (typeof supportsBlobs === 'boolean') {
         return Promise.resolve(supportsBlobs);
     }
-    return _checkBlobSupportWithoutCaching(idb).then(function(value) {
+    return _checkBlobSupportWithoutCaching(idb).then(function (value) {
         supportsBlobs = value;
         return supportsBlobs;
     });
@@ -136,7 +132,7 @@ function _deferReadiness(dbInfo: DbInfo) {
     // Create a deferred object representing the current database operation.
     var deferredOperation = {} as Defer;
 
-    deferredOperation.promise = new Promise(function(resolve, reject) {
+    deferredOperation.promise = new Promise(function (resolve, reject) {
         deferredOperation.resolve = resolve;
         deferredOperation.reject = reject;
     });
@@ -148,7 +144,7 @@ function _deferReadiness(dbInfo: DbInfo) {
     if (!dbContext.dbReady) {
         dbContext.dbReady = deferredOperation.promise;
     } else {
-        dbContext.dbReady = dbContext.dbReady.then(function() {
+        dbContext.dbReady = dbContext.dbReady.then(function () {
             return deferredOperation.promise;
         });
     }
@@ -183,7 +179,7 @@ function _rejectReadiness(dbInfo: DbInfo, err: any) {
 }
 
 function _getConnection(dbInfo: DbInfo, upgradeNeeded: boolean) {
-    return new Promise<IDBDatabase>(function(resolve, reject) {
+    return new Promise<IDBDatabase>(function (resolve, reject) {
         dbContexts[dbInfo.name] = dbContexts[dbInfo.name] || createDbContext();
 
         if (dbInfo.db) {
@@ -204,7 +200,7 @@ function _getConnection(dbInfo: DbInfo, upgradeNeeded: boolean) {
         var openreq = idb.open.apply(idb, dbArgs);
 
         if (upgradeNeeded) {
-            openreq.onupgradeneeded = function(e) {
+            openreq.onupgradeneeded = function (e) {
                 var db = openreq.result;
                 try {
                     db.createObjectStore(dbInfo.storeName);
@@ -233,14 +229,14 @@ function _getConnection(dbInfo: DbInfo, upgradeNeeded: boolean) {
             };
         }
 
-        openreq.onerror = function(e) {
+        openreq.onerror = function (e) {
             e.preventDefault();
             reject(openreq.error);
         };
 
-        openreq.onsuccess = function() {
+        openreq.onsuccess = function () {
             var db = openreq.result;
-            db.onversionchange = function(e) {
+            db.onversionchange = function (e) {
                 // Triggered when the database is modified (e.g. adding an objectStore) or
                 // deleted (even when initiated by other sessions in different tabs).
                 // Closing the connection here prevents those operations from being blocked.
@@ -309,10 +305,10 @@ function _isUpgradeNeeded(dbInfo: DbInfo, defaultVersion?: number) {
 
 // encode a blob for indexeddb engines that don't support blobs
 function _encodeBlob(blob: Blob) {
-    return new Promise<EncodedBlob>(function(resolve, reject) {
+    return new Promise<EncodedBlob>(function (resolve, reject) {
         var reader = new FileReader();
         reader.onerror = reject;
-        reader.onloadend = function(e) {
+        reader.onloadend = function (e) {
             var base64 = btoa((e.target?.result || '') as string);
             resolve({
                 __local_forage_encoded_blob: true,
@@ -342,7 +338,7 @@ function _isEncodedBlob(value?: EncodedBlob) {
 function _fullyReady(this: Module, callback?: () => void): Promise<void> {
     var self = this;
 
-    var promise = self._initReady!().then(function() {
+    var promise = self._initReady!().then(function () {
         var dbContext = dbContexts[self._dbInfo.name];
 
         if (dbContext && dbContext.dbReady) {
@@ -373,7 +369,7 @@ function _tryReconnect(dbInfo: DbInfo) {
     dbInfo.db = null;
 
     return _getOriginalConnection(dbInfo)
-        .then(db => {
+        .then((db) => {
             dbInfo.db = db;
             if (_isUpgradeNeeded(dbInfo)) {
                 // Reopen the database for upgrading.
@@ -381,7 +377,7 @@ function _tryReconnect(dbInfo: DbInfo) {
             }
             return db;
         })
-        .then(db => {
+        .then((db) => {
             // store the latest db reference
             // in case the db was upgraded
             dbInfo.db = dbContext.db = db;
@@ -389,7 +385,7 @@ function _tryReconnect(dbInfo: DbInfo) {
                 forages[i]._dbInfo.db = db;
             }
         })
-        .catch(err => {
+        .catch((err) => {
             _rejectReadiness(dbInfo, err);
             throw err;
         });
@@ -397,7 +393,12 @@ function _tryReconnect(dbInfo: DbInfo) {
 
 // FF doesn't like Promises (micro-tasks) and IDDB store operations,
 // so we have to do it with callbacks
-function createTransaction(dbInfo: DbInfo, mode: IDBTransactionMode, callback: ((error: any, result?: IDBTransaction) => void), retries?: number) {
+function createTransaction(
+    dbInfo: DbInfo,
+    mode: IDBTransactionMode,
+    callback: (error: any, result?: IDBTransaction) => void,
+    retries?: number
+) {
     if (retries === undefined) {
         retries = 1;
     }
@@ -408,18 +409,14 @@ function createTransaction(dbInfo: DbInfo, mode: IDBTransactionMode, callback: (
     } catch (err: any) {
         if (
             retries > 0 &&
-            (!dbInfo.db ||
-                err.name === 'InvalidStateError' ||
-                err.name === 'NotFoundError')
+            (!dbInfo.db || err.name === 'InvalidStateError' || err.name === 'NotFoundError')
         ) {
             return Promise.resolve()
                 .then(() => {
                     if (
                         !dbInfo.db ||
                         (err.name === 'NotFoundError' &&
-                            !dbInfo.db.objectStoreNames.contains(
-                                dbInfo.storeName
-                            ) &&
+                            !dbInfo.db.objectStoreNames.contains(dbInfo.storeName) &&
                             dbInfo.version <= dbInfo.db.version)
                     ) {
                         // increase the db version, to create the new ObjectStore
@@ -431,7 +428,7 @@ function createTransaction(dbInfo: DbInfo, mode: IDBTransactionMode, callback: (
                     }
                 })
                 .then(() => {
-                    return _tryReconnect(dbInfo).then(function() {
+                    return _tryReconnect(dbInfo).then(function () {
                         createTransaction(dbInfo, mode, callback, retries! - 1);
                     });
                 })
@@ -511,12 +508,12 @@ function _initStorage(this: Module, options: Option) {
     // Initialize the connection process only when
     // all the related localForages aren't pending.
     return Promise.all(initPromises)
-        .then(function() {
+        .then(function () {
             dbInfo.db = dbContext.db;
             // Get the connection or open a new one without upgrade.
             return _getOriginalConnection(dbInfo);
         })
-        .then(function(db) {
+        .then(function (db) {
             dbInfo.db = db;
             if (_isUpgradeNeeded(dbInfo, self._defaultConfig.version)) {
                 // Reopen the database for upgrading.
@@ -524,7 +521,7 @@ function _initStorage(this: Module, options: Option) {
             }
             return db;
         })
-        .then(function(db) {
+        .then(function (db) {
             dbInfo.db = dbContext.db = db;
             self._dbInfo = dbInfo;
             // Share the final connection amongst related localForages.
@@ -539,30 +536,28 @@ function _initStorage(this: Module, options: Option) {
         });
 }
 
-function getItem<T>(this: Module, key: IDBValidKey, callback: (onError: any, onResult?: T | void) => void) {
+function getItem<T>(
+    this: Module,
+    key: IDBValidKey,
+    callback: (onError: any, onResult?: T | void) => void
+) {
     var self = this;
 
     key = normalizeKey(key);
 
-    var promise = new Promise<T>(function(resolve, reject) {
-        self
-            .ready()
-            .then(function() {
-                createTransaction(self._dbInfo, READ_ONLY, function(
-                    err,
-                    transaction
-                ) {
+    var promise = new Promise<T>(function (resolve, reject) {
+        self.ready()
+            .then(function () {
+                createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
                     if (err) {
                         return reject(err);
                     }
 
                     try {
-                        var store = transaction!.objectStore(
-                            self._dbInfo.storeName
-                        );
+                        var store = transaction!.objectStore(self._dbInfo.storeName);
                         var req = store.get(key);
 
-                        req.onsuccess = function() {
+                        req.onsuccess = function () {
                             var value = req.result;
                             if (value === undefined) {
                                 value = null;
@@ -573,7 +568,7 @@ function getItem<T>(this: Module, key: IDBValidKey, callback: (onError: any, onR
                             resolve(value);
                         };
 
-                        req.onerror = function() {
+                        req.onerror = function () {
                             reject(req.error);
                         };
                     } catch (e) {
@@ -589,29 +584,27 @@ function getItem<T>(this: Module, key: IDBValidKey, callback: (onError: any, onR
 }
 
 // Iterate over all items stored in database.
-function iterate<T>(this: Module, iterator: (value: T | undefined, key: IDBValidKey, ix: number) => T, callback: (onError: any, onResult?: T | void) => void) {
+function iterate<T>(
+    this: Module,
+    iterator: (value: T | undefined, key: IDBValidKey, ix: number) => T,
+    callback: (onError: any, onResult?: T | void) => void
+) {
     var self = this;
 
-    var promise = new Promise<T | void>(function(resolve, reject) {
-        self
-            .ready()
-            .then(function() {
-                createTransaction(self._dbInfo, READ_ONLY, function(
-                    err,
-                    transaction
-                ) {
+    var promise = new Promise<T | void>(function (resolve, reject) {
+        self.ready()
+            .then(function () {
+                createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
                     if (err) {
                         return reject(err);
                     }
 
                     try {
-                        var store = transaction!.objectStore(
-                            self._dbInfo.storeName
-                        );
+                        var store = transaction!.objectStore(self._dbInfo.storeName);
                         var req = store.openCursor();
                         var iterationNumber = 1;
 
-                        req.onsuccess = function() {
+                        req.onsuccess = function () {
                             var cursor = req.result;
 
                             if (cursor) {
@@ -619,11 +612,7 @@ function iterate<T>(this: Module, iterator: (value: T | undefined, key: IDBValid
                                 if (_isEncodedBlob(value)) {
                                     value = _decodeBlob(value);
                                 }
-                                var result = iterator(
-                                    value,
-                                    cursor.key,
-                                    iterationNumber++
-                                );
+                                var result = iterator(value, cursor.key, iterationNumber++);
 
                                 // when the iterator callback returns any
                                 // (non-`undefined`) value, then we stop
@@ -638,7 +627,7 @@ function iterate<T>(this: Module, iterator: (value: T | undefined, key: IDBValid
                             }
                         };
 
-                        req.onerror = function() {
+                        req.onerror = function () {
                             reject(req.error);
                         };
                     } catch (e) {
@@ -654,45 +643,44 @@ function iterate<T>(this: Module, iterator: (value: T | undefined, key: IDBValid
     return promise;
 }
 
-type ObjectLike<T> = T | Blob | EncodedBlob | null
+type ObjectLike<T> = T | Blob | EncodedBlob | null;
 
-function setItem<T>(this: Module, key: IDBValidKey, value: T | null, callback: (onError: any, onResult?: ObjectLike<T>) => void) {
+function setItem<T>(
+    this: Module,
+    key: IDBValidKey,
+    value: T | null,
+    callback: (onError: any, onResult?: ObjectLike<T>) => void
+) {
     var self = this;
 
     key = normalizeKey(key);
 
-    var promise = new Promise<ObjectLike<T>>(function(resolve, reject) {
+    var promise = new Promise<ObjectLike<T>>(function (resolve, reject) {
         var dbInfo;
-        self
-            .ready()
-            .then(function() {
+        self.ready()
+            .then(function () {
                 dbInfo = self._dbInfo;
                 if (toString.call(value) === '[object Blob]') {
                     const blobValue = value as Blob;
-                    return _checkBlobSupport(dbInfo.db!).then<ObjectLike<T>>(function(
-                        blobSupport
-                    ) {
-                        if (blobSupport) {
-                            return blobValue;
+                    return _checkBlobSupport(dbInfo.db!).then<ObjectLike<T>>(
+                        function (blobSupport) {
+                            if (blobSupport) {
+                                return blobValue;
+                            }
+                            return _encodeBlob(blobValue);
                         }
-                        return _encodeBlob(blobValue);
-                    });
+                    );
                 }
                 return value;
             })
-            .then(function(value) {
-                createTransaction(self._dbInfo, READ_WRITE, function(
-                    err,
-                    transaction
-                ) {
+            .then(function (value) {
+                createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
                     if (err || !transaction) {
                         return reject(err);
                     }
 
                     try {
-                        var store = transaction.objectStore(
-                            self._dbInfo.storeName
-                        );
+                        var store = transaction.objectStore(self._dbInfo.storeName);
 
                         // The reason we don't _save_ null is because IE 10 does
                         // not support saving the `null` type in IndexedDB. How
@@ -704,7 +692,7 @@ function setItem<T>(this: Module, key: IDBValidKey, value: T | null, callback: (
 
                         var req = store.put(value, key);
 
-                        transaction.oncomplete = function() {
+                        transaction.oncomplete = function () {
                             // Cast to undefined so the value passed to
                             // callback/promise is the same as what one would get out
                             // of `getItem()` later. This leads to some weirdness
@@ -717,10 +705,8 @@ function setItem<T>(this: Module, key: IDBValidKey, value: T | null, callback: (
 
                             resolve(value);
                         };
-                        transaction.onabort = transaction.onerror = function() {
-                            var err = req.error
-                                ? req.error
-                                : req.transaction?.error;
+                        transaction.onabort = transaction.onerror = function () {
+                            var err = req.error ? req.error : req.transaction?.error;
                             reject(err);
                         };
                     } catch (e) {
@@ -740,42 +726,34 @@ function removeItem(this: Module, key: IDBValidKey, callback: (onError: any) => 
 
     key = normalizeKey(key);
 
-    var promise = new Promise<void>(function(resolve, reject) {
-        self
-            .ready()
-            .then(function() {
-                createTransaction(self._dbInfo, READ_WRITE, function(
-                    err,
-                    transaction
-                ) {
+    var promise = new Promise<void>(function (resolve, reject) {
+        self.ready()
+            .then(function () {
+                createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
                     if (err || !transaction) {
                         return reject(err);
                     }
 
                     try {
-                        var store = transaction.objectStore(
-                            self._dbInfo.storeName
-                        );
+                        var store = transaction.objectStore(self._dbInfo.storeName);
                         // We use a Grunt task to make this safe for IE and some
                         // versions of Android (including those used by Cordova).
                         // Normally IE won't like `.delete()` and will insist on
                         // using `['delete']()`, but we have a build step that
                         // fixes this for us now.
                         var req = store.delete(key);
-                        transaction.oncomplete = function() {
+                        transaction.oncomplete = function () {
                             resolve();
                         };
 
-                        transaction.onerror = function() {
+                        transaction.onerror = function () {
                             reject(req.error);
                         };
 
                         // The request will be also be aborted if we've exceeded our storage
                         // space.
-                        transaction.onabort = function() {
-                            var err = req.error
-                                ? req.error
-                                : req.transaction?.error;
+                        transaction.onabort = function () {
+                            var err = req.error ? req.error : req.transaction?.error;
                             reject(err);
                         };
                     } catch (e) {
@@ -793,32 +771,24 @@ function removeItem(this: Module, key: IDBValidKey, callback: (onError: any) => 
 function clear(this: Module, callback: (onError: any) => void) {
     var self = this;
 
-    var promise = new Promise<void>(function(resolve, reject) {
-        self
-            .ready()
-            .then(function() {
-                createTransaction(self._dbInfo, READ_WRITE, function(
-                    err,
-                    transaction
-                ) {
+    var promise = new Promise<void>(function (resolve, reject) {
+        self.ready()
+            .then(function () {
+                createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
                     if (err || !transaction) {
                         return reject(err);
                     }
 
                     try {
-                        var store = transaction.objectStore(
-                            self._dbInfo.storeName
-                        );
+                        var store = transaction.objectStore(self._dbInfo.storeName);
                         var req = store.clear();
 
-                        transaction.oncomplete = function() {
+                        transaction.oncomplete = function () {
                             resolve();
                         };
 
-                        transaction.onabort = transaction.onerror = function() {
-                            var err = req.error
-                                ? req.error
-                                : req.transaction?.error;
+                        transaction.onabort = transaction.onerror = function () {
+                            var err = req.error ? req.error : req.transaction?.error;
                             reject(err);
                         };
                     } catch (e) {
@@ -836,29 +806,23 @@ function clear(this: Module, callback: (onError: any) => void) {
 function length(this: Module, callback: (onError: any, onResult?: number) => void) {
     var self = this;
 
-    var promise = new Promise<number>(function(resolve, reject) {
-        self
-            .ready()
-            .then(function() {
-                createTransaction(self._dbInfo, READ_ONLY, function(
-                    err,
-                    transaction
-                ) {
+    var promise = new Promise<number>(function (resolve, reject) {
+        self.ready()
+            .then(function () {
+                createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
                     if (err) {
                         return reject(err);
                     }
 
                     try {
-                        var store = transaction!.objectStore(
-                            self._dbInfo.storeName
-                        );
+                        var store = transaction!.objectStore(self._dbInfo.storeName);
                         var req = store.count();
 
-                        req.onsuccess = function() {
+                        req.onsuccess = function () {
                             resolve(req.result);
                         };
 
-                        req.onerror = function() {
+                        req.onerror = function () {
                             reject(req.error);
                         };
                     } catch (e) {
@@ -873,35 +837,33 @@ function length(this: Module, callback: (onError: any, onResult?: number) => voi
     return promise;
 }
 
-function key(this: Module, n: number, callback: (onError: any, onResult?: IDBValidKey | null) => void) {
+function key(
+    this: Module,
+    n: number,
+    callback: (onError: any, onResult?: IDBValidKey | null) => void
+) {
     var self = this;
 
-    var promise = new Promise<IDBValidKey | null>(function(resolve, reject) {
+    var promise = new Promise<IDBValidKey | null>(function (resolve, reject) {
         if (n < 0) {
             resolve(null);
 
             return;
         }
 
-        self
-            .ready()
-            .then(function() {
-                createTransaction(self._dbInfo, READ_ONLY, function(
-                    err,
-                    transaction
-                ) {
+        self.ready()
+            .then(function () {
+                createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
                     if (err) {
                         return reject(err);
                     }
 
                     try {
-                        var store = transaction!.objectStore(
-                            self._dbInfo.storeName
-                        );
+                        var store = transaction!.objectStore(self._dbInfo.storeName);
                         var advanced = false;
                         var req = store.openKeyCursor();
 
-                        req.onsuccess = function() {
+                        req.onsuccess = function () {
                             var cursor = req.result;
                             if (!cursor) {
                                 // this means there weren't enough keys
@@ -927,7 +889,7 @@ function key(this: Module, n: number, callback: (onError: any, onResult?: IDBVal
                             }
                         };
 
-                        req.onerror = function() {
+                        req.onerror = function () {
                             reject(req.error);
                         };
                     } catch (e) {
@@ -945,26 +907,20 @@ function key(this: Module, n: number, callback: (onError: any, onResult?: IDBVal
 function keys(this: Module, callback?: (onError: any, onResult?: IDBValidKey[]) => void) {
     var self = this;
 
-    var promise = new Promise<IDBValidKey[]>(function(resolve, reject) {
-        self
-            .ready()
-            .then(function() {
-                createTransaction(self._dbInfo, READ_ONLY, function(
-                    err,
-                    transaction
-                ) {
+    var promise = new Promise<IDBValidKey[]>(function (resolve, reject) {
+        self.ready()
+            .then(function () {
+                createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
                     if (err) {
                         return reject(err);
                     }
 
                     try {
-                        var store = transaction!.objectStore(
-                            self._dbInfo.storeName
-                        );
+                        var store = transaction!.objectStore(self._dbInfo.storeName);
                         var req = store.openKeyCursor();
                         var keys: IDBValidKey[] = [];
 
-                        req.onsuccess = function() {
+                        req.onsuccess = function () {
                             var cursor = req.result;
 
                             if (!cursor) {
@@ -976,7 +932,7 @@ function keys(this: Module, callback?: (onError: any, onResult?: IDBValidKey[]) 
                             cursor.continue();
                         };
 
-                        req.onerror = function() {
+                        req.onerror = function () {
                             reject(req.error);
                         };
                     } catch (e) {
@@ -1003,7 +959,7 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
     var options: DbInfo = {
         name: _options.name,
         storeName: _options.storeName!,
-        db: null, 
+        db: null,
         version: 0
     };
 
@@ -1012,12 +968,11 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
     if (!options.name) {
         promise = Promise.reject('Invalid arguments');
     } else {
-        const isCurrentDb =
-            options.name === currentConfig.name && self._dbInfo.db;
+        const isCurrentDb = options.name === currentConfig.name && self._dbInfo.db;
 
         const dbPromise = isCurrentDb
             ? Promise.resolve(self._dbInfo.db!)
-            : _getOriginalConnection(options).then(db => {
+            : _getOriginalConnection(options).then((db) => {
                   const dbContext = dbContexts[options.name];
                   const forages = dbContext.forages;
                   dbContext.db = db;
@@ -1028,7 +983,7 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
               });
 
         if (!options.storeName) {
-            promise = dbPromise.then(db => {
+            promise = dbPromise.then((db) => {
                 _deferReadiness(options);
 
                 const dbContext = dbContexts[options.name];
@@ -1071,22 +1026,20 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
                 });
 
                 return dropDBPromise
-                    .then(db => {
+                    .then((db) => {
                         dbContext.db = db;
                         for (var i = 0; i < forages.length; i++) {
                             const forage = forages[i];
                             _advanceReadiness(forage._dbInfo);
                         }
                     })
-                    .catch(err => {
-                        (
-                            _rejectReadiness(options, err) || Promise.resolve()
-                        ).catch(() => {});
+                    .catch((err) => {
+                        (_rejectReadiness(options, err) || Promise.resolve()).catch(() => {});
                         throw err;
                     });
             });
         } else {
-            promise = dbPromise.then(db => {
+            promise = dbPromise.then((db) => {
                 if (!db.objectStoreNames.contains(options.storeName)) {
                     return;
                 }
@@ -1108,7 +1061,7 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
                 const dropObjectPromise = new Promise<IDBDatabase>((resolve, reject) => {
                     const req = idb.open(options.name, newVersion);
 
-                    req.onerror = err => {
+                    req.onerror = (err) => {
                         const db = req.result;
                         db.close();
                         reject(err);
@@ -1127,7 +1080,7 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
                 });
 
                 return dropObjectPromise
-                    .then(db => {
+                    .then((db) => {
                         dbContext.db = db;
                         for (let j = 0; j < forages.length; j++) {
                             const forage = forages[j];
@@ -1135,10 +1088,8 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
                             _advanceReadiness(forage._dbInfo);
                         }
                     })
-                    .catch(err => {
-                        (
-                            _rejectReadiness(options, err) || Promise.resolve()
-                        ).catch(() => {});
+                    .catch((err) => {
+                        (_rejectReadiness(options, err) || Promise.resolve()).catch(() => {});
                         throw err;
                     });
             });

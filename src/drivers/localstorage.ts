@@ -11,11 +11,14 @@ import normalizeKey from '../utils/normalizeKey';
 import getCallback from '../utils/getCallback';
 
 interface Module {
-    keys: (this: Module, callback?: (onError: any, onResult?: IDBValidKey[]) => void) => Promise<string[]>;
+    keys: (
+        this: Module,
+        callback?: (onError: any, onResult?: IDBValidKey[]) => void
+    ) => Promise<string[]>;
     _defaultConfig: Option;
     _dbInfo: DbInfo;
     ready: () => Promise<void>;
-    config: () => DbInfo;    
+    config: () => DbInfo;
 }
 
 interface Option {
@@ -87,7 +90,7 @@ function _initStorage(this: Module, options: Option) {
 // the app's key/value store!
 function clear(this: Module, callback: (onError: any) => void) {
     var self = this;
-    var promise = self.ready().then(function() {
+    var promise = self.ready().then(function () {
         var keyPrefix = self._dbInfo.keyPrefix;
 
         for (var i = localStorage.length - 1; i >= 0; i--) {
@@ -106,12 +109,16 @@ function clear(this: Module, callback: (onError: any) => void) {
 // Retrieve an item from the store. Unlike the original async_storage
 // library in Gaia, we don't modify return values at all. If a key's value
 // is `undefined`, we pass that value to the callback function.
-function getItem<T>(this: Module, key: IDBValidKey, callback: (onError: any, onResult?: T | void) => void) {
+function getItem<T>(
+    this: Module,
+    key: IDBValidKey,
+    callback: (onError: any, onResult?: T | void) => void
+) {
     var self = this;
 
     key = normalizeKey(key);
 
-    var promise = self.ready().then(function() {
+    var promise = self.ready().then(function () {
         var dbInfo = self._dbInfo;
         var sresult = localStorage.getItem(dbInfo.keyPrefix + key);
         var result: T | undefined;
@@ -132,10 +139,14 @@ function getItem<T>(this: Module, key: IDBValidKey, callback: (onError: any, onR
 }
 
 // Iterate over all items in the store.
-function iterate<T>(this: Module, iterator: (value: T | undefined, key: IDBValidKey, ix: number) => T, callback: (onError: any, onResult?: T | void) => void) {
+function iterate<T>(
+    this: Module,
+    iterator: (value: T | undefined, key: IDBValidKey, ix: number) => T,
+    callback: (onError: any, onResult?: T | void) => void
+) {
     var self = this;
 
-    var promise = self.ready().then(function() {
+    var promise = self.ready().then(function () {
         var dbInfo = self._dbInfo;
         var keyPrefix = dbInfo.keyPrefix;
         var keyPrefixLength = keyPrefix.length;
@@ -165,11 +176,7 @@ function iterate<T>(this: Module, iterator: (value: T | undefined, key: IDBValid
                 value = dbInfo.serializer.deserialize(svalue) as T;
             }
 
-            value = iterator(
-                value,
-                key.substring(keyPrefixLength),
-                iterationNumber++
-            );
+            value = iterator(value, key.substring(keyPrefixLength), iterationNumber++);
 
             if (value !== void 0) {
                 return value;
@@ -182,9 +189,13 @@ function iterate<T>(this: Module, iterator: (value: T | undefined, key: IDBValid
 }
 
 // Same as localStorage's key() method, except takes a callback.
-function key(this: Module, n: number, callback: (onError: any, onResult?: IDBValidKey | null) => void) {
+function key(
+    this: Module,
+    n: number,
+    callback: (onError: any, onResult?: IDBValidKey | null) => void
+) {
     var self = this;
-    var promise = self.ready().then(function() {
+    var promise = self.ready().then(function () {
         var dbInfo = self._dbInfo;
         var result;
         try {
@@ -207,7 +218,7 @@ function key(this: Module, n: number, callback: (onError: any, onResult?: IDBVal
 
 function keys(this: Module, callback?: (onError: any, onResult?: IDBValidKey[]) => void) {
     var self = this;
-    var promise = self.ready().then(function() {
+    var promise = self.ready().then(function () {
         var dbInfo = self._dbInfo;
         var length = localStorage.length;
         var keys = [];
@@ -229,7 +240,7 @@ function keys(this: Module, callback?: (onError: any, onResult?: IDBValidKey[]) 
 // Supply the number of keys in the datastore to the callback function.
 function length(this: Module, callback: (onError: any, onResult?: number) => void) {
     var self = this;
-    var promise = self.keys().then(function(keys) {
+    var promise = self.keys().then(function (keys) {
         return keys.length;
     });
 
@@ -243,7 +254,7 @@ function removeItem(this: Module, key: IDBValidKey, callback: (onError: any) => 
 
     key = normalizeKey(key);
 
-    var promise = self.ready().then(function() {
+    var promise = self.ready().then(function () {
         var dbInfo = self._dbInfo;
         localStorage.removeItem(dbInfo.keyPrefix + key);
     });
@@ -256,12 +267,17 @@ function removeItem(this: Module, key: IDBValidKey, callback: (onError: any) => 
 // Unlike Gaia's implementation, the callback function is passed the value,
 // in case you want to operate on that value only after you're sure it
 // saved, or something like that.
-function setItem<T>(this: Module, key: IDBValidKey, value: T | null, callback: (onError: any, onResult?: T | null) => void) {
-     var self = this;
+function setItem<T>(
+    this: Module,
+    key: IDBValidKey,
+    value: T | null,
+    callback: (onError: any, onResult?: T | null) => void
+) {
+    var self = this;
 
     key = normalizeKey(key);
 
-    var promise = self.ready().then(function() {
+    var promise = self.ready().then(function () {
         // Convert undefined values to null.
         // https://github.com/mozilla/localForage/pull/42
         if (value === undefined) {
@@ -271,9 +287,9 @@ function setItem<T>(this: Module, key: IDBValidKey, value: T | null, callback: (
         // Save the original value to pass to the callback.
         var originalValue = value;
 
-        return new Promise<T | null>(function(resolve, reject) {
+        return new Promise<T | null>(function (resolve, reject) {
             var dbInfo = self._dbInfo;
-            dbInfo.serializer.serialize(value, function(value, error) {
+            dbInfo.serializer.serialize(value, function (value, error) {
                 if (error || value instanceof Error) {
                     reject(error);
                 } else {
@@ -311,7 +327,7 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
     }
     var options: Option = {
         name: _options.name,
-        storeName: _options.storeName!,
+        storeName: _options.storeName!
     };
 
     var self = this;
@@ -319,13 +335,13 @@ function dropInstance(this: Module, _options: Partial<Option>, callback?: (onErr
     if (!options.name) {
         promise = Promise.reject('Invalid arguments');
     } else {
-        promise = new Promise<string>(function(resolve) {
+        promise = new Promise<string>(function (resolve) {
             if (!options.storeName) {
                 resolve(`${options.name}/`);
             } else {
                 resolve(_getKeyPrefix(options, self._defaultConfig));
             }
-        }).then(function(keyPrefix) {
+        }).then(function (keyPrefix) {
             for (var i = localStorage.length - 1; i >= 0; i--) {
                 var key = localStorage.key(i)!;
 

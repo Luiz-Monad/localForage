@@ -4,8 +4,7 @@ import createBlob from './createBlob';
 // Sadly, the best way to save binary data in WebSQL/localStorage is serializing
 // it to Base64, so this is how we store it to prevent very strange errors with less
 // verbose ways of binary <-> string data storage.
-var BASE_CHARS =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+var BASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 var BLOB_TYPE_PREFIX = '~~local_forage_type~';
 var BLOB_TYPE_PREFIX_REGEX = /^~~local_forage_type~([^~]+)~/;
@@ -25,8 +24,7 @@ var TYPE_UINT16ARRAY = 'ur16';
 var TYPE_UINT32ARRAY = 'ui32';
 var TYPE_FLOAT32ARRAY = 'fl32';
 var TYPE_FLOAT64ARRAY = 'fl64';
-var TYPE_SERIALIZED_MARKER_LENGTH =
-    SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
+var TYPE_SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
 
 var toString = Object.prototype.toString;
 
@@ -74,16 +72,14 @@ function bufferToString(buffer: ArrayBuffer) {
         /*jslint bitwise: true */
         base64String += BASE_CHARS[bytes[i] >> 2];
         base64String += BASE_CHARS[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
-        base64String +=
-            BASE_CHARS[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
+        base64String += BASE_CHARS[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
         base64String += BASE_CHARS[bytes[i + 2] & 63];
     }
 
     if (bytes.length % 3 === 2) {
         base64String = base64String.substring(0, base64String.length - 1) + '=';
     } else if (bytes.length % 3 === 1) {
-        base64String =
-            base64String.substring(0, base64String.length - 2) + '==';
+        base64String = base64String.substring(0, base64String.length - 2) + '==';
     }
 
     return base64String;
@@ -92,7 +88,10 @@ function bufferToString(buffer: ArrayBuffer) {
 // Serialize a value, afterwards executing a callback (which usually
 // instructs the `setItem()` callback/promise to be executed). This is how
 // we store binary data with localStorage.
-function serialize<T>(value: ArrayBufferView | ArrayBuffer | Blob | T | null, callback: (onDone: string | Error | null, onError?: unknown) => void) {
+function serialize<T>(
+    value: ArrayBufferView | ArrayBuffer | Blob | T | null,
+    callback: (onDone: string | Error | null, onError?: unknown) => void
+) {
     var valueType = '';
     if (value) {
         valueType = toString.call(value);
@@ -106,7 +105,8 @@ function serialize<T>(value: ArrayBufferView | ArrayBuffer | Blob | T | null, ca
         value &&
         (valueType === '[object ArrayBuffer]' ||
             ((value as Partial<ArrayBufferView>).buffer &&
-                toString.call((value as Partial<ArrayBufferView>).buffer) === '[object ArrayBuffer]'))
+                toString.call((value as Partial<ArrayBufferView>).buffer) ===
+                    '[object ArrayBuffer]'))
     ) {
         const arrayBuffer = value as ArrayBufferView & ArrayBuffer;
 
@@ -147,11 +147,11 @@ function serialize<T>(value: ArrayBufferView | ArrayBuffer | Blob | T | null, ca
         callback(marker + bufferToString(buffer));
     } else if (valueType === '[object Blob]') {
         const blobValue = value as Blob;
-        
+
         // Conver the blob to a binaryArray and then to a string.
         var fileReader = new FileReader();
 
-        fileReader.onload = function() {
+        fileReader.onload = function () {
             // Backwards-compatible prefix for the blob type.
             var str =
                 BLOB_TYPE_PREFIX +
@@ -194,10 +194,7 @@ function deserialize<T>(value: string): ArrayBuffer | Blob | T {
     // TypedArray. First we separate out the type of data we're dealing
     // with from the data itself.
     var serializedString = value.substring(TYPE_SERIALIZED_MARKER_LENGTH);
-    var type = value.substring(
-        SERIALIZED_MARKER_LENGTH,
-        TYPE_SERIALIZED_MARKER_LENGTH
-    );
+    var type = value.substring(SERIALIZED_MARKER_LENGTH, TYPE_SERIALIZED_MARKER_LENGTH);
 
     var blobType;
     // Backwards-compatible blob type serialization strategy.

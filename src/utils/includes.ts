@@ -1,6 +1,5 @@
 const sameValue = (x: any, y: any) =>
-    x === y ||
-    (typeof x === 'number' && typeof y === 'number' && isNaN(x) && isNaN(y));
+    x === y || (typeof x === 'number' && typeof y === 'number' && isNaN(x) && isNaN(y));
 
 const includes = <T>(array: T[], searchElement: T) => {
     const len = array.length;

@@ -1,23 +1,11 @@
 /* global after:true, afterEach:true, before:true, beforeEach:true, describe:true, expect:true, it:true, Promise:true */
-var DRIVERS = [
-    localforage.INDEXEDDB,
-    localforage.WEBSQL,
-    localforage.LOCALSTORAGE
-];
+var DRIVERS = [localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE];
 
-var SUPPORTED_DRIVERS = DRIVERS.filter(function(driverName) {
+var SUPPORTED_DRIVERS = DRIVERS.filter(function (driverName) {
     return localforage.supports(driverName);
 });
 
-var driverApiMethods = [
-    'getItem',
-    'setItem',
-    'clear',
-    'length',
-    'removeItem',
-    'key',
-    'keys'
-];
+var driverApiMethods = ['getItem', 'setItem', 'clear', 'length', 'removeItem', 'key', 'keys'];
 
 var indexedDB =
     // eslint-disable-next-line no-use-before-define
@@ -28,33 +16,28 @@ var indexedDB =
     window.OIndexedDB ||
     window.msIndexedDB;
 
-describe('localForage API', function() {
+describe('localForage API', function () {
     // https://github.com/mozilla/localForage#working-on-localforage
-    it('has Promises available', function() {
+    it('has Promises available', function () {
         expect(Promise).to.be.a('function');
     });
 });
 
-describe('localForage', function() {
+describe('localForage', function () {
     var appropriateDriver =
-        (localforage.supports(localforage.INDEXEDDB) &&
-            localforage.INDEXEDDB) ||
+        (localforage.supports(localforage.INDEXEDDB) && localforage.INDEXEDDB) ||
         (localforage.supports(localforage.WEBSQL) && localforage.WEBSQL) ||
-        (localforage.supports(localforage.LOCALSTORAGE) &&
-            localforage.LOCALSTORAGE);
+        (localforage.supports(localforage.LOCALSTORAGE) && localforage.LOCALSTORAGE);
 
     it(
-        'automatically selects the most appropriate driver (' +
-            appropriateDriver +
-            ')',
-        function(done) {
+        'automatically selects the most appropriate driver (' + appropriateDriver + ')',
+        function (done) {
             this.timeout(10000);
             localforage.ready().then(
-                function() {
+                function () {
                     if (window.require) {
                         var appropriateDriver1 =
-                            (localforage.supports(localforage.WEBSQL) &&
-                                localforage.WEBSQL) ||
+                            (localforage.supports(localforage.WEBSQL) && localforage.WEBSQL) ||
                             (localforage.supports(localforage.LOCALSTORAGE) &&
                                 localforage.LOCALSTORAGE);
                         expect(localforage.driver()).to.be(appropriateDriver1);
@@ -63,11 +46,9 @@ describe('localForage', function() {
                     }
                     done();
                 },
-                function(error) {
+                function (error) {
                     expect(error).to.be.an(Error);
-                    expect(error.message).to.be(
-                        'No available storage method found.'
-                    );
+                    expect(error.message).to.be('No available storage method found.');
                     expect(localforage.driver()).to.be(null);
                     done();
                 }
@@ -75,41 +56,41 @@ describe('localForage', function() {
         }
     );
 
-    it('errors when a requested driver is not found [callback]', function(done) {
-        localforage.getDriver('UnknownDriver', null, function(error) {
+    it('errors when a requested driver is not found [callback]', function (done) {
+        localforage.getDriver('UnknownDriver', null, function (error) {
             expect(error).to.be.an(Error);
             expect(error.message).to.be('Driver not found.');
             done();
         });
     });
 
-    it('errors when a requested driver is not found [promise]', function(done) {
-        localforage.getDriver('UnknownDriver').then(null, function(error) {
+    it('errors when a requested driver is not found [promise]', function (done) {
+        localforage.getDriver('UnknownDriver').then(null, function (error) {
             expect(error).to.be.an(Error);
             expect(error.message).to.be('Driver not found.');
             done();
         });
     });
 
-    it('retrieves the serializer [callback]', function(done) {
-        localforage.getSerializer(function(serializer) {
+    it('retrieves the serializer [callback]', function (done) {
+        localforage.getSerializer(function (serializer) {
             expect(serializer).to.be.an('object');
             done();
         });
     });
 
-    it('retrieves the serializer [promise]', function(done) {
+    it('retrieves the serializer [promise]', function (done) {
         var serializerPromise = localforage.getSerializer();
         expect(serializerPromise).to.be.an('object');
         expect(serializerPromise.then).to.be.a('function');
 
-        serializerPromise.then(function(serializer) {
+        serializerPromise.then(function (serializer) {
             expect(serializer).to.be.an('object');
             done();
         });
     });
 
-    it('does not support object parameter to setDriver', function(done) {
+    it('does not support object parameter to setDriver', function (done) {
         var driverPreferedOrder = {
             '0': localforage.INDEXEDDB,
             '1': localforage.WEBSQL,
@@ -117,15 +98,15 @@ describe('localForage', function() {
             length: 3
         };
 
-        localforage.setDriver(driverPreferedOrder).then(null, function(error) {
+        localforage.setDriver(driverPreferedOrder).then(null, function (error) {
             expect(error).to.be.an(Error);
             expect(error.message).to.be('No available storage method found.');
             done();
         });
     });
 
-    it('skips drivers that fail to initilize', function(done) {
-        var failingStorageDriver = (function() {
+    it('skips drivers that fail to initilize', function (done) {
+        var failingStorageDriver = (function () {
             function driverDummyMethod() {
                 return Promise.reject(new Error('Driver Method Failed.'));
             }
@@ -133,9 +114,7 @@ describe('localForage', function() {
             return {
                 _driver: 'failingStorageDriver',
                 _initStorage: function _initStorage() {
-                    return Promise.reject(
-                        new Error('Driver Failed to Initialize.')
-                    );
+                    return Promise.reject(new Error('Driver Failed to Initialize.'));
                 },
                 iterate: driverDummyMethod,
                 getItem: driverDummyMethod,
@@ -157,25 +136,25 @@ describe('localForage', function() {
 
         localforage
             .defineDriver(failingStorageDriver)
-            .then(function() {
+            .then(function () {
                 return localforage.setDriver(driverPreferedOrder);
             })
-            .then(function() {
+            .then(function () {
                 return localforage.ready();
             })
-            .then(function() {
+            .then(function () {
                 expect(localforage.driver()).to.be(appropriateDriver);
                 done();
             });
     });
 
-    describe('createInstance()', function() {
+    describe('createInstance()', function () {
         var oldConsoleInfo;
 
-        before(function() {
+        before(function () {
             oldConsoleInfo = console.info;
             var logs = [];
-            console.info = function() {
+            console.info = function () {
                 console.info.logs.push({
                     args: arguments
                 });
@@ -184,11 +163,11 @@ describe('localForage', function() {
             console.info.logs = logs;
         });
 
-        after(function() {
+        after(function () {
             console.info = oldConsoleInfo;
         });
 
-        it('does not log unnecessary messages', function() {
+        it('does not log unnecessary messages', function () {
             var oldLogCount = console.info.logs.length;
             var localforage2 = localforage.createInstance();
             var localforage3 = localforage.createInstance();
@@ -197,35 +176,35 @@ describe('localForage', function() {
                 localforage.ready(),
                 localforage2.ready(),
                 localforage3.ready()
-            ]).then(function() {
+            ]).then(function () {
                 expect(console.info.logs.length).to.be(oldLogCount);
             });
         });
     });
 });
 
-SUPPORTED_DRIVERS.forEach(function(driverName) {
+SUPPORTED_DRIVERS.forEach(function (driverName) {
     if (this.require && 'asyncStorage' === driverName) {
         console.warn('asyncStorage with requirejs not working well');
         return;
     }
-    describe(driverName + ' driver', function() {
+    describe(driverName + ' driver', function () {
         'use strict';
 
         this.timeout(30000);
 
-        before(function(done) {
+        before(function (done) {
             localforage.setDriver(driverName).then(done);
         });
 
-        beforeEach(function(done) {
+        beforeEach(function (done) {
             localStorage.clear();
-            localforage.ready().then(function() {
+            localforage.ready().then(function () {
                 localforage.clear(done);
             });
         });
 
-        it('has a localStorage API', function() {
+        it('has a localStorage API', function () {
             expect(localforage.getItem).to.be.a('function');
             expect(localforage.setItem).to.be.a('function');
             expect(localforage.clear).to.be.a('function');
@@ -234,7 +213,7 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
             expect(localforage.key).to.be.a('function');
         });
 
-        it('has the localForage API', function() {
+        it('has the localForage API', function () {
             expect(localforage._initStorage).to.be.a('function');
             expect(localforage.config).to.be.a('function');
             expect(localforage.defineDriver).to.be.a('function');
@@ -256,157 +235,153 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
         });
 
         // Make sure we don't support bogus drivers.
-        it('supports ' + driverName + ' database driver', function() {
+        it('supports ' + driverName + ' database driver', function () {
             expect(localforage.supports(driverName) === true);
             expect(localforage.supports('I am not a driver') === false);
         });
 
-        it('sets the right database driver', function() {
+        it('sets the right database driver', function () {
             expect(localforage.driver() === driverName);
         });
 
-        it('has an empty length by default', function(done) {
-            localforage.length(function(err, length) {
+        it('has an empty length by default', function (done) {
+            localforage.length(function (err, length) {
                 expect(length).to.be(0);
                 done();
             });
         });
 
         if (driverName === localforage.INDEXEDDB) {
-            describe('Blob support', function() {
+            describe('Blob support', function () {
                 var transaction;
                 var called;
                 var db;
                 var blob = new Blob([''], { type: 'image/png' });
 
-                before(function() {
+                before(function () {
                     db = localforage._dbInfo.db;
                     transaction = db.transaction;
-                    db.transaction = function() {
+                    db.transaction = function () {
                         called += 1;
                         return transaction.apply(db, arguments);
                     };
                 });
 
-                beforeEach(function() {
+                beforeEach(function () {
                     called = 0;
                 });
 
-                it('not check for non Blob', function(done) {
+                it('not check for non Blob', function (done) {
                     localforage.setItem('key', {}).then(
-                        function() {
+                        function () {
                             expect(called).to.be(1);
                             done();
                         },
-                        function(error) {
+                        function (error) {
                             done(error || 'error');
                         }
                     );
                 });
 
-                it('check for Blob', function(done) {
+                it('check for Blob', function (done) {
                     localforage.setItem('key', blob).then(
-                        function() {
+                        function () {
                             expect(called).to.be.above(1);
                             done();
                         },
-                        function(error) {
+                        function (error) {
                             done(error || 'error');
                         }
                     );
                 });
 
-                it('check for Blob once', function(done) {
+                it('check for Blob once', function (done) {
                     localforage.setItem('key', blob).then(
-                        function() {
+                        function () {
                             expect(called).to.be(1);
                             done();
                         },
-                        function(error) {
+                        function (error) {
                             done(error || 'error');
                         }
                     );
                 });
 
-                after(function() {
+                after(function () {
                     localforage._dbInfo.db.transaction = transaction;
                 });
             });
 
-            describe('recover (reconnect) from IDBDatabase InvalidStateError', function() {
-                beforeEach(function(done) {
+            describe('recover (reconnect) from IDBDatabase InvalidStateError', function () {
+                beforeEach(function (done) {
                     Promise.all([
                         localforage.setItem('key', 'value1'),
                         localforage.setItem('key1', 'value1'),
                         localforage.setItem('key2', 'value2'),
                         localforage.setItem('key3', 'value3')
                     ]).then(
-                        function() {
+                        function () {
                             localforage._dbInfo.db.close();
                             done();
                         },
-                        function(error) {
+                        function (error) {
                             done(error || 'error');
                         }
                     );
                 });
 
-                it('retrieves an item from the storage', function(done) {
+                it('retrieves an item from the storage', function (done) {
                     localforage.getItem('key').then(
-                        function(value) {
+                        function (value) {
                             expect(value).to.be('value1');
                             done();
                         },
-                        function(error) {
+                        function (error) {
                             done(error || 'error');
                         }
                     );
                 });
 
-                it('retrieves more than one items from the storage', function(done) {
+                it('retrieves more than one items from the storage', function (done) {
                     Promise.all([
                         localforage.getItem('key1'),
                         localforage.getItem('key2'),
                         localforage.getItem('key3')
                     ]).then(
-                        function(values) {
-                            expect(values).to.eql([
-                                'value1',
-                                'value2',
-                                'value3'
-                            ]);
+                        function (values) {
+                            expect(values).to.eql(['value1', 'value2', 'value3']);
                             done();
                         },
-                        function(error) {
+                        function (error) {
                             done(error || 'error');
                         }
                     );
                 });
 
-                it('stores and retrieves an item from the storage', function(done) {
+                it('stores and retrieves an item from the storage', function (done) {
                     localforage
                         .setItem('key', 'value1b')
-                        .then(function() {
+                        .then(function () {
                             return localforage.getItem('key');
                         })
                         .then(
-                            function(value) {
+                            function (value) {
                                 expect(value).to.be('value1b');
                                 done();
                             },
-                            function(error) {
+                            function (error) {
                                 done(error || 'error');
                             }
                         );
                 });
 
-                it('stores and retrieves more than one items from the storage', function(done) {
+                it('stores and retrieves more than one items from the storage', function (done) {
                     Promise.all([
                         localforage.setItem('key1', 'value1b'),
                         localforage.setItem('key2', 'value2b'),
                         localforage.setItem('key3', 'value3b')
                     ])
-                        .then(function() {
+                        .then(function () {
                             return Promise.all([
                                 localforage.getItem('key1'),
                                 localforage.getItem('key2'),
@@ -414,15 +389,11 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                             ]);
                         })
                         .then(
-                            function(values) {
-                                expect(values).to.eql([
-                                    'value1b',
-                                    'value2b',
-                                    'value3b'
-                                ]);
+                            function (values) {
+                                expect(values).to.eql(['value1b', 'value2b', 'value3b']);
                                 done();
                             },
-                            function(error) {
+                            function (error) {
                                 done(error || 'error');
                             }
                         );
@@ -431,40 +402,38 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
         }
 
         if (driverName === localforage.WEBSQL) {
-            describe('on QUOTA ERROR', function() {
+            describe('on QUOTA ERROR', function () {
                 var transaction;
                 var called;
                 var db;
 
                 function getQuotaErrorCode(transaction) {
-                    return new Promise(function(resolve) {
+                    return new Promise(function (resolve) {
                         transaction(
-                            function(t) {
+                            function (t) {
                                 t.executeSql('');
                             },
-                            function(err) {
+                            function (err) {
                                 resolve(err.QUOTA_ERR);
                             }
                         );
-                    }).catch(function(err) {
+                    }).catch(function (err) {
                         return err.QUOTA_ERR;
                     });
                 }
 
-                beforeEach(function() {
+                beforeEach(function () {
                     called = 0;
                     db = localforage._dbInfo.db;
                     transaction = db.transaction;
 
-                    db.transaction = function(fn, errFn) {
+                    db.transaction = function (fn, errFn) {
                         called += 1;
                         // restore the normal transaction,
                         // so that subsequent operations work
                         db.transaction = transaction;
 
-                        getQuotaErrorCode(transaction).then(function(
-                            QUOTA_ERR
-                        ) {
+                        getQuotaErrorCode(transaction).then(function (QUOTA_ERR) {
                             var error = new Error();
                             error.code = QUOTA_ERR;
                             errFn(error);
@@ -472,56 +441,49 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                     };
                 });
 
-                it('should retry setItem', function(done) {
+                it('should retry setItem', function (done) {
                     localforage.setItem('key', {}).then(
-                        function() {
+                        function () {
                             expect(called).to.be(1);
                             done();
                         },
-                        function(error) {
+                        function (error) {
                             done(error || 'error');
                         }
                     );
                 });
 
-                after(function() {
+                after(function () {
                     db.transaction = transaction || db.transaction;
                 });
             });
         }
 
-        it('should iterate [callback]', function(done) {
-            localforage.setItem('officeX', 'InitechX', function(err, setValue) {
+        it('should iterate [callback]', function (done) {
+            localforage.setItem('officeX', 'InitechX', function (err, setValue) {
                 expect(setValue).to.be('InitechX');
 
-                localforage.getItem('officeX', function(err, value) {
+                localforage.getItem('officeX', function (err, value) {
                     expect(value).to.be(setValue);
 
-                    localforage.setItem('officeY', 'InitechY', function(
-                        err,
-                        setValue
-                    ) {
+                    localforage.setItem('officeY', 'InitechY', function (err, setValue) {
                         expect(setValue).to.be('InitechY');
 
-                        localforage.getItem('officeY', function(err, value) {
+                        localforage.getItem('officeY', function (err, value) {
                             expect(value).to.be(setValue);
 
                             var accumulator = {};
                             var iterationNumbers = [];
 
                             localforage.iterate(
-                                function(value, key, iterationNumber) {
+                                function (value, key, iterationNumber) {
                                     accumulator[key] = value;
                                     iterationNumbers.push(iterationNumber);
                                 },
-                                function() {
+                                function () {
                                     try {
-                                        expect(accumulator.officeX).to.be(
-                                            'InitechX'
-                                        );
-                                        expect(accumulator.officeY).to.be(
-                                            'InitechY'
-                                        );
+                                        expect(accumulator.officeX).to.be('InitechX');
+                                        expect(accumulator.officeY).to.be('InitechY');
                                         expect(iterationNumbers).to.eql([1, 2]);
                                         done();
                                     } catch (e) {
@@ -535,37 +497,33 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
             });
         });
 
-        it('should iterate [promise]', function() {
+        it('should iterate [promise]', function () {
             var accumulator = {};
             var iterationNumbers = [];
 
             return localforage
                 .setItem('officeX', 'InitechX')
-                .then(function(setValue) {
+                .then(function (setValue) {
                     expect(setValue).to.be('InitechX');
                     return localforage.getItem('officeX');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('InitechX');
                     return localforage.setItem('officeY', 'InitechY');
                 })
-                .then(function(setValue) {
+                .then(function (setValue) {
                     expect(setValue).to.be('InitechY');
                     return localforage.getItem('officeY');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('InitechY');
 
-                    return localforage.iterate(function(
-                        value,
-                        key,
-                        iterationNumber
-                    ) {
+                    return localforage.iterate(function (value, key, iterationNumber) {
                         accumulator[key] = value;
                         iterationNumbers.push(iterationNumber);
                     });
                 })
-                .then(function() {
+                .then(function () {
                     expect(accumulator.officeX).to.be('InitechX');
                     expect(accumulator.officeY).to.be('InitechY');
                     expect(iterationNumbers).to.eql([1, 2]);
@@ -573,31 +531,28 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                 });
         });
 
-        it('should break iteration with defined return value [callback]', function(done) {
+        it('should break iteration with defined return value [callback]', function (done) {
             var breakCondition = 'Some value!';
 
-            localforage.setItem('officeX', 'InitechX', function(err, setValue) {
+            localforage.setItem('officeX', 'InitechX', function (err, setValue) {
                 expect(setValue).to.be('InitechX');
 
-                localforage.getItem('officeX', function(err, value) {
+                localforage.getItem('officeX', function (err, value) {
                     expect(value).to.be(setValue);
 
-                    localforage.setItem('officeY', 'InitechY', function(
-                        err,
-                        setValue
-                    ) {
+                    localforage.setItem('officeY', 'InitechY', function (err, setValue) {
                         expect(setValue).to.be('InitechY');
 
-                        localforage.getItem('officeY', function(err, value) {
+                        localforage.getItem('officeY', function (err, value) {
                             expect(value).to.be(setValue);
 
                             // Loop is broken within first iteration.
                             localforage.iterate(
-                                function() {
+                                function () {
                                     // Returning defined value will break the cycle.
                                     return breakCondition;
                                 },
-                                function(err, loopResult) {
+                                function (err, loopResult) {
                                     // The value that broken the cycle is returned
                                     // as a result.
                                     expect(loopResult).to.be(breakCondition);
@@ -611,43 +566,43 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
             });
         });
 
-        it('should break iteration with defined return value [promise]', function(done) {
+        it('should break iteration with defined return value [promise]', function (done) {
             var breakCondition = 'Some value!';
 
             localforage
                 .setItem('officeX', 'InitechX')
-                .then(function(setValue) {
+                .then(function (setValue) {
                     expect(setValue).to.be('InitechX');
                     return localforage.getItem('officeX');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('InitechX');
                     return localforage.setItem('officeY', 'InitechY');
                 })
-                .then(function(setValue) {
+                .then(function (setValue) {
                     expect(setValue).to.be('InitechY');
                     return localforage.getItem('officeY');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('InitechY');
-                    return localforage.iterate(function() {
+                    return localforage.iterate(function () {
                         return breakCondition;
                     });
                 })
-                .then(function(result) {
+                .then(function (result) {
                     expect(result).to.be(breakCondition);
                     done();
                 });
         });
 
-        it('should iterate() through only its own keys/values', function(done) {
+        it('should iterate() through only its own keys/values', function (done) {
             localStorage.setItem('local', 'forage');
             localforage
                 .setItem('office', 'Initech')
-                .then(function() {
+                .then(function () {
                     return localforage.setItem('name', 'Bob');
                 })
-                .then(function() {
+                .then(function () {
                     // Loop through all key/value pairs; {local: 'forage'} set
                     // manually should not be returned.
                     var numberOfItems = 0;
@@ -656,13 +611,13 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                     localStorage.setItem('locals', 'forages');
 
                     localforage.iterate(
-                        function(value, key, iterationNumber) {
+                        function (value, key, iterationNumber) {
                             expect(key).to.not.be('local');
                             expect(value).to.not.be('forage');
                             numberOfItems++;
                             iterationNumberConcat += iterationNumber;
                         },
-                        function(err) {
+                        function (err) {
                             if (!err) {
                                 // While there are 4 items in localStorage,
                                 // only 2 items were set using localForage.
@@ -680,26 +635,26 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
         });
 
         // Test for https://github.com/mozilla/localForage/issues/175
-        it('nested getItem inside clear works [callback]', function(done) {
-            localforage.setItem('hello', 'Hello World !', function() {
-                localforage.clear(function() {
-                    localforage.getItem('hello', function(secondValue) {
+        it('nested getItem inside clear works [callback]', function (done) {
+            localforage.setItem('hello', 'Hello World !', function () {
+                localforage.clear(function () {
+                    localforage.getItem('hello', function (secondValue) {
                         expect(secondValue).to.be(null);
                         done();
                     });
                 });
             });
         });
-        it('nested getItem inside clear works [promise]', function(done) {
+        it('nested getItem inside clear works [promise]', function (done) {
             localforage
                 .setItem('hello', 'Hello World !')
-                .then(function() {
+                .then(function () {
                     return localforage.clear();
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.getItem('hello');
                 })
-                .then(function(secondValue) {
+                .then(function (secondValue) {
                     expect(secondValue).to.be(null);
                     done();
                 });
@@ -709,60 +664,54 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
         // always return `null` so that localForage is consistent across
         // browsers.
         // https://github.com/mozilla/localForage/pull/42
-        it('returns null for undefined key [callback]', function(done) {
-            localforage.getItem('key', function(err, value) {
+        it('returns null for undefined key [callback]', function (done) {
+            localforage.getItem('key', function (err, value) {
                 expect(value).to.be(null);
                 done();
             });
         });
 
-        it('returns null for undefined key [promise]', function(done) {
-            localforage.getItem('key').then(function(value) {
+        it('returns null for undefined key [promise]', function (done) {
+            localforage.getItem('key').then(function (value) {
                 expect(value).to.be(null);
                 done();
             });
         });
 
-        it('saves an item [callback]', function(done) {
-            localforage.setItem('office', 'Initech', function(err, setValue) {
+        it('saves an item [callback]', function (done) {
+            localforage.setItem('office', 'Initech', function (err, setValue) {
                 expect(setValue).to.be('Initech');
 
-                localforage.getItem('office', function(err, value) {
+                localforage.getItem('office', function (err, value) {
                     expect(value).to.be(setValue);
                     done();
                 });
             });
         });
 
-        it('saves an item [promise]', function(done) {
+        it('saves an item [promise]', function (done) {
             localforage
                 .setItem('office', 'Initech')
-                .then(function(setValue) {
+                .then(function (setValue) {
                     expect(setValue).to.be('Initech');
 
                     return localforage.getItem('office');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('Initech');
                     done();
                 });
         });
 
-        it('saves an item over an existing key [callback]', function(done) {
-            localforage.setItem('4th floor', 'Mozilla', function(
-                err,
-                setValue
-            ) {
+        it('saves an item over an existing key [callback]', function (done) {
+            localforage.setItem('4th floor', 'Mozilla', function (err, setValue) {
                 expect(setValue).to.be('Mozilla');
 
-                localforage.setItem('4th floor', 'Quora', function(
-                    err,
-                    newValue
-                ) {
+                localforage.setItem('4th floor', 'Quora', function (err, newValue) {
                     expect(newValue).to.not.be(setValue);
                     expect(newValue).to.be('Quora');
 
-                    localforage.getItem('4th floor', function(err, value) {
+                    localforage.getItem('4th floor', function (err, value) {
                         expect(value).to.not.be(setValue);
                         expect(value).to.be(newValue);
                         done();
@@ -770,66 +719,66 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                 });
             });
         });
-        it('saves an item over an existing key [promise]', function(done) {
+        it('saves an item over an existing key [promise]', function (done) {
             localforage
                 .setItem('4e', 'Mozilla')
-                .then(function(setValue) {
+                .then(function (setValue) {
                     expect(setValue).to.be('Mozilla');
 
                     return localforage.setItem('4e', 'Quora');
                 })
-                .then(function(newValue) {
+                .then(function (newValue) {
                     expect(newValue).to.not.be('Mozilla');
                     expect(newValue).to.be('Quora');
 
                     return localforage.getItem('4e');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.not.be('Mozilla');
                     expect(value).to.be('Quora');
                     done();
                 });
         });
 
-        it('returns null when saving undefined [callback]', function(done) {
-            localforage.setItem('undef', undefined, function(err, setValue) {
+        it('returns null when saving undefined [callback]', function (done) {
+            localforage.setItem('undef', undefined, function (err, setValue) {
                 expect(setValue).to.be(null);
 
                 done();
             });
         });
-        it('returns null when saving undefined [promise]', function(done) {
-            localforage.setItem('undef', undefined).then(function(setValue) {
-                expect(setValue).to.be(null);
-
-                done();
-            });
-        });
-
-        it('returns null when saving null [callback]', function(done) {
-            localforage.setItem('null', null, function(err, setValue) {
-                expect(setValue).to.be(null);
-
-                done();
-            });
-        });
-        it('returns null when saving null [promise]', function(done) {
-            localforage.setItem('null', null).then(function(setValue) {
+        it('returns null when saving undefined [promise]', function (done) {
+            localforage.setItem('undef', undefined).then(function (setValue) {
                 expect(setValue).to.be(null);
 
                 done();
             });
         });
 
-        it('returns null for a non-existant key [callback]', function(done) {
-            localforage.getItem('undef', function(err, value) {
+        it('returns null when saving null [callback]', function (done) {
+            localforage.setItem('null', null, function (err, setValue) {
+                expect(setValue).to.be(null);
+
+                done();
+            });
+        });
+        it('returns null when saving null [promise]', function (done) {
+            localforage.setItem('null', null).then(function (setValue) {
+                expect(setValue).to.be(null);
+
+                done();
+            });
+        });
+
+        it('returns null for a non-existant key [callback]', function (done) {
+            localforage.getItem('undef', function (err, value) {
                 expect(value).to.be(null);
 
                 done();
             });
         });
-        it('returns null for a non-existant key [promise]', function(done) {
-            localforage.getItem('undef').then(function(value) {
+        it('returns null for a non-existant key [promise]', function (done) {
+            localforage.getItem('undef').then(function (value) {
                 expect(value).to.be(null);
 
                 done();
@@ -846,57 +795,51 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
         // if the key is ACTUALLY `null` or undefined but returning `null`.
         // And returning `undefined` here would break compatibility with
         // localStorage fallback. Maybe in the future we won't care...
-        it('returns null from an undefined key [callback]', function(done) {
-            localforage.key(0, function(err, key) {
+        it('returns null from an undefined key [callback]', function (done) {
+            localforage.key(0, function (err, key) {
                 expect(key).to.be(null);
 
                 done();
             });
         });
-        it('returns null from an undefined key [promise]', function(done) {
-            localforage.key(0).then(function(key) {
+        it('returns null from an undefined key [promise]', function (done) {
+            localforage.key(0).then(function (key) {
                 expect(key).to.be(null);
 
                 done();
             });
         });
 
-        it('returns key name [callback]', function(done) {
-            localforage.setItem('office', 'Initech').then(function() {
-                localforage.key(0, function(err, key) {
+        it('returns key name [callback]', function (done) {
+            localforage.setItem('office', 'Initech').then(function () {
+                localforage.key(0, function (err, key) {
                     expect(key).to.be('office');
 
                     done();
                 });
             });
         });
-        it('returns key name [promise]', function(done) {
+        it('returns key name [promise]', function (done) {
             localforage
                 .setItem('office', 'Initech')
-                .then(function() {
+                .then(function () {
                     return localforage.key(0);
                 })
-                .then(function(key) {
+                .then(function (key) {
                     expect(key).to.be('office');
 
                     done();
                 });
         });
 
-        it('removes an item [callback]', function(done) {
-            localforage.setItem('office', 'Initech', function() {
-                localforage.setItem('otherOffice', 'Initrode', function() {
-                    localforage.removeItem('office', function() {
-                        localforage.getItem('office', function(
-                            err,
-                            emptyValue
-                        ) {
+        it('removes an item [callback]', function (done) {
+            localforage.setItem('office', 'Initech', function () {
+                localforage.setItem('otherOffice', 'Initrode', function () {
+                    localforage.removeItem('office', function () {
+                        localforage.getItem('office', function (err, emptyValue) {
                             expect(emptyValue).to.be(null);
 
-                            localforage.getItem('otherOffice', function(
-                                err,
-                                value
-                            ) {
+                            localforage.getItem('otherOffice', function (err, value) {
                                 expect(value).to.be('Initrode');
 
                                 done();
@@ -906,41 +849,41 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                 });
             });
         });
-        it('removes an item [promise]', function(done) {
+        it('removes an item [promise]', function (done) {
             localforage
                 .setItem('office', 'Initech')
-                .then(function() {
+                .then(function () {
                     return localforage.setItem('otherOffice', 'Initrode');
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.removeItem('office');
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.getItem('office');
                 })
-                .then(function(emptyValue) {
+                .then(function (emptyValue) {
                     expect(emptyValue).to.be(null);
 
                     return localforage.getItem('otherOffice');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('Initrode');
 
                     done();
                 });
         });
 
-        it('removes all items [callback]', function(done) {
-            localforage.setItem('office', 'Initech', function() {
-                localforage.setItem('otherOffice', 'Initrode', function() {
-                    localforage.length(function(err, length) {
+        it('removes all items [callback]', function (done) {
+            localforage.setItem('office', 'Initech', function () {
+                localforage.setItem('otherOffice', 'Initrode', function () {
+                    localforage.length(function (err, length) {
                         expect(length).to.be(2);
 
-                        localforage.clear(function() {
-                            localforage.getItem('office', function(err, value) {
+                        localforage.clear(function () {
+                            localforage.getItem('office', function (err, value) {
                                 expect(value).to.be(null);
 
-                                localforage.length(function(err, length) {
+                                localforage.length(function (err, length) {
                                     expect(length).to.be(0);
 
                                     done();
@@ -951,29 +894,29 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                 });
             });
         });
-        it('removes all items [promise]', function(done) {
+        it('removes all items [promise]', function (done) {
             localforage
                 .setItem('office', 'Initech')
-                .then(function() {
+                .then(function () {
                     return localforage.setItem('otherOffice', 'Initrode');
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.length();
                 })
-                .then(function(length) {
+                .then(function (length) {
                     expect(length).to.be(2);
 
                     return localforage.clear();
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.getItem('office');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be(null);
 
                     return localforage.length();
                 })
-                .then(function(length) {
+                .then(function (length) {
                     expect(length).to.be(0);
 
                     done();
@@ -981,15 +924,15 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
         });
 
         if (driverName === localforage.LOCALSTORAGE) {
-            it('removes only own items upon clear', function(done) {
+            it('removes only own items upon clear', function (done) {
                 localStorage.setItem('local', 'forage');
 
                 localforage
                     .setItem('office', 'Initech')
-                    .then(function() {
+                    .then(function () {
                         return localforage.clear();
                     })
-                    .then(function() {
+                    .then(function () {
                         expect(localStorage.getItem('local')).to.be('forage');
 
                         localStorage.clear();
@@ -998,15 +941,15 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                     });
             });
 
-            it('returns only its own keys from keys()', function(done) {
+            it('returns only its own keys from keys()', function (done) {
                 localStorage.setItem('local', 'forage');
 
                 localforage
                     .setItem('office', 'Initech')
-                    .then(function() {
+                    .then(function () {
                         return localforage.keys();
                     })
-                    .then(function(keys) {
+                    .then(function (keys) {
                         expect(keys).to.eql(['office']);
 
                         localStorage.clear();
@@ -1015,16 +958,16 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                     });
             });
 
-            it('counts only its own items with length()', function(done) {
+            it('counts only its own items with length()', function (done) {
                 localStorage.setItem('local', 'forage');
                 localStorage.setItem('another', 'value');
 
                 localforage
                     .setItem('office', 'Initech')
-                    .then(function() {
+                    .then(function () {
                         return localforage.length();
                     })
-                    .then(function(length) {
+                    .then(function (length) {
                         expect(length).to.be(1);
 
                         localStorage.clear();
@@ -1034,11 +977,11 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
             });
         }
 
-        it('has a length after saving an item [callback]', function(done) {
-            localforage.length(function(err, length) {
+        it('has a length after saving an item [callback]', function (done) {
+            localforage.length(function (err, length) {
                 expect(length).to.be(0);
-                localforage.setItem('rapper', 'Black Thought', function() {
-                    localforage.length(function(err, length) {
+                localforage.setItem('rapper', 'Black Thought', function () {
+                    localforage.length(function (err, length) {
                         expect(length).to.be(1);
 
                         done();
@@ -1046,18 +989,18 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                 });
             });
         });
-        it('has a length after saving an item [promise]', function(done) {
+        it('has a length after saving an item [promise]', function (done) {
             localforage
                 .length()
-                .then(function(length) {
+                .then(function (length) {
                     expect(length).to.be(0);
 
                     return localforage.setItem('lame rapper', 'Vanilla Ice');
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.length();
                 })
-                .then(function(length) {
+                .then(function (length) {
                     expect(length).to.be(1);
 
                     done();
@@ -1066,104 +1009,97 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
 
         // Deal with non-string keys, see issue #250
         // https://github.com/mozilla/localForage/issues/250
-        it('casts an undefined key to a String', function(done) {
+        it('casts an undefined key to a String', function (done) {
             localforage
                 .setItem(undefined, 'goodness!')
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('goodness!');
 
                     return localforage.getItem(undefined);
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('goodness!');
 
                     return localforage.removeItem(undefined);
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.length();
                 })
-                .then(function(length) {
+                .then(function (length) {
                     expect(length).to.be(0);
                     done();
                 });
         });
 
-        it('casts a null key to a String', function(done) {
+        it('casts a null key to a String', function (done) {
             localforage
                 .setItem(null, 'goodness!')
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('goodness!');
 
                     return localforage.getItem(null);
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('goodness!');
 
                     return localforage.removeItem(null);
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.length();
                 })
-                .then(function(length) {
+                .then(function (length) {
                     expect(length).to.be(0);
                     done();
                 });
         });
 
-        it('casts a float key to a String', function(done) {
+        it('casts a float key to a String', function (done) {
             localforage
                 .setItem(537.35737, 'goodness!')
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('goodness!');
 
                     return localforage.getItem(537.35737);
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('goodness!');
 
                     return localforage.removeItem(537.35737);
                 })
-                .then(function() {
+                .then(function () {
                     return localforage.length();
                 })
-                .then(function(length) {
+                .then(function (length) {
                     expect(length).to.be(0);
                     done();
                 });
         });
 
-        it('is retrieved by getDriver [callback]', function(done) {
-            localforage.getDriver(driverName, function(driver) {
+        it('is retrieved by getDriver [callback]', function (done) {
+            localforage.getDriver(driverName, function (driver) {
                 expect(typeof driver).to.be('object');
-                driverApiMethods
-                    .concat('_initStorage')
-                    .forEach(function(methodName) {
-                        expect(typeof driver[methodName]).to.be('function');
-                    });
+                driverApiMethods.concat('_initStorage').forEach(function (methodName) {
+                    expect(typeof driver[methodName]).to.be('function');
+                });
                 expect(driver._driver).to.be(driverName);
                 done();
             });
         });
 
-        it('is retrieved by getDriver [promise]', function(done) {
-            localforage.getDriver(driverName).then(function(driver) {
+        it('is retrieved by getDriver [promise]', function (done) {
+            localforage.getDriver(driverName).then(function (driver) {
                 expect(typeof driver).to.be('object');
-                driverApiMethods
-                    .concat('_initStorage')
-                    .forEach(function(methodName) {
-                        expect(typeof driver[methodName]).to.be('function');
-                    });
+                driverApiMethods.concat('_initStorage').forEach(function (methodName) {
+                    expect(typeof driver[methodName]).to.be('function');
+                });
                 expect(driver._driver).to.be(driverName);
                 done();
             });
         });
 
-        if (
-            driverName === localforage.WEBSQL ||
-            driverName === localforage.LOCALSTORAGE
-        ) {
-            it('exposes the serializer on the dbInfo object', function(done) {
-                localforage.ready().then(function() {
+        if (driverName === localforage.WEBSQL || driverName === localforage.LOCALSTORAGE) {
+            it('exposes the serializer on the dbInfo object', function (done) {
+                localforage.ready().then(function () {
                     expect(localforage._dbInfo.serializer).to.be.an('object');
                     done();
                 });
@@ -1175,7 +1111,7 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
         // Delete IndexedDB storages (start from scratch)
         // Refers to issue #492 - https://github.com/mozilla/localForage/issues/492
         if (driverName === localforage.INDEXEDDB) {
-            return new Promise(function(resolve) {
+            return new Promise(function (resolve) {
                 indexedDB.deleteDatabase(storageName).onsuccess = resolve;
             });
         }
@@ -1184,7 +1120,7 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
         return Promise.resolve();
     }
 
-    describe(driverName + ' driver multiple instances', function() {
+    describe(driverName + ' driver multiple instances', function () {
         'use strict';
 
         this.timeout(30000);
@@ -1192,8 +1128,8 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
         var localforage2 = null;
         var localforage3 = null;
 
-        before(function(done) {
-            prepareStorage('storage2').then(function() {
+        before(function (done) {
+            prepareStorage('storage2').then(function () {
                 localforage2 = localforage.createInstance({
                     name: 'storage2',
                     // We need a small value here
@@ -1220,78 +1156,76 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                     localforage.setDriver(driverName),
                     localforage2.setDriver(driverName),
                     localforage3.setDriver(driverName)
-                ]).then(function() {
+                ]).then(function () {
                     done();
                 });
             });
         });
 
-        beforeEach(function(done) {
-            Promise.all([
-                localforage.clear(),
-                localforage2.clear(),
-                localforage3.clear()
-            ]).then(function() {
-                done();
-            });
+        beforeEach(function (done) {
+            Promise.all([localforage.clear(), localforage2.clear(), localforage3.clear()]).then(
+                function () {
+                    done();
+                }
+            );
         });
 
-        it('is not be able to access values of other instances', function(done) {
+        it('is not be able to access values of other instances', function (done) {
             Promise.all([
                 localforage.setItem('key1', 'value1a'),
                 localforage2.setItem('key2', 'value2a'),
                 localforage3.setItem('key3', 'value3a')
             ])
-                .then(function() {
+                .then(function () {
                     return Promise.all([
-                        localforage.getItem('key2').then(function(value) {
+                        localforage.getItem('key2').then(function (value) {
                             expect(value).to.be(null);
                         }),
-                        localforage2.getItem('key1').then(function(value) {
+                        localforage2.getItem('key1').then(function (value) {
                             expect(value).to.be(null);
                         }),
-                        localforage2.getItem('key3').then(function(value) {
+                        localforage2.getItem('key3').then(function (value) {
                             expect(value).to.be(null);
                         }),
-                        localforage3.getItem('key2').then(function(value) {
+                        localforage3.getItem('key2').then(function (value) {
                             expect(value).to.be(null);
                         })
                     ]);
                 })
                 .then(
-                    function() {
+                    function () {
                         done();
                     },
-                    function(errors) {
+                    function (errors) {
                         done(new Error(errors));
                     }
                 );
         });
 
-        it('retrieves the proper value when using the same key with other instances', function(done) {
+        it('retrieves the proper value when using the same key with other instances', function (done) {
             Promise.all([
                 localforage.setItem('key', 'value1'),
                 localforage2.setItem('key', 'value2'),
                 localforage3.setItem('key', 'value3')
             ])
-                .then(function() {
+                .then(function () {
                     return Promise.all([
-                        localforage.getItem('key').then(function(value) {
+                        localforage.getItem('key').then(function (value) {
                             expect(value).to.be('value1');
                         }),
-                        localforage2.getItem('key').then(function(value) {
+                        localforage2.getItem('key').then(function (value) {
                             expect(value).to.be('value2');
                         }),
-                        localforage3.getItem('key').then(function(value) {
+                        localforage3.getItem('key').then(function (value) {
                             expect(value).to.be('value3');
                         })
                     ]);
                 })
                 .then(
-                    function() {
+                    function () {
                         done();
                     },
-                    function(errors) {
+                    function (errors) {
                         done(new Error(errors));
                     }
                 );
@@ -1299,293 +1233,285 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
     });
 
     // Refers to issue #492 - https://github.com/mozilla/localForage/issues/492
-    describe(
-        driverName + ' driver multiple instances (concurrent on same database)',
-        function() {
-            'use strict';
+    describe(driverName + ' driver multiple instances (concurrent on same database)', function () {
+        'use strict';
 
-            this.timeout(30000);
+        this.timeout(30000);
 
-            before(function() {
-                return Promise.all([
-                    prepareStorage('storage3'),
-                    prepareStorage('commonStorage'),
-                    prepareStorage('commonStorage2'),
-                    prepareStorage('commonStorage3')
-                ]);
+        before(function () {
+            return Promise.all([
+                prepareStorage('storage3'),
+                prepareStorage('commonStorage'),
+                prepareStorage('commonStorage2'),
+                prepareStorage('commonStorage3')
+            ]);
+        });
+
+        it('chains operation on multiple stores', function () {
+            var localforage1 = localforage.createInstance({
+                name: 'storage3',
+                storeName: 'store1',
+                size: 1024
             });
 
-            it('chains operation on multiple stores', function() {
-                var localforage1 = localforage.createInstance({
-                    name: 'storage3',
-                    storeName: 'store1',
-                    size: 1024
-                });
-
-                var localforage2 = localforage.createInstance({
-                    name: 'storage3',
-                    storeName: 'store2',
-                    size: 1024
-                });
-
-                var localforage3 = localforage.createInstance({
-                    name: 'storage3',
-                    storeName: 'store3',
-                    size: 1024
-                });
-
-                var promise1 = localforage1
-                    .setItem('key', 'value1')
-                    .then(function() {
-                        return localforage1.getItem('key');
-                    })
-                    .then(function(value) {
-                        expect(value).to.be('value1');
-                    });
-
-                var promise2 = localforage2
-                    .setItem('key', 'value2')
-                    .then(function() {
-                        return localforage2.getItem('key');
-                    })
-                    .then(function(value) {
-                        expect(value).to.be('value2');
-                    });
-
-                var promise3 = localforage3
-                    .setItem('key', 'value3')
-                    .then(function() {
-                        return localforage3.getItem('key');
-                    })
-                    .then(function(value) {
-                        expect(value).to.be('value3');
-                    });
-
-                return Promise.all([promise1, promise2, promise3]);
+            var localforage2 = localforage.createInstance({
+                name: 'storage3',
+                storeName: 'store2',
+                size: 1024
             });
 
-            it('can create multiple instances of the same store', function() {
-                var localforage1;
-                var localforage2;
-                var localforage3;
-
-                Promise.resolve()
-                    .then(function() {
-                        localforage1 = localforage.createInstance({
-                            name: 'commonStorage',
-                            storeName: 'commonStore',
-                            size: 1024
-                        });
-                        return localforage1.ready();
-                    })
-                    .then(function() {
-                        localforage2 = localforage.createInstance({
-                            name: 'commonStorage',
-                            storeName: 'commonStore',
-                            size: 1024
-                        });
-                        return localforage2.ready();
-                    })
-                    .then(function() {
-                        localforage3 = localforage.createInstance({
-                            name: 'commonStorage',
-                            storeName: 'commonStore',
-                            size: 1024
-                        });
-                        return localforage3.ready();
-                    })
-                    .then(function() {
-                        return Promise.resolve()
-                            .then(function() {
-                                return localforage1
-                                    .setItem('key1', 'value1')
-                                    .then(function() {
-                                        return localforage1.getItem('key1');
-                                    })
-                                    .then(function(value) {
-                                        expect(value).to.be('value1');
-                                    });
-                            })
-                            .then(function() {
-                                return localforage2
-                                    .setItem('key2', 'value2')
-                                    .then(function() {
-                                        return localforage2.getItem('key2');
-                                    })
-                                    .then(function(value) {
-                                        expect(value).to.be('value2');
-                                    });
-                            })
-                            .then(function() {
-                                return localforage3
-                                    .setItem('key3', 'value3')
-                                    .then(function() {
-                                        return localforage3.getItem('key3');
-                                    })
-                                    .then(function(value) {
-                                        expect(value).to.be('value3');
-                                    });
-                            });
-                    });
+            var localforage3 = localforage.createInstance({
+                name: 'storage3',
+                storeName: 'store3',
+                size: 1024
             });
 
-            it('can create multiple instances of the same store and do concurrent operations', function() {
-                var localforage1;
-                var localforage2;
-                var localforage3;
-                var localforage3b;
+            var promise1 = localforage1
+                .setItem('key', 'value1')
+                .then(function () {
+                    return localforage1.getItem('key');
+                })
+                .then(function (value) {
+                    expect(value).to.be('value1');
+                });
 
-                Promise.resolve()
-                    .then(function() {
-                        localforage1 = localforage.createInstance({
-                            name: 'commonStorage2',
-                            storeName: 'commonStore',
-                            size: 1024
-                        });
-                        return localforage1.ready();
-                    })
-                    .then(function() {
-                        localforage2 = localforage.createInstance({
-                            name: 'commonStorage2',
-                            storeName: 'commonStore',
-                            size: 1024
-                        });
-                        return localforage2.ready();
-                    })
-                    .then(function() {
-                        localforage3 = localforage.createInstance({
-                            name: 'commonStorage2',
-                            storeName: 'commonStore',
-                            size: 1024
-                        });
-                        return localforage3.ready();
-                    })
-                    .then(function() {
-                        localforage3b = localforage.createInstance({
-                            name: 'commonStorage2',
-                            storeName: 'commonStore',
-                            size: 1024
-                        });
-                        return localforage3b.ready();
-                    })
-                    .then(function() {
-                        var promise1 = localforage1
-                            .setItem('key1', 'value1')
-                            .then(function() {
-                                return localforage1.getItem('key1');
-                            })
-                            .then(function(value) {
-                                expect(value).to.be('value1');
-                            });
+            var promise2 = localforage2
+                .setItem('key', 'value2')
+                .then(function () {
+                    return localforage2.getItem('key');
+                })
+                .then(function (value) {
+                    expect(value).to.be('value2');
+                });
 
-                        var promise2 = localforage2
-                            .setItem('key2', 'value2')
-                            .then(function() {
-                                return localforage2.getItem('key2');
-                            })
-                            .then(function(value) {
-                                expect(value).to.be('value2');
-                            });
+            var promise3 = localforage3
+                .setItem('key', 'value3')
+                .then(function () {
+                    return localforage3.getItem('key');
+                })
+                .then(function (value) {
+                    expect(value).to.be('value3');
+                });
 
-                        var promise3 = localforage3
-                            .setItem('key3', 'value3')
-                            .then(function() {
-                                return localforage3.getItem('key3');
-                            })
-                            .then(function(value) {
-                                expect(value).to.be('value3');
-                            });
+            return Promise.all([promise1, promise2, promise3]);
+        });
 
-                        var promise4 = localforage3b
-                            .setItem('key3', 'value3')
-                            .then(function() {
-                                return localforage3.getItem('key3');
-                            })
-                            .then(function(value) {
-                                expect(value).to.be('value3');
-                            });
+        it('can create multiple instances of the same store', function () {
+            var localforage1;
+            var localforage2;
+            var localforage3;
 
-                        return Promise.all([
-                            promise1,
-                            promise2,
-                            promise3,
-                            promise4
-                        ]);
+            Promise.resolve()
+                .then(function () {
+                    localforage1 = localforage.createInstance({
+                        name: 'commonStorage',
+                        storeName: 'commonStore',
+                        size: 1024
                     });
+                    return localforage1.ready();
+                })
+                .then(function () {
+                    localforage2 = localforage.createInstance({
+                        name: 'commonStorage',
+                        storeName: 'commonStore',
+                        size: 1024
+                    });
+                    return localforage2.ready();
+                })
+                .then(function () {
+                    localforage3 = localforage.createInstance({
+                        name: 'commonStorage',
+                        storeName: 'commonStore',
+                        size: 1024
+                    });
+                    return localforage3.ready();
+                })
+                .then(function () {
+                    return Promise.resolve()
+                        .then(function () {
+                            return localforage1
+                                .setItem('key1', 'value1')
+                                .then(function () {
+                                    return localforage1.getItem('key1');
+                                })
+                                .then(function (value) {
+                                    expect(value).to.be('value1');
+                                });
+                        })
+                        .then(function () {
+                            return localforage2
+                                .setItem('key2', 'value2')
+                                .then(function () {
+                                    return localforage2.getItem('key2');
+                                })
+                                .then(function (value) {
+                                    expect(value).to.be('value2');
+                                });
+                        })
+                        .then(function () {
+                            return localforage3
+                                .setItem('key3', 'value3')
+                                .then(function () {
+                                    return localforage3.getItem('key3');
+                                })
+                                .then(function (value) {
+                                    expect(value).to.be('value3');
+                                });
+                        });
+                });
+        });
+
+        it('can create multiple instances of the same store and do concurrent operations', function () {
+            var localforage1;
+            var localforage2;
+            var localforage3;
+            var localforage3b;
+
+            Promise.resolve()
+                .then(function () {
+                    localforage1 = localforage.createInstance({
+                        name: 'commonStorage2',
+                        storeName: 'commonStore',
+                        size: 1024
+                    });
+                    return localforage1.ready();
+                })
+                .then(function () {
+                    localforage2 = localforage.createInstance({
+                        name: 'commonStorage2',
+                        storeName: 'commonStore',
+                        size: 1024
+                    });
+                    return localforage2.ready();
+                })
+                .then(function () {
+                    localforage3 = localforage.createInstance({
+                        name: 'commonStorage2',
+                        storeName: 'commonStore',
+                        size: 1024
+                    });
+                    return localforage3.ready();
+                })
+                .then(function () {
+                    localforage3b = localforage.createInstance({
+                        name: 'commonStorage2',
+                        storeName: 'commonStore',
+                        size: 1024
+                    });
+                    return localforage3b.ready();
+                })
+                .then(function () {
+                    var promise1 = localforage1
+                        .setItem('key1', 'value1')
+                        .then(function () {
+                            return localforage1.getItem('key1');
+                        })
+                        .then(function (value) {
+                            expect(value).to.be('value1');
+                        });
+
+                    var promise2 = localforage2
+                        .setItem('key2', 'value2')
+                        .then(function () {
+                            return localforage2.getItem('key2');
+                        })
+                        .then(function (value) {
+                            expect(value).to.be('value2');
+                        });
+
+                    var promise3 = localforage3
+                        .setItem('key3', 'value3')
+                        .then(function () {
+                            return localforage3.getItem('key3');
+                        })
+                        .then(function (value) {
+                            expect(value).to.be('value3');
+                        });
+
+                    var promise4 = localforage3b
+                        .setItem('key3', 'value3')
+                        .then(function () {
+                            return localforage3.getItem('key3');
+                        })
+                        .then(function (value) {
+                            expect(value).to.be('value3');
+                        });
+
+                    return Promise.all([promise1, promise2, promise3, promise4]);
+                });
+        });
+
+        it('can create multiple instances of the same store concurrently', function () {
+            var localforage1 = localforage.createInstance({
+                name: 'commonStorage3',
+                storeName: 'commonStore',
+                size: 1024
             });
 
-            it('can create multiple instances of the same store concurrently', function() {
-                var localforage1 = localforage.createInstance({
-                    name: 'commonStorage3',
-                    storeName: 'commonStore',
-                    size: 1024
-                });
-
-                var localforage2 = localforage.createInstance({
-                    name: 'commonStorage3',
-                    storeName: 'commonStore',
-                    size: 1024
-                });
-
-                var localforage3 = localforage.createInstance({
-                    name: 'commonStorage3',
-                    storeName: 'commonStore',
-                    size: 1024
-                });
-
-                var localforage3b = localforage.createInstance({
-                    name: 'commonStorage3',
-                    storeName: 'commonStore',
-                    size: 1024
-                });
-
-                var promise1 = localforage1
-                    .setItem('key1', 'value1')
-                    .then(function() {
-                        return localforage1.getItem('key1');
-                    })
-                    .then(function(value) {
-                        expect(value).to.be('value1');
-                    });
-
-                var promise2 = localforage2
-                    .setItem('key2', 'value2')
-                    .then(function() {
-                        return localforage2.getItem('key2');
-                    })
-                    .then(function(value) {
-                        expect(value).to.be('value2');
-                    });
-
-                var promise3 = localforage3
-                    .setItem('key3', 'value3')
-                    .then(function() {
-                        return localforage3.getItem('key3');
-                    })
-                    .then(function(value) {
-                        expect(value).to.be('value3');
-                    });
-
-                var promise4 = localforage3b
-                    .setItem('key3', 'value3')
-                    .then(function() {
-                        return localforage3.getItem('key3');
-                    })
-                    .then(function(value) {
-                        expect(value).to.be('value3');
-                    });
-
-                return Promise.all([promise1, promise2, promise3, promise4]);
+            var localforage2 = localforage.createInstance({
+                name: 'commonStorage3',
+                storeName: 'commonStore',
+                size: 1024
             });
-        }
-    );
 
-    describe(driverName + ' driver', function() {
+            var localforage3 = localforage.createInstance({
+                name: 'commonStorage3',
+                storeName: 'commonStore',
+                size: 1024
+            });
+
+            var localforage3b = localforage.createInstance({
+                name: 'commonStorage3',
+                storeName: 'commonStore',
+                size: 1024
+            });
+
+            var promise1 = localforage1
+                .setItem('key1', 'value1')
+                .then(function () {
+                    return localforage1.getItem('key1');
+                })
+                .then(function (value) {
+                    expect(value).to.be('value1');
+                });
+
+            var promise2 = localforage2
+                .setItem('key2', 'value2')
+                .then(function () {
+                    return localforage2.getItem('key2');
+                })
+                .then(function (value) {
+                    expect(value).to.be('value2');
+                });
+
+            var promise3 = localforage3
+                .setItem('key3', 'value3')
+                .then(function () {
+                    return localforage3.getItem('key3');
+                })
+                .then(function (value) {
+                    expect(value).to.be('value3');
+                });
+
+            var promise4 = localforage3b
+                .setItem('key3', 'value3')
+                .then(function () {
+                    return localforage3.getItem('key3');
+                })
+                .then(function (value) {
+                    expect(value).to.be('value3');
+                });
+
+            return Promise.all([promise1, promise2, promise3, promise4]);
+        });
+    });
+
+    describe(driverName + ' driver', function () {
         'use strict';
 
         var driverPreferedOrder;
 
-        before(function() {
+        before(function () {
             // add some unsupported drivers before
             // and after the target driver
             driverPreferedOrder = ['I am a not supported driver'];
@@ -1605,111 +1531,104 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
             driverPreferedOrder.push('I am another not supported driver');
         });
 
-        it('is used according to setDriver preference order', function(done) {
-            localforage.setDriver(driverPreferedOrder).then(function() {
+        it('is used according to setDriver preference order', function (done) {
+            localforage.setDriver(driverPreferedOrder).then(function () {
                 expect(localforage.driver()).to.be(driverName);
                 done();
             });
         });
     });
 
-    describe(
-        driverName + ' driver when the callback throws an Error',
-        function() {
-            'use strict';
+    describe(driverName + ' driver when the callback throws an Error', function () {
+        'use strict';
 
-            var testObj = {
-                throwFunc: function() {
-                    testObj.throwFuncCalls++;
-                    throw new Error('Thrown test error');
-                },
-                throwFuncCalls: 0
-            };
+        var testObj = {
+            throwFunc: function () {
+                testObj.throwFuncCalls++;
+                throw new Error('Thrown test error');
+            },
+            throwFuncCalls: 0
+        };
 
-            beforeEach(function(done) {
-                testObj.throwFuncCalls = 0;
+        beforeEach(function (done) {
+            testObj.throwFuncCalls = 0;
+            done();
+        });
+
+        it('resolves the promise of getItem()', function (done) {
+            localforage.getItem('key', testObj.throwFunc).then(function () {
+                expect(testObj.throwFuncCalls).to.be(1);
                 done();
             });
+        });
 
-            it('resolves the promise of getItem()', function(done) {
-                localforage.getItem('key', testObj.throwFunc).then(function() {
-                    expect(testObj.throwFuncCalls).to.be(1);
-                    done();
-                });
+        it('resolves the promise of setItem()', function (done) {
+            localforage.setItem('key', 'test', testObj.throwFunc).then(function () {
+                expect(testObj.throwFuncCalls).to.be(1);
+                done();
             });
+        });
 
-            it('resolves the promise of setItem()', function(done) {
-                localforage
-                    .setItem('key', 'test', testObj.throwFunc)
-                    .then(function() {
-                        expect(testObj.throwFuncCalls).to.be(1);
-                        done();
-                    });
+        it('resolves the promise of clear()', function (done) {
+            localforage.clear(testObj.throwFunc).then(function () {
+                expect(testObj.throwFuncCalls).to.be(1);
+                done();
             });
+        });
 
-            it('resolves the promise of clear()', function(done) {
-                localforage.clear(testObj.throwFunc).then(function() {
-                    expect(testObj.throwFuncCalls).to.be(1);
-                    done();
-                });
+        it('resolves the promise of length()', function (done) {
+            localforage.length(testObj.throwFunc).then(function () {
+                expect(testObj.throwFuncCalls).to.be(1);
+                done();
             });
+        });
 
-            it('resolves the promise of length()', function(done) {
-                localforage.length(testObj.throwFunc).then(function() {
-                    expect(testObj.throwFuncCalls).to.be(1);
-                    done();
-                });
+        it('resolves the promise of removeItem()', function (done) {
+            localforage.removeItem('key', testObj.throwFunc).then(function () {
+                expect(testObj.throwFuncCalls).to.be(1);
+                done();
             });
+        });
 
-            it('resolves the promise of removeItem()', function(done) {
-                localforage
-                    .removeItem('key', testObj.throwFunc)
-                    .then(function() {
-                        expect(testObj.throwFuncCalls).to.be(1);
-                        done();
-                    });
+        it('resolves the promise of key()', function (done) {
+            localforage.key('key', testObj.throwFunc).then(function () {
+                expect(testObj.throwFuncCalls).to.be(1);
+                done();
             });
+        });
 
-            it('resolves the promise of key()', function(done) {
-                localforage.key('key', testObj.throwFunc).then(function() {
-                    expect(testObj.throwFuncCalls).to.be(1);
-                    done();
-                });
+        it('resolves the promise of keys()', function (done) {
+            localforage.keys(testObj.throwFunc).then(function () {
+                expect(testObj.throwFuncCalls).to.be(1);
+                done();
             });
+        });
+    });
 
-            it('resolves the promise of keys()', function(done) {
-                localforage.keys(testObj.throwFunc).then(function() {
-                    expect(testObj.throwFuncCalls).to.be(1);
-                    done();
-                });
-            });
-        }
-    );
-
-    describe(driverName + ' driver when ready() gets rejected', function() {
+    describe(driverName + ' driver when ready() gets rejected', function () {
         'use strict';
 
         this.timeout(30000);
 
         var _oldReady;
 
-        beforeEach(function(done) {
+        beforeEach(function (done) {
             _oldReady = localforage.ready;
-            localforage.ready = function() {
+            localforage.ready = function () {
                 return Promise.reject();
             };
             done();
         });
 
-        afterEach(function(done) {
+        afterEach(function (done) {
             localforage.ready = _oldReady;
             _oldReady = null;
             done();
         });
 
-        driverApiMethods.forEach(function(methodName) {
-            it('rejects ' + methodName + '() promise', function(done) {
-                localforage[methodName]().then(null, function(/*err*/) {
+        driverApiMethods.forEach(function (methodName) {
+            it('rejects ' + methodName + '() promise', function (done) {
+                localforage[methodName]().then(null, function (/*err*/) {
                     done();
                 });
             });
@@ -1717,9 +1636,9 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
     });
 });
 
-DRIVERS.forEach(function(driverName) {
-    describe(driverName + ' driver instance', function() {
-        it('creates a new instance and sets the driver', function(done) {
+DRIVERS.forEach(function (driverName) {
+    describe(driverName + ' driver instance', function () {
+        it('creates a new instance and sets the driver', function (done) {
             var localforage2 = localforage.createInstance({
                 name: 'storage2',
                 driver: driverName,
@@ -1735,11 +1654,11 @@ DRIVERS.forEach(function(driverName) {
             // and since driver() and supports() are not defered (are sync),
             // we have to wait till an async method returns
             localforage2.length().then(
-                function() {
+                function () {
                     expect(localforage2.driver()).to.be(driverName);
                     done();
                 },
-                function() {
+                function () {
                     expect(localforage2.driver()).to.be(null);
                     done();
                 }
@@ -1748,8 +1667,8 @@ DRIVERS.forEach(function(driverName) {
     });
 });
 
-SUPPORTED_DRIVERS.forEach(function(driverName) {
-    describe(driverName + ' driver dropInstance', function() {
+SUPPORTED_DRIVERS.forEach(function (driverName) {
+    describe(driverName + ' driver dropInstance', function () {
         this.timeout(80000);
 
         function setCommonOpts(opts) {
@@ -1816,84 +1735,68 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
             storeName: 'dropStore3'
         });
 
-        before(function() {
+        before(function () {
             nodropInstance = localforage.createInstance(nodropInstanceOptions);
-            dropStoreInstance1 = localforage.createInstance(
-                dropStoreInstance1Options
-            );
-            dropStoreInstance2 = localforage.createInstance(
-                dropStoreInstance2Options
-            );
-            dropStoreInstance3 = localforage.createInstance(
-                dropStoreInstance3Options
-            );
+            dropStoreInstance1 = localforage.createInstance(dropStoreInstance1Options);
+            dropStoreInstance2 = localforage.createInstance(dropStoreInstance2Options);
+            dropStoreInstance3 = localforage.createInstance(dropStoreInstance3Options);
             dropDbInstance = localforage.createInstance(dropDbInstanceOptions);
-            dropDb2Instance = localforage.createInstance(
-                dropDb2InstanceOptions
-            );
-            dropDb3Instance1 = localforage.createInstance(
-                dropDb3Instance1Options
-            );
-            dropDb3Instance2 = localforage.createInstance(
-                dropDb3Instance2Options
-            );
-            dropDb3Instance3 = localforage.createInstance(
-                dropDb3Instance3Options
-            );
+            dropDb2Instance = localforage.createInstance(dropDb2InstanceOptions);
+            dropDb3Instance1 = localforage.createInstance(dropDb3Instance1Options);
+            dropDb3Instance2 = localforage.createInstance(dropDb3Instance2Options);
+            dropDb3Instance3 = localforage.createInstance(dropDb3Instance3Options);
             return Promise.resolve()
-                .then(function() {
+                .then(function () {
                     return nodropInstance.setItem('key1', 'value0');
                 })
-                .then(function() {
+                .then(function () {
                     return dropStoreInstance1.setItem('key1', 'value1');
                 })
-                .then(function() {
+                .then(function () {
                     return dropStoreInstance2.setItem('key1', 'value2');
                 })
-                .then(function() {
+                .then(function () {
                     return dropStoreInstance3.setItem('key1', 'value3');
                 })
-                .then(function() {
+                .then(function () {
                     return dropDbInstance.setItem('key1', 'value3');
                 })
-                .then(function() {
+                .then(function () {
                     return dropDb2Instance.setItem('key1', 'value3');
                 })
-                .then(function() {
+                .then(function () {
                     return dropDb3Instance1.setItem('key1', 'value1');
                 })
-                .then(function() {
+                .then(function () {
                     return dropDb3Instance2.setItem('key1', 'value2');
                 })
-                .then(function() {
+                .then(function () {
                     return dropDb3Instance3.setItem('key1', 'value3');
                 });
         });
 
         function expectStoreToNotExistAsync(options) {
-            return new Promise(function(resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 if (driverName === localforage.INDEXEDDB) {
                     var req = indexedDB.open(options.name);
-                    req.onsuccess = function() {
+                    req.onsuccess = function () {
                         var db = req.result;
                         if (!db) {
                             reject();
                             return;
                         }
-                        expect(
-                            db.objectStoreNames.contains(options.storeName)
-                        ).to.be(false);
+                        expect(db.objectStoreNames.contains(options.storeName)).to.be(false);
                         db.close();
                         resolve();
                     };
                     req.onerror = req.onblocked = reject;
                 } else if (driverName === localforage.WEBSQL) {
                     var db = openDatabase(options.name, '', '', 0);
-                    db.transaction(function(t) {
+                    db.transaction(function (t) {
                         t.executeSql(
                             "SELECT name FROM sqlite_master WHERE type='table' AND name = ?",
                             [options.storeName],
-                            function(t, results) {
+                            function (t, results) {
                                 expect(results.rows.length).to.be(0);
                                 resolve();
                             },
@@ -1901,10 +1804,7 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                         );
                     }, reject);
                 } else if (driverName === localforage.LOCALSTORAGE) {
-                    var keyPrefix = (function _getKeyPrefix(
-                        options,
-                        defaultConfig
-                    ) {
+                    var keyPrefix = (function _getKeyPrefix(options, defaultConfig) {
                         var keyPrefix = options.name + '/';
 
                         if (options.storeName !== defaultConfig.storeName) {
@@ -1917,11 +1817,7 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                     });
 
                     var foundLocalStorageKey = false;
-                    for (
-                        var i = 0, length = localStorage.length;
-                        i < length;
-                        i++
-                    ) {
+                    for (var i = 0, length = localStorage.length; i < length; i++) {
                         if (localStorage.key(i).indexOf(keyPrefix) === 0) {
                             foundLocalStorageKey = true;
                             break;
@@ -1935,67 +1831,67 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
             });
         }
 
-        it('drops the current instance without affecting the rest', function() {
+        it('drops the current instance without affecting the rest', function () {
             return dropStoreInstance1
                 .dropInstance()
-                .then(function() {
+                .then(function () {
                     return nodropInstance.getItem('key1');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('value0');
                 });
         });
 
-        it('can recreate and set values to previously dropped instances', function() {
+        it('can recreate and set values to previously dropped instances', function () {
             return dropStoreInstance1
                 .dropInstance()
-                .then(function() {
+                .then(function () {
                     return dropStoreInstance1.getItem('key1');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be(null);
                     return dropStoreInstance1.length();
                 })
-                .then(function(length) {
+                .then(function (length) {
                     expect(length).to.be(0);
                 })
-                .then(function() {
+                .then(function () {
                     return dropStoreInstance1.setItem('key1', 'newvalue2');
                 })
-                .then(function() {
+                .then(function () {
                     return dropStoreInstance1.getItem('key1');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('newvalue2');
                 });
         });
 
-        it('drops an other instance without affecting the rest', function() {
+        it('drops an other instance without affecting the rest', function () {
             var opts = {
                 name: dropStoreInstance2Options.name,
                 storeName: dropStoreInstance2Options.storeName
             };
             return nodropInstance
                 .dropInstance(opts)
-                .then(function() {
+                .then(function () {
                     return nodropInstance.getItem('key1');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be('value0');
                 });
         });
 
-        it('the dropped instance is completely removed', function() {
+        it('the dropped instance is completely removed', function () {
             var opts = {
                 name: dropStoreInstance3Options.name,
                 storeName: dropStoreInstance3Options.storeName
             };
-            return dropStoreInstance3.dropInstance().then(function() {
+            return dropStoreInstance3.dropInstance().then(function () {
                 return expectStoreToNotExistAsync(opts);
             });
         });
 
-        it('resolves when trying to drop a store that does not exit', function() {
+        it('resolves when trying to drop a store that does not exit', function () {
             var opts = {
                 name: dropStoreInstance3Options.name,
                 storeName: 'NotExistingStore' + Date.now()
@@ -2004,10 +1900,10 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
         });
 
         function expectDBToNotExistAsync(options) {
-            return new Promise(function(resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 if (driverName === localforage.INDEXEDDB) {
                     var req = indexedDB.open(options.name);
-                    req.onsuccess = function() {
+                    req.onsuccess = function () {
                         var db = req.result;
                         if (!db) {
                             reject();
@@ -2020,19 +1916,15 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                     req.onerror = req.onblocked = reject;
                 } else if (driverName === localforage.WEBSQL) {
                     var db = openDatabase(options.name, '', '', 0);
-                    db.transaction(function(t) {
+                    db.transaction(function (t) {
                         t.executeSql(
                             "SELECT name FROM sqlite_master WHERE type='table'",
                             [],
-                            function(t, results) {
+                            function (t, results) {
                                 var stores = Array.prototype.filter.call(
                                     results.rows,
-                                    function(obj) {
-                                        return (
-                                            obj &&
-                                            obj.name &&
-                                            obj.name.indexOf('__') !== 0
-                                        );
+                                    function (obj) {
+                                        return obj && obj.name && obj.name.indexOf('__') !== 0;
                                     }
                                 );
                                 expect(stores.length).to.be(0);
@@ -2047,11 +1939,7 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
                     })(options);
 
                     var foundLocalStorageKey = false;
-                    for (
-                        var i = 0, length = localStorage.length;
-                        i < length;
-                        i++
-                    ) {
+                    for (var i = 0, length = localStorage.length; i < length; i++) {
                         if (localStorage.key(i).indexOf(keyPrefix) === 0) {
                             foundLocalStorageKey = true;
                             break;
@@ -2065,30 +1953,30 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
             });
         }
 
-        it('the dropped "DB" can be recreated', function() {
+        it('the dropped "DB" can be recreated', function () {
             var opts = {
                 name: dropDbInstanceOptions.name
             };
             return dropDbInstance
                 .dropInstance(opts)
-                .then(function() {
+                .then(function () {
                     return dropDbInstance.getItem('key1');
                 })
-                .then(function(value) {
+                .then(function (value) {
                     expect(value).to.be(null);
                 });
         });
 
-        it('the dropped "DB" is completely removed', function() {
+        it('the dropped "DB" is completely removed', function () {
             var opts = {
                 name: dropDb2InstanceOptions.name
             };
-            return dropDb2Instance.dropInstance(opts).then(function() {
+            return dropDb2Instance.dropInstance(opts).then(function () {
                 return expectDBToNotExistAsync(opts);
             });
         });
 
-        it('resolves when trying to drop a store of a "DB" that does not exit', function() {
+        it('resolves when trying to drop a store of a "DB" that does not exit', function () {
             var opts = {
                 name: 'NotExistingDB' + Date.now(),
                 storeName: 'NotExistingStore' + Date.now()
@@ -2096,23 +1984,23 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
             return dropStoreInstance3.dropInstance(opts);
         });
 
-        it('resolves when trying to drop a "DB" that does not exist', function() {
+        it('resolves when trying to drop a "DB" that does not exist', function () {
             var opts = {
                 name: 'NotExistingDB' + Date.now()
             };
             return dropStoreInstance3.dropInstance(opts);
         });
 
-        it('drops a "DB" that we previously dropped a store', function() {
+        it('drops a "DB" that we previously dropped a store', function () {
             var opts = {
                 name: dropStoreInstance3Options.name
             };
-            return dropStoreInstance3.dropInstance(opts).then(function() {
+            return dropStoreInstance3.dropInstance(opts).then(function () {
                 return expectDBToNotExistAsync(opts);
             });
         });
 
-        it('drops a "DB" after dropping all its stores', function() {
+        it('drops a "DB" after dropping all its stores', function () {
             var opts = {
                 name: dropDb3name
             };
@@ -2120,28 +2008,28 @@ SUPPORTED_DRIVERS.forEach(function(driverName) {
             // make sure that the instance that you will use
             // is configured to use the same driver as well.
             return Promise.resolve()
-                .then(function() {
+                .then(function () {
                     return dropDb3Instance1.dropInstance({
                         name: dropDb3name,
                         storeName: dropDb3Instance1Options.storeName
                     });
                 })
-                .then(function() {
+                .then(function () {
                     return dropDb3Instance1.dropInstance({
                         name: dropDb3name,
                         storeName: dropDb3Instance2Options.storeName
                     });
                 })
-                .then(function() {
+                .then(function () {
                     return dropDb3Instance1.dropInstance({
                         name: dropDb3name,
                         storeName: dropDb3Instance3Options.storeName
                     });
                 })
-                .then(function() {
+                .then(function () {
                     return dropDb3Instance1.dropInstance(opts);
                 })
-                .then(function() {
+                .then(function () {
                     return expectDBToNotExistAsync(opts);
                 });
         });

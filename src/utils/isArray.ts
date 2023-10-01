@@ -1,6 +1,6 @@
 const isArray =
     Array.isArray ||
-    function(arg) {
+    function (arg) {
         return Object.prototype.toString.call(arg) === '[object Array]';
     };
 

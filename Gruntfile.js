@@ -1,20 +1,17 @@
 const path = require('path');
 const saucelabsBrowsers = require(path.resolve('test', 'saucelabs-browsers.ts'));
 
-const sourceFiles = [
-    'Gruntfile.js',
-    'src/*.ts',
-    'src/**/*.ts',
-    'test/**/test.*.ts'
-];
+const sourceFiles = ['Gruntfile.js', 'src/*.ts', 'src/**/*.ts', 'test/**/test.*.ts'];
 
-module.exports = exports = function(grunt) {
+module.exports = exports = function (grunt) {
     'use strict';
 
-    const BANNER = 
+    const BANNER =
         '/*!\n' +
         '    localForage -- Offline Storage, Improved\n' +
-        '    Version ' + grunt.file.readJSON('package.json').version + '\n' +
+        '    Version ' +
+        grunt.file.readJSON('package.json').version +
+        '\n' +
         '    https://localforage.github.io/localForage\n' +
         '    (c) 2013-2017 Mozilla, Apache License 2.0\n' +
         '*/\n';
@@ -63,10 +60,7 @@ module.exports = exports = function(grunt) {
                         standalone: 'localforage'
                     },
                     transform: ['rollupify', 'babelify'],
-                    plugin: [
-                        'bundle-collapser/plugin', 
-                        'browserify-derequire'
-                    ]
+                    plugin: ['bundle-collapser/plugin', 'browserify-derequire']
                 }
             },
             no_promises: {
@@ -78,10 +72,7 @@ module.exports = exports = function(grunt) {
                         standalone: 'localforage'
                     },
                     transform: ['rollupify', 'babelify'],
-                    plugin: [
-                        'bundle-collapser/plugin', 
-                        'browserify-derequire'
-                    ],
+                    plugin: ['bundle-collapser/plugin', 'browserify-derequire'],
                     exclude: ['lie/polyfill']
                 }
             }
@@ -94,12 +85,8 @@ module.exports = exports = function(grunt) {
                 // just to add the BANNER
                 // without adding an extra grunt module
                 files: {
-                    'dist/localforage.js': [
-                        'dist/localforage.js'
-                    ],
-                    'dist/localforage.nopromises.js': [
-                        'dist/localforage.nopromises.js'
-                    ]
+                    'dist/localforage.js': ['dist/localforage.js'],
+                    'dist/localforage.nopromises.js': ['dist/localforage.nopromises.js']
                 },
                 options: {
                     banner: BANNER
@@ -112,13 +99,11 @@ module.exports = exports = function(grunt) {
                     base: '.',
                     hostname: '*',
                     port: 9999,
-                    middleware: function(connect) {
+                    middleware: function (connect) {
                         return [
-                            function(req, res, next) {
-                                res.setHeader('Access-Control-Allow-Origin',
-                                              '*');
-                                res.setHeader('Access-Control-Allow-Methods',
-                                              '*');
+                            function (req, res, next) {
+                                res.setHeader('Access-Control-Allow-Origin', '*');
+                                res.setHeader('Access-Control-Allow-Methods', '*');
 
                                 return next();
                             },
@@ -130,16 +115,20 @@ module.exports = exports = function(grunt) {
         },
         es3_safe_recast: {
             dist: {
-                files: [{
-                    src: ['dist/localforage.js'],
-                    dest: 'dist/localforage.js'
-                }]
+                files: [
+                    {
+                        src: ['dist/localforage.js'],
+                        dest: 'dist/localforage.js'
+                    }
+                ]
             },
             nopromises: {
-                files: [{
-                    src: ['dist/localforage.nopromises.js'],
-                    dest: 'dist/localforage.nopromises.js'
-                }]
+                files: [
+                    {
+                        src: ['dist/localforage.nopromises.js'],
+                        dest: 'dist/localforage.nopromises.js'
+                    }
+                ]
             }
         },
         eslint: {
@@ -174,9 +163,7 @@ module.exports = exports = function(grunt) {
             localforage: {
                 files: {
                     'dist/localforage.min.js': ['dist/localforage.js'],
-                    'dist/localforage.nopromises.min.js': [
-                        'dist/localforage.nopromises.js'
-                    ]
+                    'dist/localforage.nopromises.min.js': ['dist/localforage.nopromises.js']
                 },
                 options: {
                     banner: BANNER
@@ -189,11 +176,7 @@ module.exports = exports = function(grunt) {
                 tasks: ['build']
             },
             'mocha:unit': {
-                files: [
-                    'dist/localforage.js',
-                    'test/runner.js',
-                    'test/test.*.*'
-                ],
+                files: ['dist/localforage.js', 'test/runner.js', 'test/test.*.*'],
                 tasks: [
                     'eslint',
                     'browserify:package_bundling_test',
@@ -214,10 +197,16 @@ module.exports = exports = function(grunt) {
     });
 
     require('load-grunt-tasks')(grunt);
-    
+
     grunt.registerTask('default', ['build', 'connect', 'watch']);
-    grunt.registerTask('build', ['ts:build', 'browserify:main', 'browserify:no_promises',
-        'concat', 'es3_safe_recast', 'uglify']);
+    grunt.registerTask('build', [
+        'ts:build',
+        'browserify:main',
+        'browserify:no_promises',
+        'concat',
+        'es3_safe_recast',
+        'uglify'
+    ]);
     grunt.registerTask('serve', ['build', 'connect:test', 'watch']);
 
     // These are the test tasks we run regardless of Sauce Labs credentials.
@@ -232,8 +221,8 @@ module.exports = exports = function(grunt) {
         'mocha'
     ];
     grunt.registerTask('test:local', testTasks.slice());
-    grunt.registerTask('mocha', 'custom function to run mocha tests', function() {
-        const {runner} = require('mocha-headless-chrome');
+    grunt.registerTask('mocha', 'custom function to run mocha tests', function () {
+        const { runner } = require('mocha-headless-chrome');
         const fs = require('fs');
         const done = this.async();
         const tempErrLogs = fs.createWriteStream('temp.test.log');
@@ -242,63 +231,65 @@ module.exports = exports = function(grunt) {
         const totaltestsFailed = 0;
         const totalDuration = 0;
         const urls = [
-                 'http://localhost:9999/test/test.main1.html',
-                 'http://localhost:9999/test/test.min.html',
-                 'http://localhost:9999/test/test.polyfill.html',
-                 'http://localhost:9999/test/test.customdriver.html',
-                 'http://localhost:9999/test/test.faultydriver.html',
-                 'http://localhost:9999/test/test.nodriver.html',
-                 'http://localhost:9999/test/test.browserify.html',
-                 'http://localhost:9999/test/test.callwhenready.html',
-                 'http://localhost:9999/test/test.require.html',
-                 'http://localhost:9999/test/test.webpack.html'
-                   ];
+            'http://localhost:9999/test/test.main1.html',
+            'http://localhost:9999/test/test.min.html',
+            'http://localhost:9999/test/test.polyfill.html',
+            'http://localhost:9999/test/test.customdriver.html',
+            'http://localhost:9999/test/test.faultydriver.html',
+            'http://localhost:9999/test/test.nodriver.html',
+            'http://localhost:9999/test/test.browserify.html',
+            'http://localhost:9999/test/test.callwhenready.html',
+            'http://localhost:9999/test/test.require.html',
+            'http://localhost:9999/test/test.webpack.html'
+        ];
 
-        grunt.util.async.forEachSeries(urls, async function(url, next) {
+        grunt.util.async.forEachSeries(
+            urls,
+            async function (url, next) {
+                const options = {
+                    file: url, // test page path
+                    reporter: 'dot', // mocha reporter name
+                    width: 800, // viewport width
+                    height: 600, // viewport height
+                    timeout: 120000, // timeout in ms
+                    executablePath: null, // chrome executable path
+                    visible: false, // show chrome window
+                    args: ['no-sandbox'] // chrome arguments
+                };
 
-            const options = {
-                file: url,                                   // test page path
-                reporter: 'dot',                             // mocha reporter name
-                width: 800,                                  // viewport width
-                height: 600,                                 // viewport height
-                timeout: 120000,                             // timeout in ms
-                executablePath: null,                        // chrome executable path
-                visible: false,                              // show chrome window
-                args: ['no-sandbox']                         // chrome arguments
-            };
+                console.log('Testing: ' + url + '\n\n');
+                process.stderr.write = tempErrLogs.write.bind(tempErrLogs);
 
-            console.log('Testing: ' + url + '\n\n');
-            process.stderr.write = tempErrLogs.write.bind(tempErrLogs);
+                await runner(options)
+                    .then((obj) => {
+                        process.stderr.write = oldStdErr;
+                        if (obj.result.stats.passes) {
+                            totaltestsPassed += obj.result.stats.passes;
+                            totalDuration += obj.result.stats.duration;
+                        }
 
-            await runner(options)
-                .then(obj => {
-                    process.stderr.write = oldStdErr;
-                    if (obj.result.stats.passes) {
-                        totaltestsPassed += obj.result.stats.passes;
-                        totalDuration += obj.result.stats.duration;
-                    }
+                        if (obj.result.stats.failures) {
+                            totaltestsFailed += obj.result.stats.failures;
+                        }
+                    })
+                    .catch((err) => {
+                        process.stderr.write = oldStdErr;
+                        console.error(err);
+                        process.exit(1);
+                    });
+                next();
+            },
+            function () {
+                grunt.log.oklns(totaltestsPassed + ' passed! (' + totalDuration / 1000 + 's)');
 
-                    if (obj.result.stats.failures) {
-                        totaltestsFailed += obj.result.stats.failures;
-                    }
-                })
-                .catch(err => {
-                    process.stderr.write = oldStdErr;
-                    console.error(err);
-                    process.exit(1);
-            });
-            next();
-        },function() {
-
-            grunt.log.oklns(totaltestsPassed + ' passed! (' + totalDuration/1000 + 's)');
-
-            if (totaltestsFailed > 0) {
-                grunt.log.errorlns(totaltestsFailed + ' failed!');
-                done(false);
-            } else {
-                done(true);
+                if (totaltestsFailed > 0) {
+                    grunt.log.errorlns(totaltestsFailed + ' failed!');
+                    done(false);
+                } else {
+                    done(true);
+                }
             }
-	});
+        );
     });
 
     // Run tests using Sauce Labs if we are on Travis or have locally

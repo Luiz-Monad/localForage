@@ -3,7 +3,7 @@ importScripts('/dist/localforage.js');
 
 self.addEventListener(
     'message',
-    function(e) {
+    function (e) {
         function handleError(e) {
             self.postMessage({
                 error: JSON.stringify(e),
@@ -14,16 +14,13 @@ self.addEventListener(
 
         localforage.setDriver(
             e.data.driver,
-            function() {
+            function () {
                 localforage
                     .setItem(
                         'web worker',
                         e.data.value,
-                        function() {
-                            localforage.getItem('web worker', function(
-                                err,
-                                value
-                            ) {
+                        function () {
+                            localforage.getItem('web worker', function (err, value) {
                                 self.postMessage({
                                     body: value
                                 });

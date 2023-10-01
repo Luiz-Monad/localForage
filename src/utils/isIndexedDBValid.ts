@@ -17,8 +17,7 @@ function isIndexedDBValid() {
             !/BlackBerry/.test(navigator.platform);
 
         var hasFetch =
-            typeof fetch === 'function' &&
-            fetch.toString().indexOf('[native code') !== -1;
+            typeof fetch === 'function' && fetch.toString().indexOf('[native code') !== -1;
 
         // Safari <10.1 does not meet our requirements for IDB support
         // (see: https://github.com/pouchdb/pouchdb/issues/5572).

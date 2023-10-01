@@ -1,40 +1,31 @@
 {
-  "include": [
-    "./src/**/*"
-  ],
-  "exclude": [
-    "./node_modules/**/*"
-  ],
-  "compilerOptions": {
-    "target": "ES2015",
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "include": ["./src/**/*"],
+    "exclude": ["./node_modules/**/*"],
+    "compilerOptions": {
+        "target": "ES2015",
+        "module": "ESNext",
+        "moduleResolution": "Node",
 
-    "strict": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "skipLibCheck": true,
-    "noImplicitThis": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true,
-    "removeComments": false,
+        "strict": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "skipLibCheck": true,
+        "noImplicitThis": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "forceConsistentCasingInFileNames": true,
+        "removeComments": false,
 
-    "lib": [
-      "DOM"
-    ],
+        "lib": ["DOM"],
 
-    "allowJs": true,
-    "checkJs": true,
+        "allowJs": true,
+        "checkJs": true,
 
-    "rootDir": "./src",
-    "outDir": "./build/",
-    "baseUrl": "./src/",
-    "paths": {
-      "openpromise": [
-        "../../openpromise"
-      ]
+        "rootDir": "./src",
+        "outDir": "./build/",
+        "baseUrl": "./src/",
+        "paths": {
+            "openpromise": ["../../openpromise"]
+        }
     }
-
-  }
 }

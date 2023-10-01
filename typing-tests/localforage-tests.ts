@@ -9,10 +9,10 @@ namespace LocalForageTest {
 
     localForage.getSerializer().then((s: LocalForageSerializer) => {
         let serializer: LocalForageSerializer = s;
-        typeof serializer.bufferToString === "function";
-        typeof serializer.deserialize === "function";
-        typeof serializer.serialize === "function";
-        typeof serializer.stringToBuffer === "function";
+        typeof serializer.bufferToString === 'function';
+        typeof serializer.deserialize === 'function';
+        typeof serializer.serialize === 'function';
+        typeof serializer.stringToBuffer === 'function';
     });
 
     localForage.iterate((value, key: string, num: number) => {
@@ -39,44 +39,50 @@ namespace LocalForageTest {
         let newNum: number = num;
     });
 
-    localForage.iterate((str: string, key: string, num: number) => {
-        let newStr: string = str;
-        let newKey: string = key;
-        let newNum: number = num;
-        if (newStr === 'END') {
-            return newNum;
-        }
-    }).then((result: number | undefined) => {
-        if (result) {
-            let numResult: number = result;
-        }
-    });
+    localForage
+        .iterate((str: string, key: string, num: number) => {
+            let newStr: string = str;
+            let newKey: string = key;
+            let newNum: number = num;
+            if (newStr === 'END') {
+                return newNum;
+            }
+        })
+        .then((result: number | undefined) => {
+            if (result) {
+                let numResult: number = result;
+            }
+        });
 
-    localForage.iterate<string, number | void>((str, key: string, num: number) => {
-        let newStr: string = str;
-        let newKey: string = key;
-        let newNum: number = num;
-        if (newStr === 'END') {
-            return newNum;
-        }
-    }).then((result: number | void) => {
-        if (result) {
-            let numResult: number = result;
-        }
-    });
+    localForage
+        .iterate<string, number | void>((str, key: string, num: number) => {
+            let newStr: string = str;
+            let newKey: string = key;
+            let newNum: number = num;
+            if (newStr === 'END') {
+                return newNum;
+            }
+        })
+        .then((result: number | void) => {
+            if (result) {
+                let numResult: number = result;
+            }
+        });
 
-    localForage.iterate<string, number | void>((str: string, key: string, num: number) => {
-        let newStr: string = str;
-        let newKey: string = key;
-        let newNum: number = num;
-        if (newStr === 'END') {
-            return newNum;
-        }
-    }).then((result: number | void) => {
-        if (result) {
-            let numResult: number = result;
-        }
-    });
+    localForage
+        .iterate<string, number | void>((str: string, key: string, num: number) => {
+            let newStr: string = str;
+            let newKey: string = key;
+            let newNum: number = num;
+            if (newStr === 'END') {
+                return newNum;
+            }
+        })
+        .then((result: number | void) => {
+            if (result) {
+                let numResult: number = result;
+            }
+        });
 
     localForage.length((err: any, num: number) => {
         let newError: any = err;
@@ -101,86 +107,106 @@ namespace LocalForageTest {
         var newArray: Array<string> = keys;
     });
 
-    localForage.getItem("key",(err: any, str: string) => {
+    localForage.getItem('key', (err: any, str: string) => {
         let newError: any = err;
-        let newStr: string = str
-    });
-
-    localForage.getItem<string>("key").then((str: string) => {
         let newStr: string = str;
     });
 
-    localForage.setItem("key", "value",(err: any, str: string) => {
-        let newError: any = err;
-        let newStr: string = str
-    });
-
-    localForage.setItem("key", "value").then((str: string) => {
+    localForage.getItem<string>('key').then((str: string) => {
         let newStr: string = str;
     });
 
-    localForage.removeItem("key",(err: any) => {
+    localForage.setItem('key', 'value', (err: any, str: string) => {
+        let newError: any = err;
+        let newStr: string = str;
+    });
+
+    localForage.setItem('key', 'value').then((str: string) => {
+        let newStr: string = str;
+    });
+
+    localForage.removeItem('key', (err: any) => {
         let newError: any = err;
     });
 
-    localForage.removeItem("key").then(() => {
-    });
+    localForage.removeItem('key').then(() => {});
 
     const customDriver: LocalForageDriver = {
-        _driver: "CustomDriver",
+        _driver: 'CustomDriver',
         _initStorage: (options: LocalForageOptions) => {},
-        getItem: <T>(key: string, callback?: (err: any, value: T) => void) => Promise.resolve({} as T),
-        setItem: <T>(key: string, value: T, callback?: (err: any, value: T) => void) => Promise.resolve(value),
+        getItem: <T>(key: string, callback?: (err: any, value: T) => void) =>
+            Promise.resolve({} as T),
+        setItem: <T>(key: string, value: T, callback?: (err: any, value: T) => void) =>
+            Promise.resolve(value),
         removeItem: (key: string, callback?: (err: any) => void) => Promise.resolve(),
         clear: (callback?: (err: any) => void) => Promise.resolve(),
         length: (callback?: (err: any, numberOfKeys: number) => void) => Promise.resolve(5),
-        key: (keyIndex: number, callback?: (err: any, key: string) => void) => Promise.resolve('aKey'),
+        key: (keyIndex: number, callback?: (err: any, key: string) => void) =>
+            Promise.resolve('aKey'),
         keys: (callback?: (err: any, keys: string[]) => void) => Promise.resolve(['1', '2']),
-        iterate: <T, U>(iteratee: (value: T, key: string, iterationNumber: number) => U, callback?: (err: any, result: U) => void) => Promise.resolve({} as U),
+        iterate: <T, U>(
+            iteratee: (value: T, key: string, iterationNumber: number) => U,
+            callback?: (err: any, result: U) => void
+        ) => Promise.resolve({} as U)
     };
     localForage.defineDriver(customDriver);
 
     const customDriver2: LocalForageDriver = {
-        _driver: "CustomDriver",
+        _driver: 'CustomDriver',
         _initStorage: (options: LocalForageOptions) => {},
         _support: true,
-        getItem: <T>(key: string, callback?: (err: any, value: T) => void) => Promise.resolve({} as T),
-        setItem: <T>(key: string, value: T, callback?: (err: any, value: T) => void) => Promise.resolve(value),
+        getItem: <T>(key: string, callback?: (err: any, value: T) => void) =>
+            Promise.resolve({} as T),
+        setItem: <T>(key: string, value: T, callback?: (err: any, value: T) => void) =>
+            Promise.resolve(value),
         removeItem: (key: string, callback?: (err: any) => void) => Promise.resolve(),
         clear: (callback?: (err: any) => void) => Promise.resolve(),
         length: (callback?: (err: any, numberOfKeys: number) => void) => Promise.resolve(5),
-        key: (keyIndex: number, callback?: (err: any, key: string) => void) => Promise.resolve('aKey'),
+        key: (keyIndex: number, callback?: (err: any, key: string) => void) =>
+            Promise.resolve('aKey'),
         keys: (callback?: (err: any, keys: string[]) => void) => Promise.resolve(['1', '2']),
-        iterate: <T, U>(iteratee: (value: T, key: string, iterationNumber: number) => U, callback?: (err: any, result: U) => void) => Promise.resolve({} as U),
+        iterate: <T, U>(
+            iteratee: (value: T, key: string, iterationNumber: number) => U,
+            callback?: (err: any, result: U) => void
+        ) => Promise.resolve({} as U)
     };
     localForage.defineDriver(customDriver2);
 
     const customDriver3: LocalForageDriver = {
-        _driver: "CustomDriver",
+        _driver: 'CustomDriver',
         _initStorage: (options: LocalForageOptions) => {},
         _support: () => Promise.resolve(true),
-        getItem: <T>(key: string, callback?: (err: any, value: T) => void) => Promise.resolve({} as T),
-        setItem: <T>(key: string, value: T, callback?: (err: any, value: T) => void) => Promise.resolve(value),
+        getItem: <T>(key: string, callback?: (err: any, value: T) => void) =>
+            Promise.resolve({} as T),
+        setItem: <T>(key: string, value: T, callback?: (err: any, value: T) => void) =>
+            Promise.resolve(value),
         removeItem: (key: string, callback?: (err: any) => void) => Promise.resolve(),
         clear: (callback?: (err: any) => void) => Promise.resolve(),
         length: (callback?: (err: any, numberOfKeys: number) => void) => Promise.resolve(5),
-        key: (keyIndex: number, callback?: (err: any, key: string) => void) => Promise.resolve('aKey'),
+        key: (keyIndex: number, callback?: (err: any, key: string) => void) =>
+            Promise.resolve('aKey'),
         keys: (callback?: (err: any, keys: string[]) => void) => Promise.resolve(['1', '2']),
-        iterate: <T, U>(iteratee: (value: T, key: string, iterationNumber: number) => U, callback?: (err: any, result: U) => void) => Promise.resolve({} as U),
-        dropInstance: (dbInstanceOptions?: LocalForageDbInstanceOptions, callback?: (err: any) => void) => Promise.resolve(),
+        iterate: <T, U>(
+            iteratee: (value: T, key: string, iterationNumber: number) => U,
+            callback?: (err: any, result: U) => void
+        ) => Promise.resolve({} as U),
+        dropInstance: (
+            dbInstanceOptions?: LocalForageDbInstanceOptions,
+            callback?: (err: any) => void
+        ) => Promise.resolve()
     };
     localForage.defineDriver(customDriver3);
 
-    localForage.getDriver("CustomDriver").then((result: LocalForageDriver) => {
+    localForage.getDriver('CustomDriver').then((result: LocalForageDriver) => {
         var driver: LocalForageDriver = result;
         // we need to use a variable for proper type guards before TS 2.0
         var _support = driver._support;
-        if (typeof _support === "function") {
+        if (typeof _support === 'function') {
             // _support = _support.bind(driver);
             _support().then((result: boolean) => {
                 let doesSupport: boolean = result;
             });
-        } else if (typeof _support === "boolean") {
+        } else if (typeof _support === 'boolean') {
             let doesSupport: boolean = _support;
         }
     });
@@ -189,13 +215,13 @@ namespace LocalForageTest {
         let config: boolean;
 
         const configOptions: LocalForageOptions = {
-            name: "testyo",
+            name: 'testyo',
             driver: localForage.LOCALSTORAGE
         };
 
         config = localForage.config(configOptions);
         config = localForage.config({
-            name: "testyo",
+            name: 'testyo',
             driver: localForage.LOCALSTORAGE
         });
     }
@@ -204,13 +230,13 @@ namespace LocalForageTest {
         let store: LocalForage;
 
         const configOptions: LocalForageOptions = {
-            name: "da instance",
+            name: 'da instance',
             driver: localForage.LOCALSTORAGE
         };
 
         store = localForage.createInstance(configOptions);
         store = localForage.createInstance({
-            name: "da instance",
+            name: 'da instance',
             driver: localForage.LOCALSTORAGE
         });
     }
@@ -219,31 +245,34 @@ namespace LocalForageTest {
         localForage.dropInstance().then(() => {});
 
         const dropInstanceOptions: LocalForageDbInstanceOptions = {
-            name: "da instance",
-            storeName: "da store"
+            name: 'da instance',
+            storeName: 'da store'
         };
 
         localForage.dropInstance(dropInstanceOptions).then(() => {});
 
-        localForage.dropInstance({
-            name: "da instance",
-            storeName: "da store"
-        }).then(() => {});
+        localForage
+            .dropInstance({
+                name: 'da instance',
+                storeName: 'da store'
+            })
+            .then(() => {});
 
         const dropDbOptions: LocalForageDbInstanceOptions = {
-            name: "da instance",
+            name: 'da instance'
         };
 
-        localForage.dropInstance({
-            name: "da instance",
-        }).then(() => {});
+        localForage
+            .dropInstance({
+                name: 'da instance'
+            })
+            .then(() => {});
     }
 
     {
         let testSerializer: LocalForageSerializer;
 
-        localForage.getSerializer()
-        .then((serializer: LocalForageSerializer) => {
+        localForage.getSerializer().then((serializer: LocalForageSerializer) => {
             testSerializer = serializer;
         });
 
@@ -257,9 +286,7 @@ namespace LocalForageTest {
 
         localForage.ready((error) => {
             if (error) {
-
             } else {
-                
             }
         });
     }

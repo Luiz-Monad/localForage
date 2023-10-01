@@ -1,4 +1,5 @@
 # localForage
+
 [![NPM version](https://badge.fury.io/js/localforage.svg)](http://badge.fury.io/js/localforage)
 [![npm](https://img.shields.io/npm/dm/localforage.svg?maxAge=2592000)](https://npmcharts.com/compare/localforage?minimal=true)
 [![jsDelivr Hits](https://data.jsdelivr.com/v1/package/npm/localforage/badge?style=rounded)](https://www.jsdelivr.com/package/npm/localforage)
@@ -15,8 +16,11 @@ To use localForage, just drop a single JavaScript file into your page:
 
 ```html
 <script src="localforage/dist/localforage.js"></script>
-<script>localforage.getItem('something', myCallback);</script>
+<script>
+    localforage.getItem('something', myCallback);
+</script>
 ```
+
 Try the [live example](http://codepen.io/thgreasi/pen/ojYKeE).
 
 Download the [latest localForage from GitHub](https://github.com/localForage/localForage/releases/latest), or install with
@@ -50,23 +54,27 @@ Here's an example of the Node-style callback form:
 
 ```js
 localforage.setItem('key', 'value', function (err) {
-  // if err is non-null, we got an error
-  localforage.getItem('key', function (err, value) {
-    // if err is non-null, we got an error. otherwise, value is the value
-  });
+    // if err is non-null, we got an error
+    localforage.getItem('key', function (err, value) {
+        // if err is non-null, we got an error. otherwise, value is the value
+    });
 });
 ```
 
 And the Promise form:
 
 ```js
-localforage.setItem('key', 'value').then(function () {
-  return localforage.getItem('key');
-}).then(function (value) {
-  // we got our value
-}).catch(function (err) {
-  // we got an error
-});
+localforage
+    .setItem('key', 'value')
+    .then(function () {
+        return localforage.getItem('key');
+    })
+    .then(function (value) {
+        // we got our value
+    })
+    .catch(function (err) {
+        // we got an error
+    });
 ```
 
 Or, use `async`/`await`:
@@ -108,14 +116,15 @@ Available options are `driver`, `name`, `storeName`, `version`, `size`, and
 `description`.
 
 Example:
+
 ```javascript
 localforage.config({
-    driver      : localforage.WEBSQL, // Force WebSQL; same as using setDriver()
-    name        : 'myApp',
-    version     : 1.0,
-    size        : 4980736, // Size of database, in bytes. WebSQL-only for now.
-    storeName   : 'keyvaluepairs', // Should be alphanumeric, with underscores.
-    description : 'some description'
+    driver: localforage.WEBSQL, // Force WebSQL; same as using setDriver()
+    name: 'myApp',
+    version: 1.0,
+    size: 4980736, // Size of database, in bytes. WebSQL-only for now.
+    storeName: 'keyvaluepairs', // Should be alphanumeric, with underscores.
+    description: 'some description'
 });
 ```
 
@@ -129,18 +138,18 @@ You can create multiple instances of localForage that point to different stores
 using `createInstance`. All the configuration options used by
 [`config`](#configuration) are supported.
 
-``` javascript
+```javascript
 var store = localforage.createInstance({
-  name: "nameHere"
+    name: 'nameHere'
 });
 
 var otherStore = localforage.createInstance({
-  name: "otherName"
+    name: 'otherName'
 });
 
 // Setting the key on one of these doesn't affect the other.
-store.setItem("key", "value");
-otherStore.setItem("key", "value2");
+store.setItem('key', 'value');
+otherStore.setItem('key', 'value2');
 ```
 
 ## RequireJS
@@ -148,7 +157,7 @@ otherStore.setItem("key", "value2");
 You can use localForage with [RequireJS](http://requirejs.org/):
 
 ```javascript
-define(['localforage'], function(localforage) {
+define(['localforage'], function (localforage) {
     // As a callback:
     localforage.setItem('mykey', 'myvalue', console.log);
 
@@ -162,7 +171,7 @@ define(['localforage'], function(localforage) {
 If you have the [`allowSyntheticDefaultImports` compiler option](https://www.typescriptlang.org/docs/handbook/compiler-options.html) set to `true` in your [tsconfig.json](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html) (supported in TypeScript v1.8+), you should use:
 
 ```javascript
-import localForage from "localforage";
+import localForage from 'localforage';
 ```
 
 Otherwise you should use one of the following:
@@ -180,12 +189,12 @@ If you use a framework listed, there's a localForage storage driver for the
 models in your framework so you can store data offline with localForage. We
 have drivers for the following frameworks:
 
-* [AngularJS](https://github.com/ocombe/angular-localForage)
-* [Angular 4 and up](https://github.com/Alorel/ngforage/)
-* [Backbone](https://github.com/localForage/localForage-backbone)
-* [Ember](https://github.com/genkgo/ember-localforage-adapter)
-* [Vue](https://github.com/dmlzj/vlf)
-* [NuxtJS](https://github.com/nuxt-community/localforage-module)
+-   [AngularJS](https://github.com/ocombe/angular-localForage)
+-   [Angular 4 and up](https://github.com/Alorel/ngforage/)
+-   [Backbone](https://github.com/localForage/localForage-backbone)
+-   [Ember](https://github.com/genkgo/ember-localforage-adapter)
+-   [Vue](https://github.com/dmlzj/vlf)
+-   [NuxtJS](https://github.com/nuxt-community/localforage-module)
 
 If you have a driver you'd like listed, please
 [open an issue](https://github.com/localForage/localForage/issues/new) to have it
@@ -237,6 +246,7 @@ When you submit a pull request, tests will be run against all browsers that
 localForage supports on Travis CI using [Sauce Labs](https://saucelabs.com/).
 
 ## Library Size
+
 As of version 1.7.3 the payload added to your app is rather small. Served using gzip compression, localForage will add less than 10k to your total bundle size:
 
 <dl>

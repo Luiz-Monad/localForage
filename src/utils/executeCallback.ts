@@ -1,10 +1,10 @@
 function executeCallback<T>(promise: Promise<T>, callback?: (onError: any, onResult?: T) => void) {
     if (callback) {
         promise.then(
-            function(result) {
+            function (result) {
                 callback(null, result);
             },
-            function(error) {
+            function (error) {
                 callback(error);
             }
         );
