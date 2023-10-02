@@ -1,8 +1,8 @@
 ﻿/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-var */
-/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable no-var */
+/* eslint-disable prefer-const */
 import LocalForageValue from 'localforage';
 import LocalForageSerializerValue from 'utils/serializer';
 import { InstanceOptions, OptionalDropInstanceDriver, Options } from 'types';

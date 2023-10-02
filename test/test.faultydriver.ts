@@ -3,8 +3,6 @@ import { expect } from 'chai';
 mocha.setup({ asyncOnly: true });
 
 describe('When Driver Fails to Initialize', function () {
-    'use strict';
-
     const FAULTYDRIVERS = [localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE]
         .filter(localforage.supports)
         .filter(function (driverName) {

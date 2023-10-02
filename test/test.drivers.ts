@@ -3,8 +3,6 @@ import { expect } from 'chai';
 mocha.setup({ asyncOnly: true });
 
 describe('Driver API', function () {
-    'use strict';
-
     beforeEach(function (done) {
         if (localforage.supports(localforage.INDEXEDDB)) {
             localforage.setDriver(localforage.INDEXEDDB, function () {

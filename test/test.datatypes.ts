@@ -43,8 +43,6 @@ DRIVERS.forEach(function (driverName) {
     }
 
     describe('Type handler for ' + driverName, function () {
-        'use strict';
-
         this.timeout(30000);
 
         before(function (done) {

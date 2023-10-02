@@ -3,8 +3,6 @@ import { expect } from 'chai';
 mocha.setup({ asyncOnly: true });
 
 describe('Inside iFrames', function () {
-    'use strict';
-
     before(function () {
         const iFrame = window.document.createElement('iframe');
         iFrame.name = 'iframe';

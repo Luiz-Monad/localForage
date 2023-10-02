@@ -3,8 +3,6 @@ import { expect } from 'chai';
 mocha.setup({ asyncOnly: true });
 
 describe('When No Drivers Are Available', function () {
-    'use strict';
-
     const DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
 
     xit('agrees with Modernizr on storage drivers support', async function () {

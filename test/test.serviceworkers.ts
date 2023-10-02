@@ -16,8 +16,6 @@ DRIVERS.forEach(function (driverName) {
     }
 
     describe('Service Worker support in ' + driverName, function () {
-        'use strict';
-
         // Use this until a test is added to Modernizr
         if (!('serviceworker' in Modernizr)) {
             Modernizr.serviceworker = 'serviceWorker' in navigator;

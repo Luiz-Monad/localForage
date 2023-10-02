@@ -3,8 +3,6 @@ import { expect } from 'chai';
 mocha.setup({ asyncOnly: true });
 
 describe('Config API', function () {
-    'use strict';
-
     const DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
     let supportedDrivers: string[] = [];
 

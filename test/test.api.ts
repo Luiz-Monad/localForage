@@ -188,8 +188,6 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         return;
     }
     describe(driverName + ' driver', function () {
-        'use strict';
-
         this.timeout(30000);
 
         before(function () {
@@ -1013,8 +1011,6 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
     }
 
     describe(driverName + ' driver multiple instances', function () {
-        'use strict';
-
         this.timeout(30000);
 
         let localforage2 = {} as LocalForageDriver;
@@ -1102,8 +1098,6 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
     // Refers to issue #492 - https://github.com/mozilla/localForage/issues/492
     describe(driverName + ' driver multiple instances (concurrent on same database)', function () {
-        'use strict';
-
         this.timeout(30000);
 
         before(function () {
@@ -1375,8 +1369,6 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
     });
 
     describe(driverName + ' driver', function () {
-        'use strict';
-
         let driverPreferedOrder: string[];
 
         before(function () {
@@ -1407,8 +1399,6 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
     });
 
     describe(driverName + ' driver when the callback throws an Error', function () {
-        'use strict';
-
         const testObj = {
             throwFunc: function () {
                 testObj.throwFuncCalls++;
@@ -1465,8 +1455,6 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
     });
 
     describe(driverName + ' driver when ready() gets rejected', function () {
-        'use strict';
-
         this.timeout(30000);
 
         let _oldReady: typeof localforage.ready;

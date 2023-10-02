@@ -17,8 +17,6 @@ DRIVERS.forEach(function (driverName) {
     }
 
     describe('Web Worker support in ' + driverName, function () {
-        'use strict';
-
         before(function () {
             return localforage.setDriver(driverName);
         });

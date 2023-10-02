@@ -4,7 +4,6 @@ import dummyStorageDriver from './dummyStorageDriver';
 mocha.setup({ asyncOnly: true });
 
 describe('When Custom Drivers are used', function () {
-    'use strict';
     const errorMessage =
         'Custom driver not compliant; see ' + 'https://mozilla.github.io/localForage/#definedriver';
 
