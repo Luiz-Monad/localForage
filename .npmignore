@@ -1,12 +1,21 @@
+.vscode
 docs
 test
 typing-tests
 examples
 
-tsconfig.json
-Gruntfile.js
-.prettierrc
 .babelrc
 .babelrc-umd
-.travis.yml
+.editorconfig
+.eslintignore
 .eslintrc
+.gitignore
+.huskyrc
+.lintstagedrc
+.npmignore
+.npmrc
+.prettierignore
+.prettierrc
+.travis.yml
+Gruntfile.js
+tsconfig.json
