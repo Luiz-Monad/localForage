@@ -166,24 +166,6 @@ module.exports = exports = function (grunt) {
                 dest: 'build/bower_components/requirejs/require.js'
             }
         },
-        es3_safe_recast: {
-            dist: {
-                files: [
-                    {
-                        src: ['dist/localforage.js'],
-                        dest: 'dist/localforage.js'
-                    }
-                ]
-            },
-            nopromises: {
-                files: [
-                    {
-                        src: ['dist/localforage.nopromises.js'],
-                        dest: 'dist/localforage.nopromises.js'
-                    }
-                ]
-            }
-        },
         eslint: {
             target: sourceFiles,
             test: testFiles
@@ -323,7 +305,6 @@ module.exports = exports = function (grunt) {
         'browserify:main',
         'browserify:no_promises',
         'concat',
-        'es3_safe_recast',
         'uglify',
         'copy:types'
     ]);
