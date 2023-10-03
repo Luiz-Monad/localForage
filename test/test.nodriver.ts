@@ -1,31 +1,8 @@
 import { expect } from 'chai';
-import { Callback } from 'types';
+import { promisifyOne, promisifyTwo } from './promisify';
+import { expectError } from './utils';
 
 mocha.setup({ asyncOnly: true });
-
-function promisify<Rest extends readonly unknown[], Success, Fail, Context>(
-    func: (
-        this: Context | undefined,
-        ...args: [...rest: Rest, resolve: Callback<Success>, reject: Callback<Fail>]
-    ) => void,
-    thisContext?: Context
-): (...rest: Rest) => Promise<Success> {
-    return (...rest: Rest) => {
-        return new Promise<Success>((resolve, reject) => {
-            try {
-                const success: Callback<Success> = (result) => {
-                    resolve(result);
-                };
-                const fail: Callback<Fail> = (err) => {
-                    reject(err);
-                };
-                func.apply(thisContext, [...rest, success, fail]);
-            } catch (err: any) {
-                reject(err);
-            }
-        });
-    };
-}
 
 describe('When No Drivers Are Available', function () {
     const DRIVERS = [localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL];
@@ -42,14 +19,15 @@ describe('When No Drivers Are Available', function () {
     });
 
     it('fails to load localForage [callback]', function () {
-        return localforage.ready(function (err) {
+        const ready = promisifyOne(localforage.ready, localforage);
+        return ready().then(expectError, function (err) {
             expect(err).to.be.instanceof(Error);
             expect(err.message).to.be.eq('No available storage method found.');
         });
     });
 
     it('fails to load localForage [promise]', function () {
-        return localforage.ready().then(null, function (err) {
+        return localforage.ready().then(expectError, function (err) {
             expect(err).to.be.instanceof(Error);
             expect(err.message).to.be.eq('No available storage method found.');
         });
@@ -63,15 +41,15 @@ describe('When No Drivers Are Available', function () {
 
     DRIVERS.forEach(function (driverName) {
         it('fails to setDriver ' + driverName + ' [callback]', function () {
-            const setDriver = promisify(localforage.setDriver, localforage);
-            return setDriver(driverName).then(null, function (err) {
+            const setDriver = promisifyTwo(localforage.setDriver, localforage);
+            return setDriver(driverName).then(expectError, function (err) {
                 expect(err).to.be.instanceof(Error);
                 expect(err.message).to.be.eq('No available storage method found.');
             });
         });
 
         it('fails to setDriver ' + driverName + ' [promise]', function () {
-            return localforage.setDriver(driverName).then(null, function (err) {
+            return localforage.setDriver(driverName).then(expectError, function (err) {
                 expect(err).to.be.instanceof(Error);
                 expect(err.message).to.be.eq('No available storage method found.');
             });
@@ -79,15 +57,15 @@ describe('When No Drivers Are Available', function () {
     });
 
     it('fails to setDriver using array parameter [callback]', function () {
-        const setDriver = promisify(localforage.setDriver, localforage);
-        return setDriver(DRIVERS).then(null, function (err) {
+        const setDriver = promisifyTwo(localforage.setDriver, localforage);
+        return setDriver(DRIVERS).then(expectError, function (err) {
             expect(err).to.be.instanceof(Error);
             expect(err.message).to.be.eq('No available storage method found.');
         });
     });
 
     it('fails to setDriver using array parameter [promise]', function () {
-        return localforage.setDriver(DRIVERS).then(null, function (err) {
+        return localforage.setDriver(DRIVERS).then(expectError, function (err) {
             expect(err).to.be.instanceof(Error);
             expect(err.message).to.be.eq('No available storage method found.');
         });

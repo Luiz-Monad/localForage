@@ -12,8 +12,9 @@ export interface Options extends InstanceOptions {
     description?: string;
 }
 
-export type InvCallback<T> = (value: T, err: any) => void;
-export type Callback<T> = (err: any, value: T) => void;
+export type ResultCallback<T> = (value: T) => void;
+export type ErrorCallback = (err: Error | null) => void;
+export type Callback<T> = (err: Error | null, value: T) => void;
 export type DbIterator<T, U> = (
     result: T | null,
     value: string,
@@ -58,26 +59,26 @@ export interface Forage<DbInfo extends Options = Options> {
     config(): DbInfo;
     config(option: string): unknown;
     config(option: Partial<Options>): boolean | Promise<void> | Error;
-    ready(callback?: Callback<void>): Promise<void>;
+    ready(callback?: ResultCallback<void>): Promise<void>;
 }
 
 export interface ILocalForage extends Forage {
     defineDriver(
         driverObject: OptionalDropInstanceDriver,
-        callback?: Callback<void>,
-        errorCallback?: Callback<void>
+        callback?: ResultCallback<void>,
+        errorCallback?: ErrorCallback
     ): Promise<void>;
     driver(): string | null;
     getDriver(
         driverName: string,
-        callback?: InvCallback<OptionalDropInstanceDriver>,
-        errorCallback?: Callback<void>
+        callback?: ResultCallback<OptionalDropInstanceDriver>,
+        errorCallback?: ErrorCallback
     ): Promise<OptionalDropInstanceDriver>;
-    getSerializer(callback?: InvCallback<typeof serializer>): Promise<typeof serializer>;
+    getSerializer(callback?: ResultCallback<typeof serializer>): Promise<typeof serializer>;
     setDriver(
         drivers: string | string[],
-        callback?: Callback<void>,
-        errorCallback?: Callback<void>
+        callback?: ResultCallback<void>,
+        errorCallback?: ErrorCallback
     ): Promise<void>;
     supports(driverName: string): boolean;
     createInstance(options?: Options): LocalForageComplete;

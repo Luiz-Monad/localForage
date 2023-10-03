@@ -100,7 +100,7 @@ function executeCallback(promise, callback) {
     promise.then(function (result) {
       callback(null, result);
     }, function (error) {
-      callback(error);
+      callback(error, undefined);
     });
   }
 }

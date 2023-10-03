@@ -1,12 +1,12 @@
-import { Callback } from '../types';
+import { ResultCallback, ErrorCallback } from '../types';
 
 function executeTwoCallbacks<T>(
     promise: Promise<T>,
-    callback?: Callback<T>,
-    errorCallback?: Callback<void>
+    callback?: ResultCallback<T>,
+    errorCallback?: ErrorCallback
 ) {
     if (typeof callback === 'function') {
-        promise.then(callback as any);
+        promise.then(callback);
     }
 
     if (typeof errorCallback === 'function') {

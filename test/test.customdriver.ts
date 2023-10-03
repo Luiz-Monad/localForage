@@ -1,57 +1,16 @@
 import { expect } from 'chai';
-import { Callback } from 'types';
 import dummyStorageDriver from './dummyStorageDriver';
+import { promisify, promisifyTwo } from './promisify';
+import { expectError } from './utils';
 
 mocha.setup({ asyncOnly: true });
-
-function promisify<Rest extends readonly unknown[], Success, Fail, Context>(
-    func: (
-        this: Context | undefined,
-        ...args: [...rest: Rest, resolve: Callback<Success>, reject: Callback<Fail>]
-    ) => void,
-    thisContext?: Context
-): (...rest: Rest) => Promise<Success> {
-    return (...rest: Rest) => {
-        return new Promise<Success>((resolve, reject) => {
-            try {
-                const success: Callback<Success> = (result) => {
-                    resolve(result);
-                };
-                const fail: Callback<Fail> = (err) => {
-                    reject(err);
-                };
-                func.apply(thisContext, [...rest, success, fail]);
-            } catch (err: any) {
-                reject(err);
-            }
-        });
-    };
-}
-
-function promisifyOne<Rest extends readonly unknown[], Success, Context>(
-    func: (this: Context | undefined, ...args: [...rest: Rest, resolve: Callback<Success>]) => void,
-    thisContext?: Context
-): (...rest: Rest) => Promise<Success> {
-    return (...rest: Rest) => {
-        return new Promise<Success>((resolve, reject) => {
-            try {
-                const success: Callback<Success> = (_, result) => {
-                    resolve(result);
-                };
-                func.apply(thisContext, [...rest, success]);
-            } catch (err: any) {
-                reject(err);
-            }
-        });
-    };
-}
 
 describe('When Custom Drivers are used', function () {
     const errorMessage =
         'Custom driver not compliant; see ' + 'https://mozilla.github.io/localForage/#definedriver';
 
     it('fails to define a no-name custom driver [callback]', function () {
-        const defineDriver = promisify(localforage.defineDriver, localforage);
+        const defineDriver = promisifyTwo(localforage.defineDriver, localforage);
         return defineDriver({
             _initStorage: () => {},
             iterate: () => {},
@@ -82,14 +41,14 @@ describe('When Custom Drivers are used', function () {
                 key: () => Promise.reject(),
                 keys: () => Promise.reject()
             })
-            .then(null, function (err) {
+            .then(expectError, function (err) {
                 expect(err).to.be.instanceof(Error);
                 expect(err.message).to.be.eq(errorMessage);
             });
     });
 
     it('fails to define a custom driver with missing methods [callback]', function () {
-        const defineDriver = promisify(localforage.defineDriver, localforage);
+        const defineDriver = promisifyTwo(localforage.defineDriver, localforage);
         return defineDriver({
             _driver: 'missingMethodsDriver',
             _initStorage: () => {},
@@ -98,7 +57,7 @@ describe('When Custom Drivers are used', function () {
             setItem: () => {},
             removeItem: () => {},
             clear: () => {}
-        } as any).then(null, function (err) {
+        } as any).then(expectError, function (err) {
             expect(err).to.be.instanceof(Error);
             expect(err.message).to.be.eq(errorMessage);
         });
@@ -115,14 +74,14 @@ describe('When Custom Drivers are used', function () {
                 removeItem: () => Promise.reject(),
                 clear: () => Promise.reject()
             } as any)
-            .then(null, function (err) {
+            .then(expectError, function (err) {
                 expect(err).to.be.instanceof(Error);
                 expect(err.message).to.be.eq(errorMessage);
             });
     });
 
     it('defines a compliant custom driver [callback]', function () {
-        return promisify(localforage.defineDriver, localforage);
+        return promisifyTwo(localforage.defineDriver, localforage);
     });
 
     it('defines a compliant custom driver [promise]', function () {
@@ -130,9 +89,9 @@ describe('When Custom Drivers are used', function () {
     });
 
     it('sets a custom driver [callback]', function () {
-        const defineDriver = promisify(localforage.defineDriver, localforage);
+        const defineDriver = promisifyTwo(localforage.defineDriver, localforage);
         return defineDriver(dummyStorageDriver).then(function () {
-            const setDriver = promisify(localforage.setDriver, localforage);
+            const setDriver = promisifyTwo(localforage.setDriver, localforage);
             return setDriver(dummyStorageDriver._driver).then(function () {
                 expect(localforage.driver()).to.be.eq(dummyStorageDriver._driver);
             });
@@ -218,13 +177,13 @@ describe('When Custom Drivers are used', function () {
     });
 
     it('sets and uses a custom driver [callback]', function () {
-        const defineDriver = promisify(localforage.defineDriver, localforage);
+        const defineDriver = promisifyTwo(localforage.defineDriver, localforage);
         return defineDriver(dummyStorageDriver).then(function () {
-            const setDriver = promisify(localforage.setDriver, localforage);
+            const setDriver = promisifyTwo(localforage.setDriver, localforage);
             return setDriver(dummyStorageDriver._driver).then(function () {
-                const setItem = promisifyOne(localforage.setItem, localforage);
+                const setItem = promisify(localforage.setItem, localforage);
                 return setItem('testCallbackKey', 'testCallbackValue').then(function () {
-                    const getItem = promisifyOne(localforage.getItem, localforage);
+                    const getItem = promisify(localforage.getItem, localforage);
                     return getItem('testCallbackKey').then(function (value) {
                         expect(value).to.be.eq('testCallbackValue');
                     });

@@ -1,49 +1,8 @@
 import { expect } from 'chai';
-import { Callback } from 'types';
+import { promisifyOne, promisifyTwo } from './promisify';
+import { expectError } from './utils';
 
 mocha.setup({ asyncOnly: true });
-
-function promisify<Rest extends readonly unknown[], Success, Fail, Context>(
-    func: (
-        this: Context | undefined,
-        ...args: [...rest: Rest, resolve: Callback<Success>, reject: Callback<Fail>]
-    ) => void,
-    thisContext?: Context
-): (...rest: Rest) => Promise<Success> {
-    return (...rest: Rest) => {
-        return new Promise<Success>((resolve, reject) => {
-            try {
-                const success: Callback<Success> = (result) => {
-                    resolve(result);
-                };
-                const fail: Callback<Fail> = (err) => {
-                    reject(err);
-                };
-                func.apply(thisContext, [...rest, success, fail]);
-            } catch (err: any) {
-                reject(err);
-            }
-        });
-    };
-}
-
-function promisifyOne<Rest extends readonly unknown[], Success, Context>(
-    func: (this: Context | undefined, ...args: [...rest: Rest, resolve: Callback<Success>]) => void,
-    thisContext?: Context
-): (...rest: Rest) => Promise<Success> {
-    return (...rest: Rest) => {
-        return new Promise<Success>((resolve, reject) => {
-            try {
-                const success: Callback<Success> = (_, result) => {
-                    resolve(result);
-                };
-                func.apply(thisContext, [...rest, success]);
-            } catch (err: any) {
-                reject(err);
-            }
-        });
-    };
-}
 
 describe('When Driver Fails to Initialize', function () {
     const FAULTYDRIVERS = [localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE]
@@ -67,10 +26,10 @@ describe('When Driver Fails to Initialize', function () {
             });
 
             it('fails to setDriver ' + driverName + ' [callback]', function () {
-                const setDriver = promisify(localforage.setDriver, localforage);
+                const setDriver = promisifyTwo(localforage.setDriver, localforage);
                 return setDriver(driverName).then(function () {
                     const ready = promisifyOne(localforage.ready, localforage);
-                    ready().then(null, function (err) {
+                    ready().then(expectError, function (err) {
                         expect(err).to.be.instanceof(Error);
                         expect(err.message).to.be.eq('No available storage method found.');
                     });
@@ -83,7 +42,7 @@ describe('When Driver Fails to Initialize', function () {
                     .then(function () {
                         return localforage.ready();
                     })
-                    .then(null, function (err) {
+                    .then(expectError, function (err) {
                         expect(err).to.be.instanceof(Error);
                         expect(err.message).to.be.eq('No available storage method found.');
                     });

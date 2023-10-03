@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { Callback, InvCallback } from 'types';
+import { promisify, promisifyOne, promisifyTwo } from './promisify';
+import { expectError } from './utils';
 
 mocha.setup({ asyncOnly: true });
 
@@ -19,69 +20,6 @@ const indexedDB =
     window.mozIndexedDB ||
     window.OIndexedDB ||
     window.msIndexedDB;
-
-function promisify<Rest extends readonly unknown[], Success, Context>(
-    func: (this: Context | undefined, ...args: [...rest: Rest, resolve: Callback<Success>]) => void,
-    thisContext?: Context
-): (...rest: Rest) => Promise<Success> {
-    return (...rest: Rest) => {
-        return new Promise<Success>((resolve, reject) => {
-            try {
-                const success: Callback<Success> = (_, result) => {
-                    resolve(result);
-                };
-                func.apply(thisContext, [...rest, success]);
-            } catch (err: any) {
-                reject(err);
-            }
-        });
-    };
-}
-
-function promisifyInv<Rest extends readonly unknown[], Success, Context>(
-    func: (
-        this: Context | undefined,
-        ...args: [...rest: Rest, resolve: InvCallback<Success>]
-    ) => void,
-    thisContext?: Context
-): (...rest: Rest) => Promise<Success> {
-    return (...rest: Rest) => {
-        return new Promise<Success>((resolve, reject) => {
-            try {
-                const success: InvCallback<Success> = (result) => {
-                    resolve(result);
-                };
-                func.apply(thisContext, [...rest, success]);
-            } catch (err: any) {
-                reject(err);
-            }
-        });
-    };
-}
-
-function promisifyTwoInv<Rest extends readonly unknown[], Success, Fail, Context>(
-    func: (
-        this: Context | undefined,
-        ...args: [...rest: Rest, resolve: InvCallback<Success>, reject: Callback<Fail>]
-    ) => void,
-    thisContext?: Context
-): (...rest: Rest) => Promise<Success> {
-    return (...rest: Rest) => {
-        return new Promise<Success>((resolve, reject) => {
-            try {
-                const success: InvCallback<Success> = (result) => {
-                    resolve(result);
-                };
-                const fail: Callback<Fail> = (err) => {
-                    reject(err);
-                };
-                func.apply(thisContext, [...rest, success, fail]);
-            } catch (err: any) {
-                reject(err);
-            }
-        });
-    };
-}
 
 describe('localForage API', function () {
     // https://github.com/mozilla/localForage#working-on-localforage
@@ -122,22 +60,22 @@ describe('localForage', function () {
     );
 
     it('errors when a requested driver is not found [callback]', function () {
-        const getDriver = promisifyTwoInv(localforage.getDriver, localforage);
-        return getDriver('UnknownDriver').then(null, function (error) {
+        const getDriver = promisifyTwo(localforage.getDriver, localforage);
+        return getDriver('UnknownDriver').then(expectError, function (error) {
             expect(error).to.be.instanceof(Error);
             expect(error.message).to.be.eq('Driver not found.');
         });
     });
 
     it('errors when a requested driver is not found [promise]', function () {
-        return localforage.getDriver('UnknownDriver').then(null, function (error) {
+        return localforage.getDriver('UnknownDriver').then(expectError, function (error) {
             expect(error).to.be.instanceof(Error);
             expect(error.message).to.be.eq('Driver not found.');
         });
     });
 
     it('retrieves the serializer [callback]', function () {
-        const getSerializer = promisifyInv(localforage.getSerializer, localforage);
+        const getSerializer = promisifyOne(localforage.getSerializer, localforage);
         return getSerializer().then(function (serializer) {
             expect(serializer).to.be.an('object');
         });
@@ -161,7 +99,7 @@ describe('localForage', function () {
             length: 3
         } as any as string[];
 
-        return localforage.setDriver(driverPreferedOrder).then(null, function (error) {
+        return localforage.setDriver(driverPreferedOrder).then(expectError, function (error) {
             expect(error).to.be.instanceof(Error);
             expect(error.message).to.be.eq('No available storage method found.');
         });
@@ -1061,7 +999,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
         });
 
         it('is retrieved by getDriver [callback]', function () {
-            const getDriver = promisifyTwoInv(localforage.getDriver, localforage);
+            const getDriver = promisifyTwo(localforage.getDriver, localforage);
             return getDriver(driverName).then(function (driver) {
                 expect(typeof driver).to.be.eq('object');
                 driverApiMethods.concat('_initStorage').forEach(function (methodName) {
@@ -1571,7 +1509,7 @@ SUPPORTED_DRIVERS.forEach(function (driverName) {
 
         driverApiMethods.forEach(function (methodName) {
             it('rejects ' + methodName + '() promise', function () {
-                return (localforage as any)[methodName]().then(null, function (err: any) {
+                return (localforage as any)[methodName]().then(expectError, function (err: any) {
                     expect(err).to.be.true;
                 });
             });

@@ -8,7 +8,7 @@ function executeCallback<T>(promise: Promise<T>, callback?: Callback<T>) {
                 callback(null, result);
             },
             function (error) {
-                (callback as Function)(error);
+                callback(error, undefined!);
             }
         );
     }

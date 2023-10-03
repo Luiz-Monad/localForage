@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { promisify } from './promisify';
 
 mocha.setup({ asyncOnly: true });
 
@@ -45,26 +46,27 @@ DRIVERS.forEach(function (driverName) {
     describe('Type handler for ' + driverName, function () {
         this.timeout(30000);
 
-        before(function (done) {
-            localforage.setDriver(driverName).then(done);
+        before(function () {
+            return localforage.setDriver(driverName);
         });
 
-        beforeEach(function (done) {
-            localforage.clear(done);
+        beforeEach(function () {
+            return localforage.clear();
         });
 
-        it('saves a string [callback]', function (done) {
-            localforage.setItem('office', 'Initech', function (err, setValue) {
+        it('saves a string [callback]', function () {
+            const setItem = promisify(localforage.setItem, localforage);
+            return setItem('office', 'Initech').then(function (setValue) {
                 expect(setValue).to.be.eq('Initech');
 
-                localforage.getItem('office', function (err, value) {
+                const getItem = promisify(localforage.getItem, localforage);
+                return getItem('office').then(function (value) {
                     expect(value).to.be.eq(setValue);
-                    done();
                 });
             });
         });
-        it('saves a string [promise]', function (done) {
-            localforage
+        it('saves a string [promise]', function () {
+            return localforage
                 .setItem('office', 'Initech')
                 .then(function (setValue) {
                     expect(setValue).to.be.eq('Initech');
@@ -73,12 +75,22 @@ DRIVERS.forEach(function (driverName) {
                 })
                 .then(function (value) {
                     expect(value).to.be.eq('Initech');
-                    done();
                 });
         });
 
-        it('saves a string like "[object Blob]" [promise]', function (done) {
-            localforage
+        it('saves a string like "[object Blob]" [callback]', function () {
+            const setItem = promisify(localforage.setItem, localforage);
+            return setItem('fake Blob', '[object Blob]').then(function (setValue) {
+                expect(setValue).to.be.eq('[object Blob]');
+
+                const getItem = promisify(localforage.getItem, localforage);
+                return getItem('fake Blob').then(function (value) {
+                    expect(value).to.be.eq('[object Blob]');
+                });
+            });
+        });
+        it('saves a string like "[object Blob]" [promise]', function () {
+            return localforage
                 .setItem('fake Blob', '[object Blob]')
                 .then(function (setValue) {
                     expect(setValue).to.be.eq('[object Blob]');
@@ -87,24 +99,24 @@ DRIVERS.forEach(function (driverName) {
                 })
                 .then(function (value) {
                     expect(value).to.be.eq('[object Blob]');
-                    done();
                 });
         });
 
-        it('saves a number [callback]', function (done) {
-            localforage.setItem('number', 546, function (err, setValue) {
+        it('saves a number [callback]', function () {
+            const setItem = promisify(localforage.setItem, localforage);
+            return setItem('number', 546).then(function (setValue) {
                 expect(setValue).to.be.eq(546);
                 expect(setValue).to.be.a('number');
 
-                localforage.getItem('number', function (err, value) {
+                const getItem = promisify(localforage.getItem, localforage);
+                return getItem('number').then(function (value) {
                     expect(value).to.be.eq(setValue);
                     expect(value).to.be.a('number');
-                    done();
                 });
             });
         });
-        it('saves a number [promise]', function (done) {
-            localforage
+        it('saves a number [promise]', function () {
+            return localforage
                 .setItem('number', 546)
                 .then(function (setValue) {
                     expect(setValue).to.be.eq(546);
@@ -115,24 +127,24 @@ DRIVERS.forEach(function (driverName) {
                 .then(function (value) {
                     expect(value).to.be.eq(546);
                     expect(value).to.be.a('number');
-                    done();
                 });
         });
 
-        it('saves a boolean [callback]', function (done) {
-            localforage.setItem('boolean', false, function (err, setValue) {
+        it('saves a boolean [callback]', function () {
+            const setItem = promisify(localforage.setItem, localforage);
+            return setItem('boolean', false).then(function (setValue) {
                 expect(setValue).to.be.eq(false);
                 expect(setValue).to.be.a('boolean');
 
-                localforage.getItem('boolean', function (err, value) {
+                const getItem = promisify(localforage.getItem, localforage);
+                return getItem('boolean').then(function (value) {
                     expect(value).to.be.eq(setValue);
                     expect(value).to.be.a('boolean');
-                    done();
                 });
             });
         });
-        it('saves a boolean [promise]', function (done) {
-            localforage
+        it('saves a boolean [promise]', function () {
+            return localforage
                 .setItem('boolean', false)
                 .then(function (setValue) {
                     expect(setValue).to.be.eq(false);
@@ -143,22 +155,22 @@ DRIVERS.forEach(function (driverName) {
                 .then(function (value) {
                     expect(value).to.be.eq(false);
                     expect(value).to.be.a('boolean');
-                    done();
                 });
         });
 
-        it('saves null [callback]', function (done) {
-            localforage.setItem('null', null, function (err, setValue) {
+        it('saves null [callback]', function () {
+            const setItem = promisify(localforage.setItem, localforage);
+            return setItem('null', null).then(function (setValue) {
                 expect(setValue).to.be.eq(null);
 
-                localforage.getItem('null', function (err, value) {
+                const getItem = promisify(localforage.getItem, localforage);
+                return getItem('null').then(function (value) {
                     expect(value).to.be.eq(null);
-                    done();
                 });
             });
         });
-        it('saves null [promise]', function (done) {
-            localforage
+        it('saves null [promise]', function () {
+            return localforage
                 .setItem('null', null)
                 .then(function (setValue) {
                     expect(setValue).to.be.eq(null);
@@ -167,22 +179,22 @@ DRIVERS.forEach(function (driverName) {
                 })
                 .then(function (value) {
                     expect(value).to.be.eq(null);
-                    done();
                 });
         });
 
-        it('saves undefined as null [callback]', function (done) {
-            localforage.setItem('null', undefined, function (err, setValue) {
+        it('saves undefined as null [callback]', function () {
+            const setItem = promisify(localforage.setItem, localforage);
+            return setItem('null', undefined).then(function (setValue) {
                 expect(setValue).to.be.eq(null);
 
-                localforage.getItem('null', function (err, value) {
+                const getItem = promisify(localforage.getItem, localforage);
+                return getItem('null').then(function (value) {
                     expect(value).to.be.eq(null);
-                    done();
                 });
             });
         });
-        it('saves undefined as null [promise]', function (done) {
-            localforage
+        it('saves undefined as null [promise]', function () {
+            return localforage
                 .setItem('null', undefined)
                 .then(function (setValue) {
                     expect(setValue).to.be.eq(null);
@@ -191,24 +203,24 @@ DRIVERS.forEach(function (driverName) {
                 })
                 .then(function (value) {
                     expect(value).to.be.eq(null);
-                    done();
                 });
         });
 
-        it('saves a float [callback]', function (done) {
-            localforage.setItem('float', 546.041, function (err, setValue) {
+        it('saves a float [callback]', function () {
+            const setItem = promisify(localforage.setItem, localforage);
+            return setItem('float', 546.041).then(function (setValue) {
                 expect(setValue).to.be.eq(546.041);
                 expect(setValue).to.be.a('number');
 
-                localforage.getItem('float', function (err, value) {
+                const getItem = promisify(localforage.getItem, localforage);
+                return getItem('float').then(function (value) {
                     expect(value).to.be.eq(setValue);
                     expect(value).to.be.a('number');
-                    done();
                 });
             });
         });
-        it('saves a float [promise]', function (done) {
-            localforage
+        it('saves a float [promise]', function () {
+            return localforage
                 .setItem('float', 546.041)
                 .then(function (setValue) {
                     expect(setValue).to.be.eq(546.041);
@@ -219,26 +231,26 @@ DRIVERS.forEach(function (driverName) {
                 .then(function (value) {
                     expect(value).to.be.eq(546.041);
                     expect(value).to.be.a('number');
-                    done();
                 });
         });
 
         const arrayToSave = [2, 'one', true];
-        it('saves an array [callback]', function (done) {
-            localforage.setItem('array', arrayToSave, function (err, setValue) {
+        it('saves an array [callback]', function () {
+            const setItem = promisify(localforage.setItem, localforage);
+            return setItem('array', arrayToSave).then(function (setValue) {
                 expect(setValue!.length).to.be.eq(arrayToSave.length);
                 expect(setValue instanceof Array).to.be.eq(true);
 
-                localforage.getItem<typeof arrayToSave>('array', function (err, value) {
+                const getItem = promisify(localforage.getItem, localforage);
+                return getItem<typeof arrayToSave>('array').then(function (value) {
                     expect(value?.length).to.be.eq(arrayToSave.length);
                     expect(value instanceof Array).to.be.eq(true);
                     expect(value![1]).to.be.a('string');
-                    done();
                 });
             });
         });
-        it('saves an array [promise]', function (done) {
-            localforage
+        it('saves an array [promise]', function () {
+            return localforage
                 .setItem('array', arrayToSave)
                 .then(function (setValue) {
                     expect(setValue?.length).to.be.eq(arrayToSave.length);
@@ -250,7 +262,6 @@ DRIVERS.forEach(function (driverName) {
                     expect(value?.length).to.be.eq(arrayToSave.length);
                     expect(value instanceof Array).to.be.eq(true);
                     expect(value![1]).to.be.a('string');
-                    done();
                 });
         });
 
@@ -267,12 +278,14 @@ DRIVERS.forEach(function (driverName) {
             ],
             string: 'bar'
         };
-        it('saves a nested object [callback]', function (done) {
-            localforage.setItem('obj', objectToSave, function (err, setValue) {
+        it('saves a nested object [callback]', function () {
+            const setItem = promisify(localforage.setItem, localforage);
+            return setItem('obj', objectToSave).then(function (setValue) {
                 expect(Object.keys(setValue!).length).to.be.eq(Object.keys(objectToSave).length);
                 expect(setValue).to.be.an('object');
 
-                localforage.getItem<typeof objectToSave>('obj', function (err, value) {
+                const getItem = promisify(localforage.getItem, localforage);
+                return getItem<typeof objectToSave>('obj').then(function (value) {
                     expect(Object.keys(value!).length).to.be.eq(Object.keys(objectToSave).length);
                     expect(value).to.be.an('object');
                     expect(value!.nested).to.be.an('object');
@@ -285,12 +298,11 @@ DRIVERS.forEach(function (driverName) {
                             value!.nestedObjects[1].theCake
                     ).to.be.a('string');
                     expect(value!.nestedObjects[3]).to.be.eq(false);
-                    done();
                 });
             });
         });
-        it('saves a nested object [promise]', function (done) {
-            localforage
+        it('saves a nested object [promise]', function () {
+            return localforage
                 .setItem('obj', objectToSave)
                 .then(function (setValue) {
                     expect(Object.keys(setValue!).length).to.be.eq(
@@ -313,7 +325,6 @@ DRIVERS.forEach(function (driverName) {
                             value!.nestedObjects[1].theCake
                     ).to.be.a('string');
                     expect(value!.nestedObjects[3]).to.be.eq(false);
-                    done();
                 });
         });
 
@@ -330,7 +341,8 @@ DRIVERS.forEach(function (driverName) {
                     if (request.readyState === request.DONE) {
                         const response = request.response;
                         localforage
-                            .setItem('ab', response, function (err, sab) {
+                            .setItem('ab', response)
+                            .then(function (sab) {
                                 expect(sab.toString()).to.be.eq('[object ArrayBuffer]');
                                 expect(sab.byteLength).to.be.eq(response.byteLength);
                             })
@@ -348,7 +360,8 @@ DRIVERS.forEach(function (driverName) {
                                     }
                                 );
                                 done();
-                            });
+                            })
+                            .catch(done);
                     }
                 };
 
@@ -370,26 +383,24 @@ DRIVERS.forEach(function (driverName) {
         // https://github.com/ariya/phantomjs/issues/11013
         // Skip binary(Blob) data tests if Blob isn't supported.
         if (typeof Blob === 'function') {
-            it('saves binary (Blob) data', function (done) {
+            it('saves binary (Blob) data', function () {
                 const fileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 const mimeString = 'text/html';
 
                 const testBlob = createBlob(fileParts, { type: mimeString });
 
-                localforage
-                    .setItem('blob', testBlob, function (err, blob) {
-                        expect(err).to.be.eq(null);
+                return localforage
+                    .setItem('blob', testBlob)
+                    .then(function (blob) {
                         expect(blob!.toString()).to.be.eq('[object Blob]');
                         expect(blob!.size).to.be.eq(testBlob.size);
                         expect(blob!.type).to.be.eq(testBlob.type);
                     })
                     .then(function () {
-                        localforage.getItem<Blob>('blob', function (err, blob) {
-                            expect(err).to.be.eq(null);
+                        return localforage.getItem<Blob>('blob').then(function (blob) {
                             expect(blob!.toString()).to.be.eq('[object Blob]');
                             expect(blob!.size).to.be.eq(testBlob.size);
                             expect(blob!.type).to.be.eq(testBlob.type);
-                            done();
                         });
                     });
             });
@@ -398,28 +409,27 @@ DRIVERS.forEach(function (driverName) {
         }
 
         if (typeof Blob === 'function') {
-            it('saves binary (Blob) data, iterate back', function (done) {
+            it('saves binary (Blob) data, iterate back', function () {
                 const fileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 const mimeString = 'text/html';
 
                 const testBlob = createBlob(fileParts, { type: mimeString });
 
-                localforage
-                    .setItem('blob', testBlob, function (err, blob) {
-                        expect(err).to.be.eq(null);
+                return localforage
+                    .setItem('blob', testBlob)
+                    .then(function (blob) {
                         expect(blob!.toString()).to.be.eq('[object Blob]');
                         expect(blob!.size).to.be.eq(testBlob.size);
                         expect(blob!.type).to.be.eq(testBlob.type);
                     })
                     .then(function () {
-                        localforage.iterate<Blob, void>(function (blob, key) {
+                        return localforage.iterate<Blob, void>(function (blob, key) {
                             if (key !== 'blob') {
                                 return;
                             }
                             expect(blob!.toString()).to.be.eq('[object Blob]');
                             expect(blob!.size).to.be.eq(testBlob.size);
                             expect(blob!.type).to.be.eq(testBlob.type);
-                            done();
                         });
                     });
             });
@@ -430,19 +440,17 @@ DRIVERS.forEach(function (driverName) {
 
     describe('Typed Array handling in ' + driverName, function () {
         if (typeof Int8Array !== 'undefined') {
-            it('saves an Int8Array', function (done) {
+            it('saves an Int8Array', function () {
                 const array = new Int8Array(8);
                 array[2] = 65;
                 array[4] = 0;
 
-                localforage.setItem('array', array, function (err, writeValue) {
-                    localforage.getItem<typeof array>('array', function (err, readValue) {
+                return localforage.setItem('array', array).then(function (writeValue) {
+                    return localforage.getItem<typeof array>('array').then(function (readValue) {
                         expect(readValue instanceof Int8Array).to.be.eq(true);
                         expect(readValue![2]).to.be.eq(array[2]);
                         expect(readValue![4]).to.be.eq(writeValue![4]);
                         expect(readValue!.length).to.be.eq(writeValue!.length);
-
-                        done();
                     });
                 });
             });
@@ -451,19 +459,17 @@ DRIVERS.forEach(function (driverName) {
         }
 
         if (typeof Uint8Array !== 'undefined') {
-            it('saves an Uint8Array', function (done) {
+            it('saves an Uint8Array', function () {
                 const array = new Uint8Array(8);
                 array[0] = 65;
                 array[4] = 0;
 
-                localforage.setItem('array', array, function (err, writeValue) {
-                    localforage.getItem<typeof array>('array', function (err, readValue) {
+                return localforage.setItem('array', array).then(function (writeValue) {
+                    return localforage.getItem<typeof array>('array').then(function (readValue) {
                         expect(readValue instanceof Uint8Array).to.be.eq(true);
                         expect(readValue![0]).to.be.eq(array[0]);
                         expect(readValue![4]).to.be.eq(writeValue![4]);
                         expect(readValue!.length).to.be.eq(writeValue!.length);
-
-                        done();
                     });
                 });
             });
@@ -472,22 +478,20 @@ DRIVERS.forEach(function (driverName) {
         }
 
         if (typeof Uint8ClampedArray !== 'undefined') {
-            it('saves an Uint8ClampedArray', function (done) {
+            it('saves an Uint8ClampedArray', function () {
                 const array = new Uint8ClampedArray(8);
                 array[0] = 0;
                 array[1] = 93;
                 array[2] = 350;
 
-                localforage.setItem('array', array, function (err, writeValue) {
-                    localforage.getItem<typeof array>('array', function (err, readValue) {
+                return localforage.setItem('array', array).then(function (writeValue) {
+                    return localforage.getItem<typeof array>('array').then(function (readValue) {
                         expect(readValue instanceof Uint8ClampedArray).to.be.eq(true);
                         expect(readValue![0]).to.be.eq(array[0]);
                         expect(readValue![1]).to.be.eq(array[1]);
                         expect(readValue![2]).to.be.eq(array[2]);
                         expect(readValue![1]).to.be.eq(writeValue![1]);
                         expect(readValue!.length).to.be.eq(writeValue!.length);
-
-                        done();
                     });
                 });
             });
@@ -496,19 +500,17 @@ DRIVERS.forEach(function (driverName) {
         }
 
         if (typeof Int16Array !== 'undefined') {
-            it('saves an Int16Array', function (done) {
+            it('saves an Int16Array', function () {
                 const array = new Int16Array(8);
                 array[0] = 65;
                 array[4] = 0;
 
-                localforage.setItem('array', array, function (err, writeValue) {
-                    localforage.getItem<typeof array>('array', function (err, readValue) {
+                return localforage.setItem('array', array).then(function (writeValue) {
+                    return localforage.getItem<typeof array>('array').then(function (readValue) {
                         expect(readValue instanceof Int16Array).to.be.eq(true);
                         expect(readValue![0]).to.be.eq(array[0]);
                         expect(readValue![4]).to.be.eq(writeValue![4]);
                         expect(readValue!.length).to.be.eq(writeValue!.length);
-
-                        done();
                     });
                 });
             });
@@ -517,19 +519,17 @@ DRIVERS.forEach(function (driverName) {
         }
 
         if (typeof Uint16Array !== 'undefined') {
-            it('saves an Uint16Array', function (done) {
+            it('saves an Uint16Array', function () {
                 const array = new Uint16Array(8);
                 array[0] = 65;
                 array[4] = 0;
 
-                localforage.setItem('array', array, function (err, writeValue) {
-                    localforage.getItem<typeof array>('array', function (err, readValue) {
+                return localforage.setItem('array', array).then(function (writeValue) {
+                    return localforage.getItem<typeof array>('array').then(function (readValue) {
                         expect(readValue instanceof Uint16Array).to.be.eq(true);
                         expect(readValue![0]).to.be.eq(array[0]);
                         expect(readValue![4]).to.be.eq(writeValue![4]);
                         expect(readValue!.length).to.be.eq(writeValue!.length);
-
-                        done();
                     });
                 });
             });
@@ -538,19 +538,17 @@ DRIVERS.forEach(function (driverName) {
         }
 
         if (typeof Int32Array !== 'undefined') {
-            it('saves an Int32Array', function (done) {
+            it('saves an Int32Array', function () {
                 const array = new Int32Array(8);
                 array[0] = 65;
                 array[4] = 0;
 
-                localforage.setItem('array', array, function (err, writeValue) {
-                    localforage.getItem<typeof array>('array', function (err, readValue) {
+                return localforage.setItem('array', array).then(function (writeValue) {
+                    return localforage.getItem<typeof array>('array').then(function (readValue) {
                         expect(readValue instanceof Int32Array).to.be.eq(true);
                         expect(readValue![0]).to.be.eq(array[0]);
                         expect(readValue![4]).to.be.eq(writeValue![4]);
                         expect(readValue!.length).to.be.eq(writeValue!.length);
-
-                        done();
                     });
                 });
             });
@@ -559,19 +557,17 @@ DRIVERS.forEach(function (driverName) {
         }
 
         if (typeof Uint32Array !== 'undefined') {
-            it('saves an Uint32Array', function (done) {
+            it('saves an Uint32Array', function () {
                 const array = new Uint32Array(8);
                 array[0] = 65;
                 array[4] = 0;
 
-                localforage.setItem('array', array, function (err, writeValue) {
-                    localforage.getItem<typeof array>('array', function (err, readValue) {
+                return localforage.setItem('array', array).then(function (writeValue) {
+                    return localforage.getItem<typeof array>('array').then(function (readValue) {
                         expect(readValue instanceof Uint32Array).to.be.eq(true);
                         expect(readValue![0]).to.be.eq(array[0]);
                         expect(readValue![4]).to.be.eq(writeValue![4]);
                         expect(readValue!.length).to.be.eq(writeValue!.length);
-
-                        done();
                     });
                 });
             });
@@ -580,19 +576,17 @@ DRIVERS.forEach(function (driverName) {
         }
 
         if (typeof Float32Array !== 'undefined') {
-            it('saves a Float32Array', function (done) {
+            it('saves a Float32Array', function () {
                 const array = new Float32Array(8);
                 array[0] = 6.5;
                 array[4] = 0.1;
 
-                localforage.setItem('array', array, function (err, writeValue) {
-                    localforage.getItem<typeof array>('array', function (err, readValue) {
+                return localforage.setItem('array', array).then(function (writeValue) {
+                    return localforage.getItem<typeof array>('array').then(function (readValue) {
                         expect(readValue instanceof Float32Array).to.be.eq(true);
                         expect(readValue![0]).to.be.eq(array[0]);
                         expect(readValue![4]).to.be.eq(writeValue![4]);
                         expect(readValue!.length).to.be.eq(writeValue!.length);
-
-                        done();
                     });
                 });
             });
@@ -601,19 +595,17 @@ DRIVERS.forEach(function (driverName) {
         }
 
         if (typeof Float64Array !== 'undefined') {
-            it('saves a Float64Array', function (done) {
+            it('saves a Float64Array', function () {
                 const array = new Float64Array(8);
                 array[0] = 6.5;
                 array[4] = 0.1;
 
-                localforage.setItem('array', array, function (err, writeValue) {
-                    localforage.getItem<typeof array>('array', function (err, readValue) {
+                return localforage.setItem('array', array).then(function (writeValue) {
+                    return localforage.getItem<typeof array>('array').then(function (readValue) {
                         expect(readValue instanceof Float64Array).to.be.eq(true);
                         expect(readValue![0]).to.be.eq(array[0]);
                         expect(readValue![4]).to.be.eq(writeValue![4]);
                         expect(readValue!.length).to.be.eq(writeValue!.length);
-
-                        done();
                     });
                 });
             });

@@ -13,8 +13,9 @@ import {
     Options,
     OptionalDropInstanceDriver,
     ILocalForage,
-    Callback,
-    Forage
+    Forage,
+    ResultCallback,
+    ErrorCallback
 } from './types';
 
 type DriverKeys = keyof OptionalDropInstanceDriver;
@@ -178,8 +179,8 @@ class LocalForage implements ILocalForage {
     // localForage.
     defineDriver(
         driverObject: OptionalDropInstanceDriver,
-        callback?: Callback<void>,
-        errorCallback?: Callback<void>
+        callback?: ResultCallback<void>,
+        errorCallback?: ErrorCallback
     ) {
         const promise = new Promise<void>(function (resolve, reject) {
             try {
@@ -271,8 +272,8 @@ class LocalForage implements ILocalForage {
 
     getDriver(
         driverName: string,
-        callback?: Callback<OptionalDropInstanceDriver>,
-        errorCallback?: Callback<void>
+        callback?: ResultCallback<OptionalDropInstanceDriver>,
+        errorCallback?: ErrorCallback
     ) {
         const getDriverPromise = DefinedDrivers[driverName]
             ? Promise.resolve(DefinedDrivers[driverName])
@@ -282,13 +283,13 @@ class LocalForage implements ILocalForage {
         return getDriverPromise;
     }
 
-    getSerializer(callback?: Callback<typeof serializer>) {
+    getSerializer(callback?: ResultCallback<typeof serializer>) {
         const serializerPromise = Promise.resolve(serializer);
         executeTwoCallbacks(serializerPromise, callback);
         return serializerPromise;
     }
 
-    ready(callback?: Callback<void>) {
+    ready(callback?: ResultCallback<void>) {
         const self = this;
 
         const promise = self._driverSet!.then(() => {
@@ -299,14 +300,14 @@ class LocalForage implements ILocalForage {
             return self._ready;
         });
 
-        executeTwoCallbacks(promise, callback, callback);
+        executeTwoCallbacks(promise, callback, callback as any);
         return promise;
     }
 
     setDriver(
         drivers: string | string[],
-        callback?: Callback<void>,
-        errorCallback?: Callback<void>
+        callback?: ResultCallback<void>,
+        errorCallback?: ErrorCallback
     ) {
         const self = this;
 
